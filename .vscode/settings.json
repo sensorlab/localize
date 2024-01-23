@@ -1,0 +1,9 @@
+{
+  "editor.rulers": [
+    79,
+    119
+  ],
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/iterative/dvcyaml-schema/master/schema.json": "file:///media/workspace/JSI/nancy-localization/reference.yaml"
+  }
+}

@@ -1,0 +1,12 @@
+md5: 8e0660ff916529e6c804f83158c64bf1
+frozen: true
+deps:
+- checksum: '"62ea3ee9-1da219"'
+  size: 1942041
+  hash: md5
+  path: https://log-a-tec.eu/dataset-files/ble-fingerprint.zip
+outs:
+- md5: 7cdafacc2da2889c56fc8a13cbe3a35e
+  size: 1942041
+  hash: md5
+  path: logatec-fingerprint.zip

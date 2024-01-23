@@ -1,0 +1,3092 @@
+schema: '2.0'
+stages:
+  prepare-dataset-logatec@winter:
+    cmd:
+    - unzip -j data/raw/logatec-fingerprint.zip winter_data.json -d data/raw/
+    - python src/data/prepare_dataset_logatec.py --input data/raw/winter_data.json
+      --output data/interim/logatec-winter-dataset.pkl --task regression
+    - rm data/raw/winter_data.json
+    deps:
+    - path: data/raw/logatec-fingerprint.zip
+      hash: md5
+      md5: 7cdafacc2da2889c56fc8a13cbe3a35e
+      size: 1942041
+    - path: src/data/prepare_dataset_logatec.py
+      hash: md5
+      md5: 7e3205a9567bc1571f493705c990e53d
+      size: 3910
+    outs:
+    - path: data/interim/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
+  prepare-dataset-logatec@spring:
+    cmd:
+    - unzip -j data/raw/logatec-fingerprint.zip spring_data.json -d data/raw/
+    - python src/data/prepare_dataset_logatec.py --input data/raw/spring_data.json
+      --output data/interim/logatec-spring-dataset.pkl --task regression
+    - rm data/raw/spring_data.json
+    deps:
+    - path: data/raw/logatec-fingerprint.zip
+      hash: md5
+      md5: 7cdafacc2da2889c56fc8a13cbe3a35e
+      size: 1942041
+    - path: src/data/prepare_dataset_logatec.py
+      hash: md5
+      md5: 7e3205a9567bc1571f493705c990e53d
+      size: 3910
+    outs:
+    - path: data/interim/logatec-spring-dataset.pkl
+      hash: md5
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
+  prepare-features-logatec@winter:
+    cmd: "python src/data/prepare_features_logatec.py --input data/interim/logatec-winter-dataset.pkl
+      --output data/processed/logatec-winter-dataset.pkl --params params.yaml\n"
+    deps:
+    - path: data/interim/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
+    - path: src/data/prepare_features_logatec.py
+      hash: md5
+      md5: c39aa3809fd2a78c644b6818bc1e33de
+      size: 759
+    outs:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+  prepare-features-logatec@spring:
+    cmd: "python src/data/prepare_features_logatec.py --input data/interim/logatec-spring-dataset.pkl
+      --output data/processed/logatec-spring-dataset.pkl --params params.yaml\n"
+    deps:
+    - path: data/interim/logatec-spring-dataset.pkl
+      hash: md5
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
+    - path: src/data/prepare_features_logatec.py
+      hash: md5
+      md5: c39aa3809fd2a78c644b6818bc1e33de
+      size: 759
+    outs:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+  prepare-split-logatec@winter-random:
+    cmd: "python src/data/prepare_split_logatec.py --input data/processed/logatec-winter-dataset.pkl
+      --output-indices data/processed/logatec-winter-indices-random.pkl --split random
+      --params params.yaml\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: src/data/prepare_split_logatec.py
+      hash: md5
+      md5: 554a5318adb360076e457b440a326297
+      size: 1965
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 20
+          test_size: 0.2
+    outs:
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+  prepare-split-logatec@winter-kfold:
+    cmd: "python src/data/prepare_split_logatec.py --input data/processed/logatec-winter-dataset.pkl
+      --output-indices data/processed/logatec-winter-indices-kfold.pkl --split kfold
+      --params params.yaml\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: src/data/prepare_split_logatec.py
+      hash: md5
+      md5: 554a5318adb360076e457b440a326297
+      size: 1965
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 20
+          test_size: 0.2
+    outs:
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+  prepare-split-logatec@spring-random:
+    cmd: "python src/data/prepare_split_logatec.py --input data/processed/logatec-spring-dataset.pkl
+      --output-indices data/processed/logatec-spring-indices-random.pkl --split random
+      --params params.yaml\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: src/data/prepare_split_logatec.py
+      hash: md5
+      md5: 554a5318adb360076e457b440a326297
+      size: 1965
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 20
+          test_size: 0.2
+    outs:
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+  prepare-split-logatec@spring-kfold:
+    cmd: "python src/data/prepare_split_logatec.py --input data/processed/logatec-spring-dataset.pkl
+      --output-indices data/processed/logatec-spring-indices-kfold.pkl --split kfold
+      --params params.yaml\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: src/data/prepare_split_logatec.py
+      hash: md5
+      md5: 554a5318adb360076e457b440a326297
+      size: 1965
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 20
+          test_size: 0.2
+    outs:
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+  benchmark-logatec@winter-random-linear:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-winter-dataset.pkl
+      data/processed/logatec-winter-indices-random.pkl models/logatec-winter-random-linear-evaluation.pkl
+      --algorithm linear\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-random-linear-evaluation.pkl
+      hash: md5
+      md5: a1ee02af545ec93d72e36bf2f8916216
+      size: 8926
+  benchmark-logatec@winter-random-rforest:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-winter-dataset.pkl
+      data/processed/logatec-winter-indices-random.pkl models/logatec-winter-random-rforest-evaluation.pkl
+      --algorithm rforest\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-random-rforest-evaluation.pkl
+      hash: md5
+      md5: 574ee1074fc25bf411ca1bd785ab0470
+      size: 8958
+  benchmark-logatec@winter-random-xgboost:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-winter-dataset.pkl
+      data/processed/logatec-winter-indices-random.pkl models/logatec-winter-random-xgboost-evaluation.pkl
+      --algorithm xgboost\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-random-xgboost-evaluation.pkl
+      hash: md5
+      md5: ec02624b51a1120649d692fe24cea50b
+      size: 7382
+  benchmark-logatec@winter-kfold-linear:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-winter-dataset.pkl
+      data/processed/logatec-winter-indices-kfold.pkl models/logatec-winter-kfold-linear-evaluation.pkl
+      --algorithm linear\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-kfold-linear-evaluation.pkl
+      hash: md5
+      md5: 4463791a7080e4a207e98b3938eaae03
+      size: 44702
+  benchmark-logatec@winter-kfold-rforest:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-winter-dataset.pkl
+      data/processed/logatec-winter-indices-kfold.pkl models/logatec-winter-kfold-rforest-evaluation.pkl
+      --algorithm rforest\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-kfold-rforest-evaluation.pkl
+      hash: md5
+      md5: 7514ed450081b28e41247fd6d74e3a3b
+      size: 44734
+  benchmark-logatec@winter-kfold-xgboost:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-winter-dataset.pkl
+      data/processed/logatec-winter-indices-kfold.pkl models/logatec-winter-kfold-xgboost-evaluation.pkl
+      --algorithm xgboost\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-kfold-xgboost-evaluation.pkl
+      hash: md5
+      md5: 2f4de5b4890af2a384fb32794cb5219e
+      size: 37030
+  benchmark-logatec@spring-random-linear:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-spring-dataset.pkl
+      data/processed/logatec-spring-indices-random.pkl models/logatec-spring-random-linear-evaluation.pkl
+      --algorithm linear\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-random-linear-evaluation.pkl
+      hash: md5
+      md5: 359d03ad58705038e01dfeafe34f6620
+      size: 61662
+  benchmark-logatec@spring-random-rforest:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-spring-dataset.pkl
+      data/processed/logatec-spring-indices-random.pkl models/logatec-spring-random-rforest-evaluation.pkl
+      --algorithm rforest\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-random-rforest-evaluation.pkl
+      hash: md5
+      md5: 248ee6f14c124fae57a3faab2ae2fc69
+      size: 61694
+  benchmark-logatec@spring-random-xgboost:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-spring-dataset.pkl
+      data/processed/logatec-spring-indices-random.pkl models/logatec-spring-random-xgboost-evaluation.pkl
+      --algorithm xgboost\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-random-xgboost-evaluation.pkl
+      hash: md5
+      md5: bfb8cfb7aa5bc47be49db12c9849f0c1
+      size: 49574
+  benchmark-logatec@spring-kfold-linear:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-spring-dataset.pkl
+      data/processed/logatec-spring-indices-kfold.pkl models/logatec-spring-kfold-linear-evaluation.pkl
+      --algorithm linear\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-kfold-linear-evaluation.pkl
+      hash: md5
+      md5: fad43f0601d2bcddcb666208a8a53739
+      size: 308686
+  benchmark-logatec@spring-kfold-rforest:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-spring-dataset.pkl
+      data/processed/logatec-spring-indices-kfold.pkl models/logatec-spring-kfold-rforest-evaluation.pkl
+      --algorithm rforest\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-kfold-rforest-evaluation.pkl
+      hash: md5
+      md5: 7903f4ceb962b8f21eb7a147a8df3dd4
+      size: 308718
+  benchmark-logatec@spring-kfold-xgboost:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-spring-dataset.pkl
+      data/processed/logatec-spring-indices-kfold.pkl models/logatec-spring-kfold-xgboost-evaluation.pkl
+      --algorithm xgboost\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-kfold-xgboost-evaluation.pkl
+      hash: md5
+      md5: 5982125864e032ce29c45510c0484045
+      size: 248062
+  evaluation-logatec@winter-random-linear:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-random-linear.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-random.pkl
+      --output-summary reports/logatec-winter-random-linear-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: models/logatec-winter-random-linear.pkl
+      hash: md5
+      md5: 7a9624952cdd5bdfc0ebf71e6fa4ffdf
+      size: 3235
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-random-linear-summary.json
+      hash: md5
+      md5: 90099b5c1e3eae206e1b136b4c080d15
+      size: 711
+  evaluation-logatec@winter-random-rforest:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-random-rforest.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-random.pkl
+      --output-summary reports/logatec-winter-random-rforest-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: models/logatec-winter-random-rforest.pkl
+      hash: md5
+      md5: 917b89f5ff846ca888ac3827d701a546
+      size: 7802167
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-random-rforest-summary.json
+      hash: md5
+      md5: 90d80a51c82c4ce6265333ce4f8656d9
+      size: 727
+  evaluation-logatec@winter-random-xgboost:
+    cmd: "python src/evaluation/evaluate.py models/logatec-winter-random-xgboost-evaluation.pkl
+      reports/logatec-winter-random-xgboost-summary.json --task regression\n"
+    deps:
+    - path: models/logatec-winter-random-xgboost-evaluation.pkl
+      hash: md5
+      md5: ec02624b51a1120649d692fe24cea50b
+      size: 7382
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: f6a921c4e57bd2a5936dd209501392b2
+      size: 3208
+    outs:
+    - path: reports/logatec-winter-random-xgboost-summary.json
+      hash: md5
+      md5: 4eba6323634127c4657014581e17b547
+      size: 145
+  evaluation-logatec@winter-kfold-linear:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-kfold-linear.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-kfold.pkl
+      --output-summary reports/logatec-winter-kfold-linear-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: models/logatec-winter-kfold-linear.pkl
+      hash: md5
+      md5: 7a9624952cdd5bdfc0ebf71e6fa4ffdf
+      size: 3235
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-kfold-linear-summary.json
+      hash: md5
+      md5: 7c9e3a323b3b3c57d982e200967c4bf4
+      size: 840
+  evaluation-logatec@winter-kfold-rforest:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-kfold-rforest.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-kfold.pkl
+      --output-summary reports/logatec-winter-kfold-rforest-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: models/logatec-winter-kfold-rforest.pkl
+      hash: md5
+      md5: c774431c6fc0f4ec1f1ebd68a890ff76
+      size: 3112151
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-kfold-rforest-summary.json
+      hash: md5
+      md5: fbc6bfe5d032eeb5f7b28eb80ff0a4c5
+      size: 857
+  evaluation-logatec@winter-kfold-xgboost:
+    cmd: "python src/evaluation/evaluate.py models/logatec-winter-kfold-xgboost-evaluation.pkl
+      reports/logatec-winter-kfold-xgboost-summary.json --task regression\n"
+    deps:
+    - path: models/logatec-winter-kfold-xgboost-evaluation.pkl
+      hash: md5
+      md5: 2f4de5b4890af2a384fb32794cb5219e
+      size: 37030
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: f6a921c4e57bd2a5936dd209501392b2
+      size: 3208
+    outs:
+    - path: reports/logatec-winter-kfold-xgboost-summary.json
+      hash: md5
+      md5: aa5ba00211b19a7bd17fa5df86202bf3
+      size: 2994
+  evaluation-logatec@spring-random-linear:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-random-linear.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-random.pkl
+      --output-summary reports/logatec-spring-random-linear-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: models/logatec-spring-random-linear.pkl
+      hash: md5
+      md5: 9f263f733e5e326a4bcfe2a8a2b31b9e
+      size: 3373
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-random-linear-summary.json
+      hash: md5
+      md5: d58e5fafddabf0fd196f316cbf2ab12a
+      size: 711
+  evaluation-logatec@spring-random-rforest:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-random-rforest.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-random.pkl
+      --output-summary reports/logatec-spring-random-rforest-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: models/logatec-spring-random-rforest.pkl
+      hash: md5
+      md5: 58c167babc5888b88967c5c69a14fe4a
+      size: 68395681
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-random-rforest-summary.json
+      hash: md5
+      md5: 14d281a31f9a6e798a7c7da1c6910708
+      size: 719
+  evaluation-logatec@spring-random-xgboost:
+    cmd: "python src/evaluation/evaluate.py models/logatec-spring-random-xgboost-evaluation.pkl
+      reports/logatec-spring-random-xgboost-summary.json --task regression\n"
+    deps:
+    - path: models/logatec-spring-random-xgboost-evaluation.pkl
+      hash: md5
+      md5: bfb8cfb7aa5bc47be49db12c9849f0c1
+      size: 49574
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: f6a921c4e57bd2a5936dd209501392b2
+      size: 3208
+    outs:
+    - path: reports/logatec-spring-random-xgboost-summary.json
+      hash: md5
+      md5: 16e712af19ad3b5129a898e35feef1e9
+      size: 146
+  evaluation-logatec@spring-kfold-linear:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-kfold-linear.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-kfold.pkl
+      --output-summary reports/logatec-spring-kfold-linear-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: models/logatec-spring-kfold-linear.pkl
+      hash: md5
+      md5: 9f263f733e5e326a4bcfe2a8a2b31b9e
+      size: 3373
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-kfold-linear-summary.json
+      hash: md5
+      md5: fe32023f0e69c8f17bb9c754846b8e16
+      size: 839
+  evaluation-logatec@spring-kfold-rforest:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-kfold-rforest.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-kfold.pkl
+      --output-summary reports/logatec-spring-kfold-rforest-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: models/logatec-spring-kfold-rforest.pkl
+      hash: md5
+      md5: 58c167babc5888b88967c5c69a14fe4a
+      size: 68395681
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-kfold-rforest-summary.json
+      hash: md5
+      md5: 7a44a667836087152d80946de0ab18a0
+      size: 858
+  evaluation-logatec@spring-kfold-xgboost:
+    cmd: "python src/evaluation/evaluate.py models/logatec-spring-kfold-xgboost-evaluation.pkl
+      reports/logatec-spring-kfold-xgboost-summary.json --task regression\n"
+    deps:
+    - path: models/logatec-spring-kfold-xgboost-evaluation.pkl
+      hash: md5
+      md5: 5982125864e032ce29c45510c0484045
+      size: 248062
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: f6a921c4e57bd2a5936dd209501392b2
+      size: 3208
+    outs:
+    - path: reports/logatec-spring-kfold-xgboost-summary.json
+      hash: md5
+      md5: 410aecb4da9b392c564620bbfc4112fc
+      size: 2891
+  benchmark-logatec@winter-random-knn:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-winter-dataset.pkl
+      data/processed/logatec-winter-indices-random.pkl models/logatec-winter-random-knn-evaluation.pkl
+      --algorithm knn\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-random-knn-evaluation.pkl
+      hash: md5
+      md5: 4d685e927ce367b3f5df007f16ea9685
+      size: 8926
+  benchmark-logatec@winter-kfold-knn:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-winter-dataset.pkl
+      data/processed/logatec-winter-indices-kfold.pkl models/logatec-winter-kfold-knn-evaluation.pkl
+      --algorithm knn\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-kfold-knn-evaluation.pkl
+      hash: md5
+      md5: 60796384ab4a80f5be0ed1ed0428d95e
+      size: 44702
+  benchmark-logatec@spring-random-knn:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-spring-dataset.pkl
+      data/processed/logatec-spring-indices-random.pkl models/logatec-spring-random-knn-evaluation.pkl
+      --algorithm knn\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-random-knn-evaluation.pkl
+      hash: md5
+      md5: caa98a18869abc8f91aa813dc35fd647
+      size: 61694
+  benchmark-logatec@spring-kfold-knn:
+    cmd: "python src/models/make_regression_model.py data/processed/logatec-spring-dataset.pkl
+      data/processed/logatec-spring-indices-kfold.pkl models/logatec-spring-kfold-knn-evaluation.pkl
+      --algorithm knn\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: src/models/make_regression_model.py
+      hash: md5
+      md5: 13ea2fdf71761e842722b577b162d292
+      size: 4731
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-kfold-knn-evaluation.pkl
+      hash: md5
+      md5: 23ef19d554db960a0716c97a9b613978
+      size: 308718
+  evaluation-logatec@winter-random-knn:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-random-knn.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-random.pkl
+      --output-summary reports/logatec-winter-random-knn-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: models/logatec-winter-random-knn.pkl
+      hash: md5
+      md5: 502e823b33cda483b80a09e7ec2a1307
+      size: 379382
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-random-knn-summary.json
+      hash: md5
+      md5: 1e5cf09160fe5f5556dbc29e6fa76389
+      size: 711
+  evaluation-logatec@winter-kfold-knn:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-kfold-knn.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-kfold.pkl
+      --output-summary reports/logatec-winter-kfold-knn-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: models/logatec-winter-kfold-knn.pkl
+      hash: md5
+      md5: 502e823b33cda483b80a09e7ec2a1307
+      size: 379382
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-kfold-knn-summary.json
+      hash: md5
+      md5: 0d2a1729e402a8e7effd69161d35e4af
+      size: 840
+  evaluation-logatec@spring-random-knn:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-random-knn.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-random.pkl
+      --output-summary reports/logatec-spring-random-knn-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: models/logatec-spring-random-knn.pkl
+      hash: md5
+      md5: 3c1772205924ef2dad31c31f97c96e36
+      size: 3152288
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-random-knn-summary.json
+      hash: md5
+      md5: aa28ae6d8ff2ed26591a720bc8230852
+      size: 475
+  evaluation-logatec@spring-kfold-knn:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-kfold-knn.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-kfold.pkl
+      --output-summary reports/logatec-spring-kfold-knn-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: models/logatec-spring-kfold-knn.pkl
+      hash: md5
+      md5: 3c1772205924ef2dad31c31f97c96e36
+      size: 3152288
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-kfold-knn-summary.json
+      hash: md5
+      md5: aa28ae6d8ff2ed26591a720bc8230852
+      size: 475
+  train-logatec@winter-random-linear:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-random.pkl --use linear
+      --params params.yaml --out-model models/logatec-winter-random-linear.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-random-linear.pkl
+      hash: md5
+      md5: 7a9624952cdd5bdfc0ebf71e6fa4ffdf
+      size: 3235
+  train-logatec@winter-random-rforest:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-random.pkl --use rforest
+      --params params.yaml --out-model models/logatec-winter-random-rforest.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-random-rforest.pkl
+      hash: md5
+      md5: 917b89f5ff846ca888ac3827d701a546
+      size: 7802167
+  train-logatec@winter-random-xgb:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-random.pkl --use xgb --params
+      params.yaml --out-model models/logatec-winter-random-xgb.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-random-xgb.pkl
+      hash: md5
+      md5: 72ee08385532cb3586909d536323338f
+      size: 427119
+  train-logatec@winter-random-xgbrf:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-random.pkl --use xgbrf
+      --params params.yaml --out-model models/logatec-winter-random-xgbrf.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-random-xgbrf.pkl
+      hash: md5
+      md5: 164d3ba44f64c00e6aadbb9f511bb635
+      size: 510719
+  train-logatec@winter-random-knn:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-random.pkl --use knn --params
+      params.yaml --out-model models/logatec-winter-random-knn.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-random-knn.pkl
+      hash: md5
+      md5: 502e823b33cda483b80a09e7ec2a1307
+      size: 379382
+  train-logatec@winter-kfold-linear:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-kfold.pkl --use linear
+      --params params.yaml --out-model models/logatec-winter-kfold-linear.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-kfold-linear.pkl
+      hash: md5
+      md5: 7a9624952cdd5bdfc0ebf71e6fa4ffdf
+      size: 3235
+  train-logatec@winter-kfold-rforest:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-kfold.pkl --use rforest
+      --params params.yaml --out-model models/logatec-winter-kfold-rforest.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-kfold-rforest.pkl
+      hash: md5
+      md5: c774431c6fc0f4ec1f1ebd68a890ff76
+      size: 3112151
+  train-logatec@winter-kfold-xgb:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-kfold.pkl --use xgb --params
+      params.yaml --out-model models/logatec-winter-kfold-xgb.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-kfold-xgb.pkl
+      hash: md5
+      md5: 72ee08385532cb3586909d536323338f
+      size: 427119
+  train-logatec@winter-kfold-xgbrf:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-kfold.pkl --use xgbrf
+      --params params.yaml --out-model models/logatec-winter-kfold-xgbrf.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-kfold-xgbrf.pkl
+      hash: md5
+      md5: 164d3ba44f64c00e6aadbb9f511bb635
+      size: 510719
+  train-logatec@winter-kfold-knn:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-winter-dataset.pkl
+      --split-indices data/processed/logatec-winter-indices-kfold.pkl --use knn --params
+      params.yaml --out-model models/logatec-winter-kfold-knn.pkl\n"
+    deps:
+    - path: data/processed/logatec-winter-dataset.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-winter-kfold-knn.pkl
+      hash: md5
+      md5: 502e823b33cda483b80a09e7ec2a1307
+      size: 379382
+  train-logatec@spring-random-linear:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-random.pkl --use linear
+      --params params.yaml --out-model models/logatec-spring-random-linear.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-random-linear.pkl
+      hash: md5
+      md5: 9f263f733e5e326a4bcfe2a8a2b31b9e
+      size: 3373
+  train-logatec@spring-random-rforest:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-random.pkl --use rforest
+      --params params.yaml --out-model models/logatec-spring-random-rforest.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-random-rforest.pkl
+      hash: md5
+      md5: 58c167babc5888b88967c5c69a14fe4a
+      size: 68395681
+  train-logatec@spring-random-xgb:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-random.pkl --use xgb --params
+      params.yaml --out-model models/logatec-spring-random-xgb.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-random-xgb.pkl
+      hash: md5
+      md5: 6b4e8d43b278a3a8068a2df4a7202468
+      size: 848431
+  train-logatec@spring-random-xgbrf:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-random.pkl --use xgbrf
+      --params params.yaml --out-model models/logatec-spring-random-xgbrf.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-random-xgbrf.pkl
+      hash: md5
+      md5: 4e365d33928afcb0af9da7c723836529
+      size: 903103
+  train-logatec@spring-random-knn:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-random.pkl --use knn --params
+      params.yaml --out-model models/logatec-spring-random-knn.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-random-knn.pkl
+      hash: md5
+      md5: 3c1772205924ef2dad31c31f97c96e36
+      size: 3152288
+  train-logatec@spring-kfold-linear:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-kfold.pkl --use linear
+      --params params.yaml --out-model models/logatec-spring-kfold-linear.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-kfold-linear.pkl
+      hash: md5
+      md5: 9f263f733e5e326a4bcfe2a8a2b31b9e
+      size: 3373
+  train-logatec@spring-kfold-rforest:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-kfold.pkl --use rforest
+      --params params.yaml --out-model models/logatec-spring-kfold-rforest.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-kfold-rforest.pkl
+      hash: md5
+      md5: 58c167babc5888b88967c5c69a14fe4a
+      size: 68395681
+  train-logatec@spring-kfold-xgb:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-kfold.pkl --use xgb --params
+      params.yaml --out-model models/logatec-spring-kfold-xgb.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-kfold-xgb.pkl
+      hash: md5
+      md5: 6b4e8d43b278a3a8068a2df4a7202468
+      size: 848431
+  train-logatec@spring-kfold-xgbrf:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-kfold.pkl --use xgbrf
+      --params params.yaml --out-model models/logatec-spring-kfold-xgbrf.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-kfold-xgbrf.pkl
+      hash: md5
+      md5: 4e365d33928afcb0af9da7c723836529
+      size: 903103
+  train-logatec@spring-kfold-knn:
+    cmd: "python src/models/train_regressor.py --data data/processed/logatec-spring-dataset.pkl
+      --split-indices data/processed/logatec-spring-indices-kfold.pkl --use knn --params
+      params.yaml --out-model models/logatec-spring-kfold-knn.pkl\n"
+    deps:
+    - path: data/processed/logatec-spring-dataset.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: src/models/train_regressor.py
+      hash: md5
+      md5: 942482964d1918b1759c1165adac7f20
+      size: 4909
+    params:
+      params.yaml:
+        models.regression:
+          rforest:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+          knn:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/logatec-spring-kfold-knn.pkl
+      hash: md5
+      md5: 3c1772205924ef2dad31c31f97c96e36
+      size: 3152288
+  evaluation-logatec@winter-random-xgb:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-random-xgb.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-random.pkl
+      --output-summary reports/logatec-winter-random-xgb-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: models/logatec-winter-random-xgb.pkl
+      hash: md5
+      md5: 72ee08385532cb3586909d536323338f
+      size: 427119
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-random-xgb-summary.json
+      hash: md5
+      md5: 9869d628e3395fe1e0a31b171e819354
+      size: 735
+  evaluation-logatec@winter-random-xgbrf:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-random-xgbrf.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-random.pkl
+      --output-summary reports/logatec-winter-random-xgbrf-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-random.pkl
+      hash: md5
+      md5: 7c94803996206d0294d18a3be36765cf
+      size: 8149
+    - path: models/logatec-winter-random-xgbrf.pkl
+      hash: md5
+      md5: 164d3ba44f64c00e6aadbb9f511bb635
+      size: 510719
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-random-xgbrf-summary.json
+      hash: md5
+      md5: 8ac415214655a7ec77962e687035bdec
+      size: 719
+  evaluation-logatec@winter-kfold-xgb:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-kfold-xgb.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-kfold.pkl
+      --output-summary reports/logatec-winter-kfold-xgb-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: models/logatec-winter-kfold-xgb.pkl
+      hash: md5
+      md5: 72ee08385532cb3586909d536323338f
+      size: 427119
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-kfold-xgb-summary.json
+      hash: md5
+      md5: 2190f708f50fea93a8362f3917e23f71
+      size: 861
+  evaluation-logatec@winter-kfold-xgbrf:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-winter-kfold-xgbrf.pkl
+      --data data/processed/logatec-winter-dataset.pkl --split-indices data/processed/logatec-winter-indices-kfold.pkl
+      --output-summary reports/logatec-winter-kfold-xgbrf-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-winter-indices-kfold.pkl
+      hash: md5
+      md5: 129f4669aa618aa9a4eef12b1d9fbb2a
+      size: 159253
+    - path: models/logatec-winter-kfold-xgbrf.pkl
+      hash: md5
+      md5: 164d3ba44f64c00e6aadbb9f511bb635
+      size: 510719
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-winter-kfold-xgbrf-summary.json
+      hash: md5
+      md5: 64a8e84f03178deacd604ee8a0dde2f9
+      size: 829
+  evaluation-logatec@spring-random-xgb:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-random-xgb.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-random.pkl
+      --output-summary reports/logatec-spring-random-xgb-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: models/logatec-spring-random-xgb.pkl
+      hash: md5
+      md5: 6b4e8d43b278a3a8068a2df4a7202468
+      size: 848431
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-random-xgb-summary.json
+      hash: md5
+      md5: bca2068ff9322dd37e00423185e815b1
+      size: 719
+  evaluation-logatec@spring-random-xgbrf:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-random-xgbrf.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-random.pkl
+      --output-summary reports/logatec-spring-random-xgbrf-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-random.pkl
+      hash: md5
+      md5: 9cc10b1500fa15067752d9cb63028e7f
+      size: 60869
+    - path: models/logatec-spring-random-xgbrf.pkl
+      hash: md5
+      md5: 4e365d33928afcb0af9da7c723836529
+      size: 903103
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-random-xgbrf-summary.json
+      hash: md5
+      md5: 5a3e7112ca4eb5a7686035d5999265e0
+      size: 707
+  evaluation-logatec@spring-kfold-xgb:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-kfold-xgb.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-kfold.pkl
+      --output-summary reports/logatec-spring-kfold-xgb-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: models/logatec-spring-kfold-xgb.pkl
+      hash: md5
+      md5: 6b4e8d43b278a3a8068a2df4a7202468
+      size: 848431
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-kfold-xgb-summary.json
+      hash: md5
+      md5: 2c35df6e54cfbbaabd4f7e032721f81f
+      size: 860
+  evaluation-logatec@spring-kfold-xgbrf:
+    cmd: "python src/evaluation/evaluate.py --model models/logatec-spring-kfold-xgbrf.pkl
+      --data data/processed/logatec-spring-dataset.pkl --split-indices data/processed/logatec-spring-indices-kfold.pkl
+      --output-summary reports/logatec-spring-kfold-xgbrf-summary.json --task regression\n"
+    deps:
+    - path: data/processed/logatec-spring-indices-kfold.pkl
+      hash: md5
+      md5: d9f548f4a6988a7cd4a1048f0c09062a
+      size: 1213773
+    - path: models/logatec-spring-kfold-xgbrf.pkl
+      hash: md5
+      md5: 4e365d33928afcb0af9da7c723836529
+      size: 903103
+    - path: src/evaluation/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    outs:
+    - path: reports/logatec-spring-kfold-xgbrf-summary.json
+      hash: md5
+      md5: 810a72f5459c08db505fd71c42c6c508
+      size: 840

@@ -1,0 +1,51 @@
+name: nancy
+
+channels:
+  - pytorch
+  - nvidia
+  - anaconda
+  - conda-forge
+
+dependencies:
+  - python~=3.11.0
+  - pip
+
+  - nodejs~=18.0
+
+  - pytorch~=2.1.0
+  - pytorch-cuda=12.1
+  - torchvision
+  - torchaudio
+
+  - nomkl
+
+  - numpy
+  - scipy
+  - matplotlib~=3.8.0
+  - scikit-learn~=1.3.0
+  - pandas~=2.1.0
+
+  - py-xgboost-cpu~=2.0
+
+  - pyarrow~=14.0
+  #- fastparquet
+
+  - jupyterlab~=4.0
+  - ipywidgets
+  - jupyterlab_widgets
+
+  - pyts
+  - h5py
+  - joblib
+
+  - pip:
+    - dvc
+    - lightning~=2.1
+    - lightning-bolts
+    - torch-metrics
+    - torchinfo
+    - pre-commit
+    #- black
+    - ruff
+
+    - SciencePlots~=2.0

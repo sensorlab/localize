@@ -1,0 +1,12 @@
+md5: ee9a2e294ef36a0155b5a26df5bc66bb
+frozen: true
+deps:
+- checksum: '"ec1f4006-581b5145a7920"'
+  size: 3961470982
+  hash: md5
+  path: https://data.ieeemlc.org/dist/01/CTW2019_Dataset_h5.zip
+outs:
+- md5: 9b545ea7a494aea9106aaf603b9ec989
+  size: 3961470982
+  hash: md5
+  path: CTW2019_Dataset_h5.zip
