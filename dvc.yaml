@@ -2,9 +2,21 @@
 vars:
   - logatec:
       models: [linear, rforest, xgb, xgbrf, knn]
+      #models: [knn]
       subsets: [winter, spring]
-      splits: [random, kfold]
+      #splits: [exclude]
+      splits: [random, kfold, exclude]
 
+# Filename templates:
+# datasets: dataset-${dataset}.pkl
+# models: model-${algorithm}-${dataset}-${split}.pkl
+# Reports: summary-${dataset}-${split}-${algorithm}.json
+
+# Filename templates (by ChatGPT):
+# Models: models/${dataset}-${model}-${split}-${version}.pkl
+# Reports: reports/${dataset}-${model}-${split}-report.json
+# Datasets: processed/${dataset}.pkl
+# Split indices: ???
 
 stages:
   prepare-dataset-logatec:
@@ -16,14 +28,14 @@ stages:
       - >-
         python src/data/prepare_dataset_logatec.py
         --input data/raw/${item.subset}_data.json
-        --output data/interim/logatec-${item.subset}-dataset.pkl
+        --output data/interim/logatec-${item.subset}.pkl
         --task regression
       - rm data/raw/${item.subset}_data.json
     deps:
       - src/data/prepare_dataset_logatec.py
       - data/raw/logatec-fingerprint.zip
     outs:
-      - data/interim/logatec-${item.subset}-dataset.pkl
+      - data/interim/logatec-${item.subset}.pkl
 
   prepare-features-logatec:
     desc: Perform feature engineering steps
@@ -31,14 +43,14 @@ stages:
       subset: ${logatec.subsets}
     cmd: >
       python src/data/prepare_features_logatec.py
-      --input data/interim/logatec-${item.subset}-dataset.pkl
-      --output data/processed/logatec-${item.subset}-dataset.pkl
+      --input data/interim/logatec-${item.subset}.pkl
+      --output data/processed/logatec-${item.subset}.pkl
       --params params.yaml
     deps:
       - src/data/prepare_features_logatec.py
-      - data/interim/logatec-${item.subset}-dataset.pkl
+      - data/interim/logatec-${item.subset}.pkl
     outs:
-      - data/processed/logatec-${item.subset}-dataset.pkl
+      - data/processed/logatec-${item.subset}.pkl
 
   prepare-split-logatec:
     desc: Prepare several train-test splits for model training
@@ -47,7 +59,7 @@ stages:
       split: ${logatec.splits}
     cmd: >
       python src/data/prepare_split_logatec.py
-      --input data/processed/logatec-${item.subset}-dataset.pkl
+      --input data/processed/logatec-${item.subset}.pkl
       --output-indices data/processed/logatec-${item.subset}-indices-${item.split}.pkl
       --split ${item.split}
       --params params.yaml
@@ -56,7 +68,7 @@ stages:
       - split
     deps:
       - src/data/prepare_split_logatec.py
-      - data/processed/logatec-${item.subset}-dataset.pkl
+      - data/processed/logatec-${item.subset}.pkl
     outs:
       - data/processed/logatec-${item.subset}-indices-${item.split}.pkl
 
@@ -70,21 +82,21 @@ stages:
     # TODO: Add models ...
     cmd: >
       python src/models/train_regressor.py
-      --data data/processed/logatec-${item.subset}-dataset.pkl
+      --data data/processed/logatec-${item.subset}.pkl
       --split-indices data/processed/logatec-${item.subset}-indices-${item.split}.pkl
       --use ${item.model}
       --params params.yaml
-      --out-model models/logatec-${item.subset}-${item.split}-${item.model}.pkl
+      --out-model models/logatec-${item.subset}-${item.model}-${item.split}.pkl
     # models/logatec-${item.subset}-${item.split}-${item.model}-evaluation.pkl
     params:
       - seed
       - models.regression
     deps:
       - src/models/train_regressor.py
-      - data/processed/logatec-${item.subset}-dataset.pkl
+      - data/processed/logatec-${item.subset}.pkl
       - data/processed/logatec-${item.subset}-indices-${item.split}.pkl
     outs:
-      - models/logatec-${item.subset}-${item.split}-${item.model}.pkl
+      - models/logatec-${item.subset}-${item.model}-${item.split}.pkl
       #- models/logatec-${item.subset}-${item.split}-${item.model}-evaluation.pkl
 
   evaluation-logatec:
@@ -95,21 +107,36 @@ stages:
       model: ${logatec.models}
     cmd: >
       python src/evaluation/evaluate.py
-      --model models/logatec-${item.subset}-${item.split}-${item.model}.pkl
-      --data data/processed/logatec-${item.subset}-dataset.pkl
+      --model models/logatec-${item.subset}-${item.model}-${item.split}.pkl
+      --data data/processed/logatec-${item.subset}.pkl
       --split-indices data/processed/logatec-${item.subset}-indices-${item.split}.pkl
-      --output-summary reports/logatec-${item.subset}-${item.split}-${item.model}-summary.json
+      --output-summary reports/logatec-${item.subset}-${item.model}-${item.split}-report.json
       --task regression
-    # --split-indices reports/logatec-${item.subset}-${item.split}-${item.model}-summary.json
+    #  --type minimal
+    # --split-indices reports/logatec-${item.subset}-${item.model}-${item.split}-report.json
     # --model models/logatec-${item.subset}-${item.split}-${item.model}-evaluation.pkl
     deps:
       - src/evaluation/evaluate.py
-      - models/logatec-${item.subset}-${item.split}-${item.model}.pkl
+      - models/logatec-${item.subset}-${item.model}-${item.split}.pkl
       - data/processed/logatec-${item.subset}-indices-${item.split}.pkl
 
     # TODO: rename metrics to summary
     metrics:
-      - reports/logatec-${item.subset}-${item.split}-${item.model}-summary.json:
+      - reports/logatec-${item.subset}-${item.model}-${item.split}-report.json:
           cache: false
     #plots:
     #  - reports/logatec/${item.model}-${item.subset}-${item.split}.png
+
+  # visualize-logatec:
+  #   desc: Visualize model performance
+  #   matrix:
+  #     subset: ${logatec.subsets}
+  #     split: ${logatec.splits}
+  #     model: ${logatec.models}
+  #   cmd: >
+  #     python src/visualization/visualize.py
+  #     --model models/logatec-${item.subset}-${item.model}-${item.split}.pkl
+  #     --data data/processed/logatec-${item.subset}.pkl
+  #     --split-indices data/processed/logatec-${item.subset}-indices-${item.split}.pkl
+  #     --output-summary reports/logatec-${item.subset}-${item.model}-${item.split}-report.json
+  #     --task regression
