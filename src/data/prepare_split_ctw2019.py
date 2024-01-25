@@ -4,7 +4,7 @@ import click
 import joblib
 import numpy as np
 from sklearn import model_selection
-from src import load_data, load_params
+from src import load_data, load_params, PredefinedSplit
 
 
 class CombineCVs(model_selection.BaseCrossValidator):
@@ -37,18 +37,12 @@ class CombineCVs(model_selection.BaseCrossValidator):
 )
 @click.option(
     "--split",
-    type=click.Choice(["random", "kfold", "exclude"], case_sensitive=False),
-    default="kfold",
+    type=click.Choice(["KFold", "Random", "LongEdge", "ShortEdge", "Cutout"], case_sensitive=True),
+    default="KFold",
     required=True,
     show_default=True,
     # help="Method to harmonize values",
 )
-# @click.option(
-#     "--params",
-#     "params_path",
-#     type=click.Path(exists=True, dir_okay=False, path_type=Path),
-#     help="Path to the YAML with parameters",
-# )
 def cli(input_path: Path, output_indices_path: Path, split: str):
     # Load parameters
     params = load_params("./params.yaml")
@@ -60,8 +54,10 @@ def cli(input_path: Path, output_indices_path: Path, split: str):
     features, targets = load_data(input_path)
     groups = None
 
+    # TODO: ...
+
     match split:
-        case "random" | "Random":
+        case "Random":
             cv = model_selection.ShuffleSplit(
                 n_splits=split_params["n_splits"],
                 test_size=split_params["test_size"],
@@ -75,10 +71,29 @@ def cli(input_path: Path, output_indices_path: Path, split: str):
                 random_state=random_state,
             )
 
-        case "exclude" | "LeaveOneGroupOut":
-            _targets = targets.to_numpy() if hasattr(targets, "iloc") else targets
-            groups = np.unique(_targets, axis=0, return_inverse=True)[1]
-            cv = model_selection.LeaveOneGroupOut()
+        case "ShortEdge":
+            x, y = targets[..., 0], targets[..., 1]
+            threshold = -1.0 * x + 2.0
+            train_mask = y > threshold
+            train_idx = np.argwhere(train_mask).flatten()
+            test_idx = np.argwhere(~train_mask).flatten()
+            cv = PredefinedSplit(indices_pairs=((train_idx, test_idx),))
+
+        case "LongEdge":
+            x, y = targets[..., 0], targets[..., 1]
+            threshold = 0.9 * x + 4.1
+            train_mask = y < threshold
+            train_idx = np.argwhere(train_mask).flatten()
+            test_idx = np.argwhere(~train_mask).flatten()
+            cv = PredefinedSplit(indices_pairs=((train_idx, test_idx),))
+
+        case "Cutout":
+            x, y = targets[..., 0], targets[..., 1]
+            radius = 0.5
+            train_mask = np.sqrt((y - 4) ** 2 + (x - 0.8) ** 2) > radius
+            train_idx = np.argwhere(train_mask).flatten()
+            test_idx = np.argwhere(~train_mask).flatten()
+            cv = PredefinedSplit(indices_pairs=((train_idx, test_idx),))
 
         case _:
             raise NotImplementedError('Split type "{split}" not implemented')

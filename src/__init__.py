@@ -9,6 +9,9 @@ import pandas as pd
 import yaml
 import json
 
+from sklearn import model_selection
+import numpy as np
+
 # Project source code directory
 SRC_PATH = Path(__file__).resolve().parents[0]
 
@@ -37,7 +40,7 @@ def save_params(obj: object, params_path: Path):
     match params_path.suffix:
         case ".json":
             with open(params_path, mode="w") as fp:
-                json.dump(obj, fp)
+                json.dump(obj, fp, sort_keys=True, indent=2)
 
         case ".pkl" | ".joblib":
             joblib.dump(obj, params_path)
@@ -73,3 +76,19 @@ def safe_indexing(X: Any, indices, *, axis=0):
         return X[indices]
 
     raise NotImplementedError(f'Safe indexing not implemented for "{type(X)}"')
+
+
+class PredefinedSplit(model_selection.BaseCrossValidator):
+    """Simple cross-validator for predefined train-test splits."""
+
+    def __init__(self, indices_pairs: list[tuple[np.ndarray, np.ndarray]]):
+        self.idx_pairs = indices_pairs
+
+    def get_n_splits(self, X=None, y=None, groups=None):
+        """Return the number of splitting iterations in the cross-validator"""
+        return len(self.idx_pairs)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set."""
+        for train_idx, test_idx in self.idx_pairs:
+            yield train_idx, test_idx

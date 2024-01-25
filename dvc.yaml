@@ -1,22 +1,20 @@
-# Use variables instead to help with consistency
-vars:
-  - logatec:
-      models: [linear, rforest, xgb, xgbrf, knn]
-      #models: [knn]
-      subsets: [winter, spring]
-      #splits: [exclude]
-      splits: [random, kfold, exclude]
-
-# Filename templates:
-# datasets: dataset-${dataset}.pkl
-# models: model-${algorithm}-${dataset}-${split}.pkl
-# Reports: summary-${dataset}-${split}-${algorithm}.json
-
 # Filename templates (by ChatGPT):
 # Models: models/${dataset}-${model}-${split}-${version}.pkl
 # Reports: reports/${dataset}-${model}-${split}-report.json
 # Datasets: processed/${dataset}.pkl
 # Split indices: ???
+
+vars:
+  - logatec:
+      #models: [knn]
+      #subsets: [spring]
+      #splits: [exclude]
+      models: [linear, rforest, xgb, xgbrf, knn]
+      subsets: [winter, spring]
+      splits: [random, kfold, exclude]
+
+  - ctw2019:
+      models: []
 
 stages:
   prepare-dataset-logatec:
@@ -45,7 +43,6 @@ stages:
       python src/data/prepare_features_logatec.py
       --input data/interim/logatec-${item.subset}.pkl
       --output data/processed/logatec-${item.subset}.pkl
-      --params params.yaml
     deps:
       - src/data/prepare_features_logatec.py
       - data/interim/logatec-${item.subset}.pkl
@@ -60,9 +57,8 @@ stages:
     cmd: >
       python src/data/prepare_split_logatec.py
       --input data/processed/logatec-${item.subset}.pkl
-      --output-indices data/processed/logatec-${item.subset}-indices-${item.split}.pkl
+      --output-indices data/splits/logatec-${item.subset}-${item.split}.pkl
       --split ${item.split}
-      --params params.yaml
     params:
       - seed
       - split
@@ -70,7 +66,7 @@ stages:
       - src/data/prepare_split_logatec.py
       - data/processed/logatec-${item.subset}.pkl
     outs:
-      - data/processed/logatec-${item.subset}-indices-${item.split}.pkl
+      - data/splits/logatec-${item.subset}-${item.split}.pkl
 
   train-logatec:
     desc: Benchmark models' performance on different subsets and splits
@@ -83,21 +79,20 @@ stages:
     cmd: >
       python src/models/train_regressor.py
       --data data/processed/logatec-${item.subset}.pkl
-      --split-indices data/processed/logatec-${item.subset}-indices-${item.split}.pkl
+      --split-indices data/splits/logatec-${item.subset}-${item.split}.pkl
       --use ${item.model}
-      --params params.yaml
-      --out-model models/logatec-${item.subset}-${item.model}-${item.split}.pkl
-    # models/logatec-${item.subset}-${item.split}-${item.model}-evaluation.pkl
+      --model-output models/logatec-${item.subset}-${item.model}-${item.split}.pkl
+      --best-params-output models/logatec-${item.subset}-${item.model}-${item.split}-hparams.json
     params:
       - seed
       - models.regression
     deps:
       - src/models/train_regressor.py
       - data/processed/logatec-${item.subset}.pkl
-      - data/processed/logatec-${item.subset}-indices-${item.split}.pkl
+      - data/splits/logatec-${item.subset}-${item.split}.pkl
     outs:
       - models/logatec-${item.subset}-${item.model}-${item.split}.pkl
-      #- models/logatec-${item.subset}-${item.split}-${item.model}-evaluation.pkl
+      - models/logatec-${item.subset}-${item.model}-${item.split}-hparams.json
 
   evaluation-logatec:
     desc: Perform evaluation of models.
@@ -109,16 +104,13 @@ stages:
       python src/evaluation/evaluate.py
       --model models/logatec-${item.subset}-${item.model}-${item.split}.pkl
       --data data/processed/logatec-${item.subset}.pkl
-      --split-indices data/processed/logatec-${item.subset}-indices-${item.split}.pkl
+      --split-indices data/splits/logatec-${item.subset}-${item.split}.pkl
       --output-summary reports/logatec-${item.subset}-${item.model}-${item.split}-report.json
       --task regression
-    #  --type minimal
-    # --split-indices reports/logatec-${item.subset}-${item.model}-${item.split}-report.json
-    # --model models/logatec-${item.subset}-${item.split}-${item.model}-evaluation.pkl
     deps:
       - src/evaluation/evaluate.py
       - models/logatec-${item.subset}-${item.model}-${item.split}.pkl
-      - data/processed/logatec-${item.subset}-indices-${item.split}.pkl
+      - data/splits/logatec-${item.subset}-${item.split}.pkl
 
     # TODO: rename metrics to summary
     metrics:
@@ -137,6 +129,59 @@ stages:
   #     python src/visualization/visualize.py
   #     --model models/logatec-${item.subset}-${item.model}-${item.split}.pkl
   #     --data data/processed/logatec-${item.subset}.pkl
-  #     --split-indices data/processed/logatec-${item.subset}-indices-${item.split}.pkl
+  #     --split-indices data/splits/logatec-${item.subset}-${item.split}.pkl
   #     --output-summary reports/logatec-${item.subset}-${item.model}-${item.split}-report.json
   #     --task regression
+
+
+  prepare-dataset-ctw2019:
+    desc: Prepare CTW2019 dataset from the MLOps pipeline
+    cmd:
+      - unzip data/raw/CTW2019_Dataset_h5.zip -d data/raw/
+      - >-
+        python src/data/prepare_dataset_ctw2019.py
+        --data-h data/raw/h_Estimated_CTW_Train.h5
+        --data-snr data/raw/SNR_CTW_Train.h5
+        --data-pos data/raw/r_Position_CTW_Train.h5
+        --output data/interim/ctw2019.pkl
+        --task regression
+      - rm data/raw/{h_Estimated,SNR,r_Position}_CTW_Train.h5
+    deps:
+      - data/raw/CTW2019_Dataset_h5.zip
+      - src/data/prepare_dataset_ctw2019.py
+    outs:
+      - data/interim/ctw2019.pkl:
+          cache: false
+
+  prepare-features-ctw2019:
+    desc: Prepare CTW2019 dataset
+    cmd: >
+      python src/data/prepare_features_ctw2019.py
+      --input data/interim/ctw2019.pkl
+      --output data/processed/ctw2019.pkl
+    deps:
+      - src/data/prepare_features_ctw2019.py
+      - data/interim/ctw2019.pkl
+    outs:
+      - data/processed/ctw2019.pkl:
+          cache: false
+
+
+  prepare-split-ctw2019:
+    desc: Prepare CTW2019 data split
+    matrix:
+      split: [KFold, Random, ShortEdge, LongEdge, Cutout]
+    cmd: >
+      python src/data/prepare_split_ctw2019.py
+      --input data/processed/ctw2019.pkl
+      --split ${item.split}
+      --output-indices data/splits/ctw2019-${item.split}.pkl
+    params:
+      - seed
+      - split
+    deps:
+      - data/processed/ctw2019.pkl
+      - src/data/prepare_split_ctw2019.py
+    outs:
+      - data/splits/ctw2019-${item.split}.pkl:
+          cache: false

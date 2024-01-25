@@ -9,7 +9,7 @@ clean:
 	find . -type d -name "__cache__" -ls -exec rm -rv {} +
 
 	find ./data -type f -name "*.pkl" -delete
-	find ./models -type f -name "*.pkl" -delete
+	find ./models -type f \( -name "*.pkl" -o -name "*.json" \) -delete
 
 ## Lint using black and isort
 lint:

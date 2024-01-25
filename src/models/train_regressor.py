@@ -5,25 +5,14 @@ import click
 import joblib
 import xgboost
 from sklearn import ensemble, linear_model, model_selection, multioutput, neighbors
-import numpy as np
 
-from src import load_data, load_params
+# try:
+#     from sklearnex import patch_sklearn
+#     patch_sklearn()
+# except ImportError:
+#     pass
 
-
-class CustomCrossValidation(model_selection.BaseCrossValidator):
-    """Simple cross-validator for predefined train-test splits."""
-
-    def __init__(self, indices_pairs: list[tuple[np.ndarray, np.ndarray]]):
-        self.idx_pairs = indices_pairs
-
-    def get_n_splits(self, X=None, y=None, groups=None):
-        """Return the number of splitting iterations in the cross-validator"""
-        return len(self.idx_pairs)
-
-    def split(self, X, y=None, groups=None):
-        """Generate indices to split data into training and test set."""
-        for train_idx, test_idx in self.idx_pairs:
-            yield train_idx, test_idx
+from src import load_data, load_params, save_params, PredefinedSplit
 
 
 @click.command()
@@ -53,57 +42,59 @@ class CustomCrossValidation(model_selection.BaseCrossValidator):
     "--out-model",
     "--output-model",
     "--output",
+    "--model-output",
     "model_output_path",
     type=click.Path(dir_okay=False, writable=True, path_type=Path),
     required=True,
     # help="Input data, parquet",
 )
-# @click.option(
-#     "--out-best-params",
-#     "--output-best-params",
-#     "best_params_output_path",
-#     type=click.Path(dir_okay=False, writable=True, path_type=Path),
-#     required=True,
-#     # help="Input data, parquet",
-# )
 @click.option(
-    "--params",
-    "--model-params",
-    "params_path",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    # "--out-best-params",
+    # "--output-best-params",
+    "--best-params-output",
+    "best_params_output_path",
+    type=click.Path(dir_okay=False, writable=True, path_type=Path),
     required=True,
+    # help="Input data, parquet",
 )
+# @click.option(
+#     "--params",
+#     "--model-params",
+#     "params_path",
+#     type=click.Path(exists=True, dir_okay=False, path_type=Path),
+#     required=True,
+# )
 def cli(
     input_dataset_path: Path,
     split_indices_path: Path,
     model_output_path: Path,
-    # best_params_output_path: Path,
-    params_path: Path,
+    best_params_output_path: Path,
+    # params_path: Path,
     algorithm: Literal["linear", "rforest", "xgb", "xgbrf", "knn"],
 ):
-    params = load_params(params_path)
+    params = load_params("./params.yaml")
     random_state = params["seed"]
     mparams = params["models"]["regression"]
 
     # Load data
     features, targets = load_data(input_dataset_path)
     cv_indices = load_data(split_indices_path)
-    cv = CustomCrossValidation(cv_indices)
+    cv = PredefinedSplit(cv_indices)
 
     # Number of available CPU cores
     n_jobs = joblib.cpu_count(only_physical_cores=False)
 
     # Stratified KFold for evaluation
     match algorithm:
-        case "linear":
+        case "linear" | "LinearRegression":
             estimator = linear_model.LinearRegression()
-        case "rforest":
+        case "rforest" | "RandomForestRegressor":
             estimator = ensemble.RandomForestRegressor(random_state=random_state)
-        case "xgb":
+        case "xgb" | "XGBRegressor":
             estimator = xgboost.XGBRegressor(random_state=random_state)
-        case "xgbrf":
+        case "xgbrf" | "XGBRFRegressor":
             estimator = xgboost.XGBRFRegressor(random_state=random_state)
-        case "knn":
+        case "knn" | "KNeighborsRegressor":
             estimator = neighbors.KNeighborsRegressor()
         case _:
             raise NotImplementedError
@@ -128,8 +119,11 @@ def cli(
         gridsearch.fit(features, targets)
 
     # Save best model
-    best_model = gridsearch.best_estimator_
-    joblib.dump(best_model, model_output_path)
+    joblib.dump(gridsearch.best_estimator_, model_output_path)
+
+    # Save best parameters
+    if best_params_output_path:
+        save_params(gridsearch.best_params_, best_params_output_path)
 
 
 if __name__ == "__main__":

@@ -12,12 +12,6 @@ from src import load_data
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     required=True,
 )
-# @click.option(
-#     "--params",
-#     "params_path",
-#     type=click.Path(exists=True, dir_okay=False, path_type=Path),
-#     required=True,
-# )
 @click.option(
     "--output",
     "output_path",
@@ -25,11 +19,12 @@ from src import load_data
     required=True,
 )
 def cli(input_path: Path, output_path: Path):
-    X, y = load_data(input_path)
+    data = load_data(input_path)
+    h, _, pos = data["h"], data["snr"], data["pos"]
 
     # TODO: Do some feature engineering. Currently is just a passthrough.
 
-    joblib.dump((X, y), output_path)
+    joblib.dump((h, pos), output_path)
 
 
 if __name__ == "__main__":
