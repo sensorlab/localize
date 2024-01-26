@@ -1,0 +1,36 @@
+seed: 42
+
+split:
+  n_splits: 5
+  test_size: 0.20
+
+models:
+  regression:
+    # rforest:
+    #   n_estimators: [10, 50, 100, 250, 400]
+    #   max_depth: [5, 10, 30, 50, 150, 200, null]
+
+    # knn:
+    #   weights: [uniform, distance]
+    #   #algorithm: [ball_tree, brute]
+    #   p: [1, 2, 3]
+    #   leaf_size: [5, 10, 15, 30, 45]
+    #   metric: [minkowski, euclidean, cosine, manhattan]
+
+    #linear:
+
+    svm:
+      C: [1, 10, 100]
+      kernel: [linear, rbf]
+
+data:
+  #preprocessing:
+  #  scale: [True, False]
+  #  encoding: ["label", "one_hot"]
+
+train:
+  batch_size: [16, 32, 64]
+  learning_rate: [0.01, 0.001, 0.0001]
+
+nn:
+  example: 1

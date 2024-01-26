@@ -7,11 +7,12 @@
 vars:
   - logatec:
       #models: [knn]
-      #subsets: [spring]
+      subsets: [spring]
       #splits: [exclude]
       models: [linear, rforest, xgb, xgbrf, knn]
-      subsets: [winter, spring]
-      splits: [random, kfold, exclude]
+      #subsets: [winter, spring]
+      #splits: [random, kfold, exclude]
+      splits: [Random, KFold, LeaveOneGroupOut]
 
   - ctw2019:
       models: []

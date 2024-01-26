@@ -1,0 +1,1311 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: echo "Hello $pwd"
+  prepare-dataset@spring:
+    cmd: "unzip -j data/raw/logatec.zip spring_data.json -d data/raw/\npython prepare.py
+      --input data/raw/spring_data.json --output data/interim/spring.pkl --task regression\n
+      rm data/raw/spring_data.json\n"
+    deps:
+    - path: data/raw/logatec.zip
+      hash: md5
+      md5: 7cdafacc2da2889c56fc8a13cbe3a35e
+      size: 1942041
+    - path: prepare.py
+      hash: md5
+      md5: 15677c95ff36e605129c386eb64c8888
+      size: 3917
+    outs:
+    - path: data/interim/spring.pkl
+      hash: md5
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
+  featurize@spring:
+    cmd: "python featurize.py --input data/interim/spring.pkl --output data/prepared/spring.pkl\n"
+    deps:
+    - path: data/interim/spring.pkl
+      hash: md5
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
+    - path: featurize.py
+      hash: md5
+      md5: 9838f7450c6569ed74a4c86ea7d82205
+      size: 752
+    outs:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+  prepare-split@spring-Random:
+    cmd: "python split.py --input data/prepared/spring.pkl --split Random --output-indices
+      data/splits/spring-Random.pkl\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: split.py
+      hash: md5
+      md5: 1274b5d76bfdf92ca47167cdc61d774d
+      size: 2763
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+  prepare-split@spring-LeaveOneGroupOut:
+    cmd: "python split.py --input data/prepared/spring.pkl --split LeaveOneGroupOut
+      --output-indices data/splits/spring-LeaveOneGroupOut.pkl\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: split.py
+      hash: md5
+      md5: 1274b5d76bfdf92ca47167cdc61d774d
+      size: 2763
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+  prepare-split@spring-KFold:
+    cmd: "python split.py --input data/prepared/spring.pkl --split KFold --output-indices
+      data/splits/spring-KFold.pkl\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: split.py
+      hash: md5
+      md5: 1274b5d76bfdf92ca47167cdc61d774d
+      size: 2763
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+  train-logatec@spring-LeaveOneGroupOut-knn:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --use knn --model-output
+      models/spring-knn-LeaveOneGroupOut.pkl --best-params-output models/spring-knn-LeaveOneGroupOut-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-knn-LeaveOneGroupOut-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-knn-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 7601e22bade9c47a307bda4b5b674704
+      size: 3152614
+  train-logatec@spring-KFold-xgb:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --use xgb --model-output models/spring-xgb-KFold.pkl
+      --best-params-output models/spring-xgb-KFold-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgb-KFold-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-xgb-KFold.pkl
+      hash: md5
+      md5: b58005603b026d33b0bba3016661c6e5
+      size: 849535
+  train-logatec@spring-KFold-knn:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --use knn --model-output models/spring-knn-KFold.pkl
+      --best-params-output models/spring-knn-KFold-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-knn-KFold-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-knn-KFold.pkl
+      hash: md5
+      md5: d2e377895affa833ee136faecde628b7
+      size: 3152513
+  train-logatec@spring-Random-xgb:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --use xgb --model-output models/spring-xgb-Random.pkl
+      --best-params-output models/spring-xgb-Random-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgb-Random-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-xgb-Random.pkl
+      hash: md5
+      md5: b58005603b026d33b0bba3016661c6e5
+      size: 849535
+  train-logatec@spring-KFold-xgbrf:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --use xgbrf --model-output models/spring-xgbrf-KFold.pkl
+      --best-params-output models/spring-xgbrf-KFold-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgbrf-KFold-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-xgbrf-KFold.pkl
+      hash: md5
+      md5: 59bf0be1e0df21b2e0bd04471dcc82a9
+      size: 904223
+  train-logatec@spring-Random-xgbrf:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --use xgbrf --model-output models/spring-xgbrf-Random.pkl
+      --best-params-output models/spring-xgbrf-Random-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgbrf-Random-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-xgbrf-Random.pkl
+      hash: md5
+      md5: 59bf0be1e0df21b2e0bd04471dcc82a9
+      size: 904223
+  train-logatec@spring-Random-linear:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --use linear --model-output models/spring-linear-Random.pkl
+      --best-params-output models/spring-linear-Random-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-linear-Random-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-linear-Random.pkl
+      hash: md5
+      md5: e6b731db8508ea331574145225ef217b
+      size: 3582
+  train-logatec@spring-Random-knn:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --use knn --model-output models/spring-knn-Random.pkl
+      --best-params-output models/spring-knn-Random-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-knn-Random-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-knn-Random.pkl
+      hash: md5
+      md5: d2e377895affa833ee136faecde628b7
+      size: 3152513
+  train-logatec@spring-Random-rforest:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --use rforest --model-output models/spring-rforest-Random.pkl
+      --best-params-output models/spring-rforest-Random-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-rforest-Random-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-rforest-Random.pkl
+      hash: md5
+      md5: 03a3c3bee004b31ef32b323837988b2c
+      size: 27410930
+  train-logatec@spring-LeaveOneGroupOut-linear:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --use linear --model-output
+      models/spring-linear-LeaveOneGroupOut.pkl --best-params-output models/spring-linear-LeaveOneGroupOut-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-linear-LeaveOneGroupOut-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-linear-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 9e0926d67492cc21c8b20a42e21fdcd2
+      size: 3625
+  train-logatec@spring-LeaveOneGroupOut-xgbrf:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --use xgbrf --model-output
+      models/spring-xgbrf-LeaveOneGroupOut.pkl --best-params-output models/spring-xgbrf-LeaveOneGroupOut-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgbrf-LeaveOneGroupOut-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-xgbrf-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 59bf0be1e0df21b2e0bd04471dcc82a9
+      size: 904223
+  train-logatec@spring-LeaveOneGroupOut-rforest:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --use rforest --model-output
+      models/spring-rforest-LeaveOneGroupOut.pkl --best-params-output models/spring-rforest-LeaveOneGroupOut-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-rforest-LeaveOneGroupOut-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-rforest-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: b2684c538e92a3202b64381cef039aff
+      size: 27412530
+  train-logatec@spring-KFold-linear:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --use linear --model-output models/spring-linear-KFold.pkl
+      --best-params-output models/spring-linear-KFold-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-linear-KFold-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-linear-KFold.pkl
+      hash: md5
+      md5: e6b731db8508ea331574145225ef217b
+      size: 3582
+  train-logatec@spring-KFold-rforest:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --use rforest --model-output models/spring-rforest-KFold.pkl
+      --best-params-output models/spring-rforest-KFold-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-rforest-KFold-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-rforest-KFold.pkl
+      hash: md5
+      md5: 03a3c3bee004b31ef32b323837988b2c
+      size: 27410930
+  train-logatec@spring-LeaveOneGroupOut-xgb:
+    cmd: "python ../../scripts/train_regressor.py --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --use xgb --model-output
+      models/spring-xgb-LeaveOneGroupOut.pkl --best-params-output models/spring-xgb-LeaveOneGroupOut-hparams.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgb-LeaveOneGroupOut-hparams.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+    - path: models/spring-xgb-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: b58005603b026d33b0bba3016661c6e5
+      size: 849535
+  optimization@spring-KFold-xgb:
+    cmd: "python ../../scripts/train_regressor.py --use xgb --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --model-output models/spring-xgb-KFold.pkl
+      --best-params-output params/spring-xgb-KFold.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgb-KFold.pkl
+      hash: md5
+      md5: b58005603b026d33b0bba3016661c6e5
+      size: 849535
+    - path: params/spring-xgb-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-KFold-xgbrf:
+    cmd: "python ../../scripts/train_regressor.py --use xgbrf --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --model-output models/spring-xgbrf-KFold.pkl
+      --best-params-output params/spring-xgbrf-KFold.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgbrf-KFold.pkl
+      hash: md5
+      md5: 59bf0be1e0df21b2e0bd04471dcc82a9
+      size: 904223
+    - path: params/spring-xgbrf-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-LeaveOneGroupOut-xgbrf:
+    cmd: "python ../../scripts/train_regressor.py --use xgbrf --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --model-output models/spring-xgbrf-LeaveOneGroupOut.pkl
+      --best-params-output params/spring-xgbrf-LeaveOneGroupOut.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgbrf-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 59bf0be1e0df21b2e0bd04471dcc82a9
+      size: 904223
+    - path: params/spring-xgbrf-LeaveOneGroupOut.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-Random-xgbrf:
+    cmd: "python ../../scripts/train_regressor.py --use xgbrf --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --model-output models/spring-xgbrf-Random.pkl
+      --best-params-output params/spring-xgbrf-Random.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgbrf-Random.pkl
+      hash: md5
+      md5: 59bf0be1e0df21b2e0bd04471dcc82a9
+      size: 904223
+    - path: params/spring-xgbrf-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-Random-rforest:
+    cmd: "python ../../scripts/train_regressor.py --use rforest --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --model-output models/spring-rforest-Random.pkl
+      --best-params-output params/spring-rforest-Random.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-rforest-Random.pkl
+      hash: md5
+      md5: 03a3c3bee004b31ef32b323837988b2c
+      size: 27410930
+    - path: params/spring-rforest-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-KFold-linear:
+    cmd: "python ../../scripts/train_regressor.py --use linear --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --model-output models/spring-linear-KFold.pkl
+      --best-params-output params/spring-linear-KFold.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-linear-KFold.pkl
+      hash: md5
+      md5: e6b731db8508ea331574145225ef217b
+      size: 3582
+    - path: params/spring-linear-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-LeaveOneGroupOut-xgb:
+    cmd: "python ../../scripts/train_regressor.py --use xgb --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --model-output models/spring-xgb-LeaveOneGroupOut.pkl
+      --best-params-output params/spring-xgb-LeaveOneGroupOut.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgb-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: b58005603b026d33b0bba3016661c6e5
+      size: 849535
+    - path: params/spring-xgb-LeaveOneGroupOut.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-LeaveOneGroupOut-knn:
+    cmd: "python ../../scripts/train_regressor.py --use knn --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --model-output models/spring-knn-LeaveOneGroupOut.pkl
+      --best-params-output params/spring-knn-LeaveOneGroupOut.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-knn-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 7601e22bade9c47a307bda4b5b674704
+      size: 3152614
+    - path: params/spring-knn-LeaveOneGroupOut.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-Random-knn:
+    cmd: "python ../../scripts/train_regressor.py --use knn --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --model-output models/spring-knn-Random.pkl
+      --best-params-output params/spring-knn-Random.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-knn-Random.pkl
+      hash: md5
+      md5: d2e377895affa833ee136faecde628b7
+      size: 3152513
+    - path: params/spring-knn-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-KFold-knn:
+    cmd: "python ../../scripts/train_regressor.py --use knn --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --model-output models/spring-knn-KFold.pkl
+      --best-params-output params/spring-knn-KFold.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-knn-KFold.pkl
+      hash: md5
+      md5: d2e377895affa833ee136faecde628b7
+      size: 3152513
+    - path: params/spring-knn-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-Random-linear:
+    cmd: "python ../../scripts/train_regressor.py --use linear --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --model-output models/spring-linear-Random.pkl
+      --best-params-output params/spring-linear-Random.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-linear-Random.pkl
+      hash: md5
+      md5: e6b731db8508ea331574145225ef217b
+      size: 3582
+    - path: params/spring-linear-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-KFold-rforest:
+    cmd: "python ../../scripts/train_regressor.py --use rforest --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --model-output models/spring-rforest-KFold.pkl
+      --best-params-output params/spring-rforest-KFold.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-rforest-KFold.pkl
+      hash: md5
+      md5: 03a3c3bee004b31ef32b323837988b2c
+      size: 27410930
+    - path: params/spring-rforest-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-LeaveOneGroupOut-linear:
+    cmd: "python ../../scripts/train_regressor.py --use linear --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --model-output models/spring-linear-LeaveOneGroupOut.pkl
+      --best-params-output params/spring-linear-LeaveOneGroupOut.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-linear-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 9e0926d67492cc21c8b20a42e21fdcd2
+      size: 3625
+    - path: params/spring-linear-LeaveOneGroupOut.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-Random-xgb:
+    cmd: "python ../../scripts/train_regressor.py --use xgb --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --model-output models/spring-xgb-Random.pkl
+      --best-params-output params/spring-xgb-Random.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: 4d8da8aeced246d8f603ae59f21ccd3b
+      size: 3690
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-xgb-Random.pkl
+      hash: md5
+      md5: b58005603b026d33b0bba3016661c6e5
+      size: 849535
+    - path: params/spring-xgb-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  optimization@spring-Random-LinearRegression:
+    cmd: "python ../../scripts/train_regressor.py --use LinearRegression --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --model-output models/spring-LinearRegression-Random.pkl
+      --best-params-output params/spring-LinearRegression-Random.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: ed48843d5b21468b97abc140a821803b
+      size: 3786
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-LinearRegression-Random.pkl
+      hash: md5
+      md5: e6b731db8508ea331574145225ef217b
+      size: 3582
+    - path: params/spring-LinearRegression-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@spring-Random-LinearRegression:
+    cmd: "python ../../scripts/train_regressor.py --use LinearRegression --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --model-output models/spring-LinearRegression-Random.pkl
+      --best-params-output params/spring-LinearRegression-Random.json\n"
+    deps:
+    - path: ../../scripts/train_regressor.py
+      hash: md5
+      md5: ed48843d5b21468b97abc140a821803b
+      size: 3786
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    params:
+      params.yaml:
+        models.regression:
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-LinearRegression-Random.pkl
+      hash: md5
+      md5: e6b731db8508ea331574145225ef217b
+      size: 3582
+    - path: params/spring-LinearRegression-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  evaluation@spring-Random-LinearRegression:
+    cmd: "python ../../scripts/evaluate.py --model models/spring-LinearRegression-Random.pkl
+      --data data/prepared/spring.pkl --split-indices data/splits/spring-Random.pkl
+      --output-summary reports/spring-LinearRegression-Random.json --task regression\n"
+    deps:
+    - path: ../../scripts/evaluate.py
+      hash: md5
+      md5: dde55fb4cee9b1bdb0fd2be452eb824c
+      size: 5159
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    - path: models/spring-LinearRegression-Random.pkl
+      hash: md5
+      md5: e6b731db8508ea331574145225ef217b
+      size: 3582
+    outs:
+    - path: reports/spring-LinearRegression-Random.json
+      hash: md5
+      md5: dc900fccae810fc5ab35425682c994c7
+      size: 840

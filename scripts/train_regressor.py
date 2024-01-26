@@ -33,7 +33,10 @@ from src import load_data, load_params, save_params, PredefinedSplit
     "--algorithm",
     "--use",
     "algorithm",
-    type=click.Choice(["linear", "rforest", "xgb", "xgbrf", "knn"], case_sensitive=False),
+    type=click.Choice(
+        ["LinearRegression", "RandomForestRegressor", "XGBRegressor", "XGBRFRegressor", "KNeighborsRegressor"],
+        case_sensitive=False,
+    ),
     required=True,
     # show_default=True,
     # help="Method to harmonize values",

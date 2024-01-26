@@ -284,20 +284,33 @@ lightning_logs/
 logs/
 tmp/
 
-data/**
-!data/**/
 
-models/**
-!models/**/
+/**/data/**
+!/**/data/**/
 
-*.ckpt
-*.joblib
-*.pkl
-*.pq
-*.parquet
+/**/models/**
+!/**/models/**/
+
+#/**/reports/**
+#!/**/reports/**/
+
+/**/params/**
+!/**/params/**/
+#*.zip
+#*.json
+#*.h5
+#*.hdf5
+#*.pickle
+#*.pkl
+
+#*.ckpt
+#*.joblib
+#*.pkl
+#*.pq
+#*.parquet
 
 !**/.gitkeep
-!**/dvc.yml
-!**/dvc.yaml
+#!**/dvc.yml
+#!**/dvc.yaml
 !**/*.dvc
-!**/dvc.lock
+#!**/dvc.lock

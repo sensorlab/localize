@@ -1,4 +1,4 @@
-md5: 8e0660ff916529e6c804f83158c64bf1
+md5: c219fbadd5e4682e0c52aa2a282c5389
 frozen: true
 deps:
 - checksum: '"62ea3ee9-1da219"'
@@ -9,4 +9,4 @@ outs:
 - md5: 7cdafacc2da2889c56fc8a13cbe3a35e
   size: 1942041
   hash: md5
-  path: logatec-fingerprint.zip
+  path: logatec.zip
