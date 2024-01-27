@@ -6,16 +6,16 @@ split:
 
 models:
   regression:
-    # rforest:
-    #   n_estimators: [10, 50, 100, 250, 400]
-    #   max_depth: [5, 10, 30, 50, 150, 200, null]
+    RandomForestRegressor:
+      n_estimators: [10, 50, 100, 250, 400]
+      max_depth: [5, 10, 30, 50, 150, 200, null]
 
-    # knn:
-    #   weights: [uniform, distance]
-    #   #algorithm: [ball_tree, brute]
-    #   p: [1, 2, 3]
-    #   leaf_size: [5, 10, 15, 30, 45]
-    #   metric: [minkowski, euclidean, cosine, manhattan]
+    KNeighborsRegressor:
+      weights: [uniform, distance]
+      #algorithm: [ball_tree, brute]
+      p: [1, 2, 3]
+      leaf_size: [5, 10, 15, 30, 45]
+      metric: [minkowski, euclidean, cosine, manhattan]
 
     #linear:
 

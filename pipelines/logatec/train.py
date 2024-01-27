@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Literal
 
 import click
 import joblib
@@ -73,7 +72,7 @@ def cli(
     model_output_path: Path,
     best_params_output_path: Path,
     # params_path: Path,
-    algorithm: Literal["linear", "rforest", "xgb", "xgbrf", "knn"],
+    algorithm: str,
 ):
     params = load_params("./params.yaml")
     random_state = params["seed"]

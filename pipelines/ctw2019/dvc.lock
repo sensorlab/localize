@@ -1,0 +1,131 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd:
+    - unzip data/raw/CTW2019_Dataset_h5.zip -d data/raw/
+    - python prepare.py --data-h data/raw/h_Estimated_CTW_Train.h5 --data-snr data/raw/SNR_CTW_Train.h5
+      --data-pos data/raw/r_Position_CTW_Train.h5 --output data/interim/ctw2019.pkl
+      --task regression
+    - rm data/raw/*.h5
+    deps:
+    - path: data/raw/CTW2019_Dataset_h5.zip
+      hash: md5
+      md5: 9b545ea7a494aea9106aaf603b9ec989
+      size: 3961470982
+    - path: prepare.py
+      hash: md5
+      md5: e41dcc0e0a7adc97bf5bc3ffc4980ab2
+      size: 2143
+    outs:
+    - path: data/interim/ctw2019.pkl
+      hash: md5
+      md5: e0f06d2aa22b431135752547308da442
+      size: 1917741295
+  featurize:
+    cmd: python featurize.py --input data/interim/ctw2019.pkl --output data/prepared/ctw2019.pkl
+    deps:
+    - path: data/interim/ctw2019.pkl
+      hash: md5
+      md5: e0f06d2aa22b431135752547308da442
+      size: 1917741295
+    - path: featurize.py
+      hash: md5
+      md5: 8dbb3723f40fda06c88957cc1442dc7e
+      size: 657
+    outs:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: c74611a56980f7e112e39ddf7377e3a0
+      size: 2068524195
+  split@ShortEdge:
+    cmd: python split.py --input data/prepared/ctw2019.pkl --split ShortEdge --output-indices
+      data/splits/ShortEdgeSplit.pkl
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: c74611a56980f7e112e39ddf7377e3a0
+      size: 2068524195
+    - path: split.py
+      hash: md5
+      md5: 07f46f5dbe7d815abef2cba33301f73d
+      size: 3454
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/ShortEdgeSplit.pkl
+      hash: md5
+      md5: 59e37057eab5040e216eb193d9c3986d
+      size: 140197
+  split@Cutout:
+    cmd: python split.py --input data/prepared/ctw2019.pkl --split Cutout --output-indices
+      data/splits/CutoutSplit.pkl
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: c74611a56980f7e112e39ddf7377e3a0
+      size: 2068524195
+    - path: split.py
+      hash: md5
+      md5: 07f46f5dbe7d815abef2cba33301f73d
+      size: 3454
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/CutoutSplit.pkl
+      hash: md5
+      md5: 4d8f68154e08f47e014248932ffca28e
+      size: 140189
+  split@LongEdge:
+    cmd: python split.py --input data/prepared/ctw2019.pkl --split LongEdge --output-indices
+      data/splits/LongEdgeSplit.pkl
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: c74611a56980f7e112e39ddf7377e3a0
+      size: 2068524195
+    - path: split.py
+      hash: md5
+      md5: 07f46f5dbe7d815abef2cba33301f73d
+      size: 3454
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/LongEdgeSplit.pkl
+      hash: md5
+      md5: 2a50064e5a5ad0d01db310570c843fd0
+      size: 140189
+  split@KFold:
+    cmd: python split.py --input data/prepared/ctw2019.pkl --split KFold --output-indices
+      data/splits/KFoldSplit.pkl
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: c74611a56980f7e112e39ddf7377e3a0
+      size: 2068524195
+    - path: split.py
+      hash: md5
+      md5: 07f46f5dbe7d815abef2cba33301f73d
+      size: 3454
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 199af3c437c9c014d78909477fc32fc2
+      size: 700197

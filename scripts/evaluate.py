@@ -168,6 +168,7 @@ def cli(
     # Merge dictionaries
     scores = merge_dicts(scores)
     summary = summarize_scores(scores)
+    # summary = scores
 
     # {
     #     "accuracy": {

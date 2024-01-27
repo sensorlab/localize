@@ -1,0 +1,53 @@
+stages:
+
+  prepare:
+    desc: Prepare CTW2019 dataset from the MLOps pipeline
+    cmd:
+      - unzip data/raw/CTW2019_Dataset_h5.zip -d data/raw/
+      - >-
+        python prepare.py
+        --data-h data/raw/h_Estimated_CTW_Train.h5
+        --data-snr data/raw/SNR_CTW_Train.h5
+        --data-pos data/raw/r_Position_CTW_Train.h5
+        --output data/interim/ctw2019.pkl
+        --task regression
+      - rm data/raw/*.h5
+    deps:
+      - data/raw/CTW2019_Dataset_h5.zip
+      - prepare.py
+    outs:
+      - data/interim/ctw2019.pkl:
+          cache: false
+
+  featurize:
+    desc: Prepare CTW2019 dataset
+    cmd: >-
+      python featurize.py
+      --input data/interim/ctw2019.pkl
+      --output data/prepared/ctw2019.pkl
+    deps:
+      - featurize.py
+      - data/interim/ctw2019.pkl
+    outs:
+      - data/prepared/ctw2019.pkl:
+          cache: false
+
+
+  split:
+    desc: Prepare CTW2019 data split
+    matrix:
+      split: [KFold, ShortEdge, LongEdge, Cutout]
+    cmd: >-
+      python split.py
+      --input data/prepared/ctw2019.pkl
+      --split ${item.split}
+      --output-indices data/splits/${item.split}Split.pkl
+    params:
+      - seed
+      - split
+    deps:
+      - data/prepared/ctw2019.pkl
+      - split.py
+    outs:
+      - data/splits/${item.split}Split.pkl:
+          cache: false

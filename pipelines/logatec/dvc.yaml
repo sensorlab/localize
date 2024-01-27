@@ -7,13 +7,13 @@
 
 vars:
   - logatec:
-      models: [LinearRegression]
-      subsets: [spring]
-      splits: [Random]
-      #models: [linear, rforest, xgb, xgbrf, knn]
-      #subsets: [winter, spring]
+      #models: [LinearRegression]
+      #subsets: [spring]
+      #splits: [Random]
+      models: [LinearRegression, RandomForestRegressor, XGBRegressor, XGBRFRegressor, KNeighborsRegressor]
+      subsets: [winter, spring]
       #splits: [random, kfold, exclude]
-      #splits: [Random, KFold, LeaveOneGroupOut]
+      splits: [Random, KFold, LeaveOneGroupOut]
 
 stages:
   prepare-dataset:
@@ -73,7 +73,7 @@ stages:
       split: ${logatec.splits}
       model: ${logatec.models}
     cmd: >
-      python ../../scripts/train_regressor.py
+      python train.py
       --use ${item.model}
       --data data/prepared/${item.subset}.pkl
       --split-indices data/splits/${item.subset}-${item.split}.pkl
@@ -83,7 +83,7 @@ stages:
       - seed
       - models.regression
     deps:
-      - ../../scripts/train_regressor.py
+      - train.py
       - data/prepared/${item.subset}.pkl
       - data/splits/${item.subset}-${item.split}.pkl
     outs:
@@ -109,11 +109,23 @@ stages:
       - models/${item.subset}-${item.model}-${item.split}.pkl
       - data/prepared/${item.subset}.pkl
       - data/splits/${item.subset}-${item.split}.pkl
+      - reports/${item.subset}-${item.model}-${item.split}.json
+
+  # summary:
+  #   matrix:
+  #     subset: ${logatec.subsets}
+  #   cmd: python report.py reports/${item.subset}-*.json
+  #   deps:
+  #     - reports/${item.subset}-*.json
+  #     - report.py
+  #   metrics:
+  #     - summary.json
+
 
     # TODO: rename metrics to summary
-    metrics:
-      - reports/${item.subset}-${item.model}-${item.split}.json:
-          cache: false
+    #metrics:
+    #  - reports/${item.subset}-${item.model}-${item.split}.json:
+    #      cache: false
     #plots:
     #  - reports/logatec/${item.model}-${item.subset}-${item.split}.png
 

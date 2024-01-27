@@ -46,8 +46,8 @@ stages:
       size: 1637021
     - path: split.py
       hash: md5
-      md5: 1274b5d76bfdf92ca47167cdc61d774d
-      size: 2763
+      md5: 6bedddd78baca256d34b41c22a89e213
+      size: 2761
     params:
       params.yaml:
         seed: 42
@@ -69,8 +69,8 @@ stages:
       size: 1637021
     - path: split.py
       hash: md5
-      md5: 1274b5d76bfdf92ca47167cdc61d774d
-      size: 2763
+      md5: 6bedddd78baca256d34b41c22a89e213
+      size: 2761
     params:
       params.yaml:
         seed: 42
@@ -92,8 +92,8 @@ stages:
       size: 1637021
     - path: split.py
       hash: md5
-      md5: 1274b5d76bfdf92ca47167cdc61d774d
-      size: 2763
+      md5: 6bedddd78baca256d34b41c22a89e213
+      size: 2761
     params:
       params.yaml:
         seed: 42
@@ -1246,14 +1246,10 @@ stages:
       md5: 99914b932bd37a50b983c5e7c90ae93b
       size: 2
   train@spring-Random-LinearRegression:
-    cmd: "python ../../scripts/train_regressor.py --use LinearRegression --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-Random.pkl --model-output models/spring-LinearRegression-Random.pkl
+    cmd: "python train.py --use LinearRegression --data data/prepared/spring.pkl --split-indices
+      data/splits/spring-Random.pkl --model-output models/spring-LinearRegression-Random.pkl
       --best-params-output params/spring-LinearRegression-Random.json\n"
     deps:
-    - path: ../../scripts/train_regressor.py
-      hash: md5
-      md5: ed48843d5b21468b97abc140a821803b
-      size: 3786
     - path: data/prepared/spring.pkl
       hash: md5
       md5: c2ee00768ad0b238f79a6fbe8c53d227
@@ -1262,9 +1258,47 @@ stages:
       hash: md5
       md5: ab3d0c4a940779b939c23ba0f1201ce0
       size: 303557
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
     params:
       params.yaml:
         models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
           svm:
             C:
             - 1
@@ -1290,8 +1324,8 @@ stages:
     deps:
     - path: ../../scripts/evaluate.py
       hash: md5
-      md5: dde55fb4cee9b1bdb0fd2be452eb824c
-      size: 5159
+      md5: 8e82a694d5e95d5e9b6af933739a9710
+      size: 5181
     - path: data/prepared/spring.pkl
       hash: md5
       md5: c2ee00768ad0b238f79a6fbe8c53d227
@@ -1304,8 +1338,1910 @@ stages:
       hash: md5
       md5: e6b731db8508ea331574145225ef217b
       size: 3582
-    outs:
     - path: reports/spring-LinearRegression-Random.json
       hash: md5
       md5: dc900fccae810fc5ab35425682c994c7
       size: 840
+  prepare-dataset@winter:
+    cmd: "unzip -j data/raw/logatec.zip winter_data.json -d data/raw/\npython prepare.py
+      --input data/raw/winter_data.json --output data/interim/winter.pkl --task regression\n
+      rm data/raw/winter_data.json\n"
+    deps:
+    - path: data/raw/logatec.zip
+      hash: md5
+      md5: 7cdafacc2da2889c56fc8a13cbe3a35e
+      size: 1942041
+    - path: prepare.py
+      hash: md5
+      md5: 15677c95ff36e605129c386eb64c8888
+      size: 3917
+    outs:
+    - path: data/interim/winter.pkl
+      hash: md5
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
+  featurize@winter:
+    cmd: "python featurize.py --input data/interim/winter.pkl --output data/prepared/winter.pkl\n"
+    deps:
+    - path: data/interim/winter.pkl
+      hash: md5
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
+    - path: featurize.py
+      hash: md5
+      md5: 9838f7450c6569ed74a4c86ea7d82205
+      size: 752
+    outs:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+  prepare-split@winter-Random:
+    cmd: "python split.py --input data/prepared/winter.pkl --split Random --output-indices
+      data/splits/winter-Random.pkl\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: split.py
+      hash: md5
+      md5: 6bedddd78baca256d34b41c22a89e213
+      size: 2761
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/winter-Random.pkl
+      hash: md5
+      md5: 0db70579873c503b08421cc16fa2ade2
+      size: 39957
+  prepare-split@winter-KFold:
+    cmd: "python split.py --input data/prepared/winter.pkl --split KFold --output-indices
+      data/splits/winter-KFold.pkl\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: split.py
+      hash: md5
+      md5: 6bedddd78baca256d34b41c22a89e213
+      size: 2761
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/winter-KFold.pkl
+      hash: md5
+      md5: cbe51ee465c28b15d11ab6810691982f
+      size: 40013
+  prepare-split@winter-LeaveOneGroupOut:
+    cmd: "python split.py --input data/prepared/winter.pkl --split LeaveOneGroupOut
+      --output-indices data/splits/winter-LeaveOneGroupOut.pkl\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: split.py
+      hash: md5
+      md5: 6bedddd78baca256d34b41c22a89e213
+      size: 2761
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/winter-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 25ef8755b57a975b2cacf924e2dd3fdf
+      size: 207149
+  train@winter-Random-LinearRegression:
+    cmd: "python train.py --use LinearRegression --data data/prepared/winter.pkl --split-indices
+      data/splits/winter-Random.pkl --model-output models/winter-LinearRegression-Random.pkl
+      --best-params-output params/winter-LinearRegression-Random.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-Random.pkl
+      hash: md5
+      md5: 0db70579873c503b08421cc16fa2ade2
+      size: 39957
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-LinearRegression-Random.pkl
+      hash: md5
+      md5: 606fa3b96b30fdfe2ffd23993b23f204
+      size: 3428
+    - path: params/winter-LinearRegression-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-Random-RandomForestRegressor:
+    cmd: "python train.py --use RandomForestRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-Random.pkl --model-output models/winter-RandomForestRegressor-Random.pkl
+      --best-params-output params/winter-RandomForestRegressor-Random.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-Random.pkl
+      hash: md5
+      md5: 0db70579873c503b08421cc16fa2ade2
+      size: 39957
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-RandomForestRegressor-Random.pkl
+      hash: md5
+      md5: c069c45ff5cc270958cf3527f7d1d330
+      size: 7794008
+    - path: params/winter-RandomForestRegressor-Random.json
+      hash: md5
+      md5: f6a026b47a099d2d06b775519befb6d0
+      size: 66
+  train@winter-Random-XGBRegressor:
+    cmd: "python train.py --use XGBRegressor --data data/prepared/winter.pkl --split-indices
+      data/splits/winter-Random.pkl --model-output models/winter-XGBRegressor-Random.pkl
+      --best-params-output params/winter-XGBRegressor-Random.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-Random.pkl
+      hash: md5
+      md5: 0db70579873c503b08421cc16fa2ade2
+      size: 39957
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-XGBRegressor-Random.pkl
+      hash: md5
+      md5: 330ff762064c378f3c2668faa6f66305
+      size: 428239
+    - path: params/winter-XGBRegressor-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-Random-XGBRFRegressor:
+    cmd: "python train.py --use XGBRFRegressor --data data/prepared/winter.pkl --split-indices
+      data/splits/winter-Random.pkl --model-output models/winter-XGBRFRegressor-Random.pkl
+      --best-params-output params/winter-XGBRFRegressor-Random.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-Random.pkl
+      hash: md5
+      md5: 0db70579873c503b08421cc16fa2ade2
+      size: 39957
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-XGBRFRegressor-Random.pkl
+      hash: md5
+      md5: 480bd27e240df5a17f2c94ed29040d31
+      size: 511839
+    - path: params/winter-XGBRFRegressor-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-Random-KNeighborsRegressor:
+    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-Random.pkl --model-output models/winter-KNeighborsRegressor-Random.pkl
+      --best-params-output params/winter-KNeighborsRegressor-Random.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-Random.pkl
+      hash: md5
+      md5: 0db70579873c503b08421cc16fa2ade2
+      size: 39957
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-KNeighborsRegressor-Random.pkl
+      hash: md5
+      md5: b5aaf7d6c4f2e0d62c8b10e9e39a35a1
+      size: 379708
+    - path: params/winter-KNeighborsRegressor-Random.json
+      hash: md5
+      md5: e1641965b258b0f70b7ea065d7183589
+      size: 123
+  train@winter-KFold-LinearRegression:
+    cmd: "python train.py --use LinearRegression --data data/prepared/winter.pkl --split-indices
+      data/splits/winter-KFold.pkl --model-output models/winter-LinearRegression-KFold.pkl
+      --best-params-output params/winter-LinearRegression-KFold.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-KFold.pkl
+      hash: md5
+      md5: cbe51ee465c28b15d11ab6810691982f
+      size: 40013
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-LinearRegression-KFold.pkl
+      hash: md5
+      md5: 606fa3b96b30fdfe2ffd23993b23f204
+      size: 3428
+    - path: params/winter-LinearRegression-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-KFold-RandomForestRegressor:
+    cmd: "python train.py --use RandomForestRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-KFold.pkl --model-output models/winter-RandomForestRegressor-KFold.pkl
+      --best-params-output params/winter-RandomForestRegressor-KFold.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-KFold.pkl
+      hash: md5
+      md5: cbe51ee465c28b15d11ab6810691982f
+      size: 40013
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-RandomForestRegressor-KFold.pkl
+      hash: md5
+      md5: 775c6c83f7d5d8d18e3b9a8525ee3afd
+      size: 1275848
+    - path: params/winter-RandomForestRegressor-KFold.json
+      hash: md5
+      md5: a89ec070cd43c314a89a4e0f813b07ba
+      size: 65
+  train@winter-KFold-XGBRegressor:
+    cmd: "python train.py --use XGBRegressor --data data/prepared/winter.pkl --split-indices
+      data/splits/winter-KFold.pkl --model-output models/winter-XGBRegressor-KFold.pkl
+      --best-params-output params/winter-XGBRegressor-KFold.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-KFold.pkl
+      hash: md5
+      md5: cbe51ee465c28b15d11ab6810691982f
+      size: 40013
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-XGBRegressor-KFold.pkl
+      hash: md5
+      md5: 330ff762064c378f3c2668faa6f66305
+      size: 428239
+    - path: params/winter-XGBRegressor-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-KFold-XGBRFRegressor:
+    cmd: "python train.py --use XGBRFRegressor --data data/prepared/winter.pkl --split-indices
+      data/splits/winter-KFold.pkl --model-output models/winter-XGBRFRegressor-KFold.pkl
+      --best-params-output params/winter-XGBRFRegressor-KFold.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-KFold.pkl
+      hash: md5
+      md5: cbe51ee465c28b15d11ab6810691982f
+      size: 40013
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-XGBRFRegressor-KFold.pkl
+      hash: md5
+      md5: 480bd27e240df5a17f2c94ed29040d31
+      size: 511839
+    - path: params/winter-XGBRFRegressor-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-KFold-KNeighborsRegressor:
+    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-KFold.pkl --model-output models/winter-KNeighborsRegressor-KFold.pkl
+      --best-params-output params/winter-KNeighborsRegressor-KFold.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-KFold.pkl
+      hash: md5
+      md5: cbe51ee465c28b15d11ab6810691982f
+      size: 40013
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-KNeighborsRegressor-KFold.pkl
+      hash: md5
+      md5: b5aaf7d6c4f2e0d62c8b10e9e39a35a1
+      size: 379708
+    - path: params/winter-KNeighborsRegressor-KFold.json
+      hash: md5
+      md5: e1641965b258b0f70b7ea065d7183589
+      size: 123
+  train@winter-LeaveOneGroupOut-LinearRegression:
+    cmd: "python train.py --use LinearRegression --data data/prepared/winter.pkl --split-indices
+      data/splits/winter-LeaveOneGroupOut.pkl --model-output models/winter-LinearRegression-LeaveOneGroupOut.pkl
+      --best-params-output params/winter-LinearRegression-LeaveOneGroupOut.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 25ef8755b57a975b2cacf924e2dd3fdf
+      size: 207149
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-LinearRegression-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 7d82fcf4201edfce8d14305a8fcde90a
+      size: 3471
+    - path: params/winter-LinearRegression-LeaveOneGroupOut.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-LeaveOneGroupOut-RandomForestRegressor:
+    cmd: "python train.py --use RandomForestRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-LeaveOneGroupOut.pkl --model-output models/winter-RandomForestRegressor-LeaveOneGroupOut.pkl
+      --best-params-output params/winter-RandomForestRegressor-LeaveOneGroupOut.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 25ef8755b57a975b2cacf924e2dd3fdf
+      size: 207149
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-RandomForestRegressor-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 5965e7287407d0df4b512004b918da3c
+      size: 3107272
+    - path: params/winter-RandomForestRegressor-LeaveOneGroupOut.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-LeaveOneGroupOut-XGBRegressor:
+    cmd: "python train.py --use XGBRegressor --data data/prepared/winter.pkl --split-indices
+      data/splits/winter-LeaveOneGroupOut.pkl --model-output models/winter-XGBRegressor-LeaveOneGroupOut.pkl
+      --best-params-output params/winter-XGBRegressor-LeaveOneGroupOut.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 25ef8755b57a975b2cacf924e2dd3fdf
+      size: 207149
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-XGBRegressor-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 330ff762064c378f3c2668faa6f66305
+      size: 428239
+    - path: params/winter-XGBRegressor-LeaveOneGroupOut.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-LeaveOneGroupOut-XGBRFRegressor:
+    cmd: "python train.py --use XGBRFRegressor --data data/prepared/winter.pkl --split-indices
+      data/splits/winter-LeaveOneGroupOut.pkl --model-output models/winter-XGBRFRegressor-LeaveOneGroupOut.pkl
+      --best-params-output params/winter-XGBRFRegressor-LeaveOneGroupOut.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 25ef8755b57a975b2cacf924e2dd3fdf
+      size: 207149
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-XGBRFRegressor-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 480bd27e240df5a17f2c94ed29040d31
+      size: 511839
+    - path: params/winter-XGBRFRegressor-LeaveOneGroupOut.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@winter-LeaveOneGroupOut-KNeighborsRegressor:
+    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-LeaveOneGroupOut.pkl --model-output models/winter-KNeighborsRegressor-LeaveOneGroupOut.pkl
+      --best-params-output params/winter-KNeighborsRegressor-LeaveOneGroupOut.json\n"
+    deps:
+    - path: data/prepared/winter.pkl
+      hash: md5
+      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
+      size: 197853
+    - path: data/splits/winter-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 25ef8755b57a975b2cacf924e2dd3fdf
+      size: 207149
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/winter-KNeighborsRegressor-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67fe528a64b7ef509fc45d8068df4be3
+      size: 379708
+    - path: params/winter-KNeighborsRegressor-LeaveOneGroupOut.json
+      hash: md5
+      md5: d235b00b0f58766c41457318387e849a
+      size: 124
+  train@spring-Random-RandomForestRegressor:
+    cmd: "python train.py --use RandomForestRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --model-output models/spring-RandomForestRegressor-Random.pkl
+      --best-params-output params/spring-RandomForestRegressor-Random.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-RandomForestRegressor-Random.pkl
+      hash: md5
+      md5: e809aca7e1e5c559277c709ff50a55d7
+      size: 109375954
+    - path: params/spring-RandomForestRegressor-Random.json
+      hash: md5
+      md5: a386dcf314a917545de4c6b8362efffa
+      size: 66
+  train@spring-Random-XGBRegressor:
+    cmd: "python train.py --use XGBRegressor --data data/prepared/spring.pkl --split-indices
+      data/splits/spring-Random.pkl --model-output models/spring-XGBRegressor-Random.pkl
+      --best-params-output params/spring-XGBRegressor-Random.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-XGBRegressor-Random.pkl
+      hash: md5
+      md5: b58005603b026d33b0bba3016661c6e5
+      size: 849535
+    - path: params/spring-XGBRegressor-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@spring-Random-XGBRFRegressor:
+    cmd: "python train.py --use XGBRFRegressor --data data/prepared/spring.pkl --split-indices
+      data/splits/spring-Random.pkl --model-output models/spring-XGBRFRegressor-Random.pkl
+      --best-params-output params/spring-XGBRFRegressor-Random.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-XGBRFRegressor-Random.pkl
+      hash: md5
+      md5: 59bf0be1e0df21b2e0bd04471dcc82a9
+      size: 904223
+    - path: params/spring-XGBRFRegressor-Random.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@spring-Random-KNeighborsRegressor:
+    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --model-output models/spring-KNeighborsRegressor-Random.pkl
+      --best-params-output params/spring-KNeighborsRegressor-Random.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-Random.pkl
+      hash: md5
+      md5: ab3d0c4a940779b939c23ba0f1201ce0
+      size: 303557
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-KNeighborsRegressor-Random.pkl
+      hash: md5
+      md5: 7ac56f9ccb4f15bbb44a3b7bd0e5c114
+      size: 3152614
+    - path: params/spring-KNeighborsRegressor-Random.json
+      hash: md5
+      md5: d235b00b0f58766c41457318387e849a
+      size: 124
+  train@spring-KFold-LinearRegression:
+    cmd: "python train.py --use LinearRegression --data data/prepared/spring.pkl --split-indices
+      data/splits/spring-KFold.pkl --model-output models/spring-LinearRegression-KFold.pkl
+      --best-params-output params/spring-LinearRegression-KFold.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-LinearRegression-KFold.pkl
+      hash: md5
+      md5: e6b731db8508ea331574145225ef217b
+      size: 3582
+    - path: params/spring-LinearRegression-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@spring-KFold-RandomForestRegressor:
+    cmd: "python train.py --use RandomForestRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --model-output models/spring-RandomForestRegressor-KFold.pkl
+      --best-params-output params/spring-RandomForestRegressor-KFold.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-RandomForestRegressor-KFold.pkl
+      hash: md5
+      md5: e809aca7e1e5c559277c709ff50a55d7
+      size: 109375954
+    - path: params/spring-RandomForestRegressor-KFold.json
+      hash: md5
+      md5: a386dcf314a917545de4c6b8362efffa
+      size: 66
+  train@spring-KFold-XGBRegressor:
+    cmd: "python train.py --use XGBRegressor --data data/prepared/spring.pkl --split-indices
+      data/splits/spring-KFold.pkl --model-output models/spring-XGBRegressor-KFold.pkl
+      --best-params-output params/spring-XGBRegressor-KFold.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-XGBRegressor-KFold.pkl
+      hash: md5
+      md5: b58005603b026d33b0bba3016661c6e5
+      size: 849535
+    - path: params/spring-XGBRegressor-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@spring-KFold-XGBRFRegressor:
+    cmd: "python train.py --use XGBRFRegressor --data data/prepared/spring.pkl --split-indices
+      data/splits/spring-KFold.pkl --model-output models/spring-XGBRFRegressor-KFold.pkl
+      --best-params-output params/spring-XGBRFRegressor-KFold.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-XGBRFRegressor-KFold.pkl
+      hash: md5
+      md5: 59bf0be1e0df21b2e0bd04471dcc82a9
+      size: 904223
+    - path: params/spring-XGBRFRegressor-KFold.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
+  train@spring-KFold-KNeighborsRegressor:
+    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --model-output models/spring-KNeighborsRegressor-KFold.pkl
+      --best-params-output params/spring-KNeighborsRegressor-KFold.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-KFold.pkl
+      hash: md5
+      md5: 911d6525969e9129dc9b2b3130a7de0b
+      size: 303613
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-KNeighborsRegressor-KFold.pkl
+      hash: md5
+      md5: 7ac56f9ccb4f15bbb44a3b7bd0e5c114
+      size: 3152614
+    - path: params/spring-KNeighborsRegressor-KFold.json
+      hash: md5
+      md5: d235b00b0f58766c41457318387e849a
+      size: 124
+  train@spring-LeaveOneGroupOut-LinearRegression:
+    cmd: "python train.py --use LinearRegression --data data/prepared/spring.pkl --split-indices
+      data/splits/spring-LeaveOneGroupOut.pkl --model-output models/spring-LinearRegression-LeaveOneGroupOut.pkl
+      --best-params-output params/spring-LinearRegression-LeaveOneGroupOut.json\n"
+    deps:
+    - path: data/prepared/spring.pkl
+      hash: md5
+      md5: c2ee00768ad0b238f79a6fbe8c53d227
+      size: 1637021
+    - path: data/splits/spring-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 67bc4f0aff76109ddf54647f13301a1c
+      size: 7888533
+    - path: train.py
+      hash: md5
+      md5: e8ac790eed034a4bc9934fe6d1082b43
+      size: 3751
+    params:
+      params.yaml:
+        models.regression:
+          RandomForestRegressor:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+          KNeighborsRegressor:
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
+          svm:
+            C:
+            - 1
+            - 10
+            - 100
+            kernel:
+            - linear
+            - rbf
+        seed: 42
+    outs:
+    - path: models/spring-LinearRegression-LeaveOneGroupOut.pkl
+      hash: md5
+      md5: 9e0926d67492cc21c8b20a42e21fdcd2
+      size: 3625
+    - path: params/spring-LinearRegression-LeaveOneGroupOut.json
+      hash: md5
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
