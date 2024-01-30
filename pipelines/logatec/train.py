@@ -4,6 +4,7 @@ import click
 import joblib
 import xgboost
 from sklearn import ensemble, linear_model, model_selection, multioutput, neighbors
+import time
 
 # try:
 #     from sklearnex import patch_sklearn
@@ -11,7 +12,11 @@ from sklearn import ensemble, linear_model, model_selection, multioutput, neighb
 # except ImportError:
 #     pass
 
-from src import load_data, load_params, save_params, PredefinedSplit
+from src import load_data, load_params, save_params, PredefinedSplit, safe_indexing
+
+
+def tune_model_hyperparameters(model, hparams: dict, data, indice):
+    pass
 
 
 @click.command()
@@ -47,16 +52,16 @@ from src import load_data, load_params, save_params, PredefinedSplit
     "--model-output",
     "model_output_path",
     type=click.Path(dir_okay=False, writable=True, path_type=Path),
-    required=True,
+    # required=True,
     # help="Input data, parquet",
 )
 @click.option(
     # "--out-best-params",
-    # "--output-best-params",
-    "--best-params-output",
+    "--output-best-params",
+    # "--best-params-output",
     "best_params_output_path",
     type=click.Path(dir_okay=False, writable=True, path_type=Path),
-    required=True,
+    # required=True,
     # help="Input data, parquet",
 )
 # @click.option(
@@ -66,11 +71,17 @@ from src import load_data, load_params, save_params, PredefinedSplit
 #     type=click.Path(exists=True, dir_okay=False, path_type=Path),
 #     required=True,
 # )
+@click.option(
+    "--output-report",
+    "output_report_path",
+    type=click.Path(dir_okay=False, writable=True, path_type=Path),
+)
 def cli(
     input_dataset_path: Path,
     split_indices_path: Path,
     model_output_path: Path,
     best_params_output_path: Path,
+    output_report_path: Path,
     # params_path: Path,
     algorithm: str,
 ):
@@ -80,23 +91,24 @@ def cli(
 
     # Load data
     features, targets = load_data(input_dataset_path)
-    cv_indices = load_data(split_indices_path)
+    split_data = load_data(split_indices_path)
+    cv_indices = split_data["indices"]
     cv = PredefinedSplit(cv_indices)
 
     # Number of available CPU cores
-    n_jobs = joblib.cpu_count(only_physical_cores=False)
+    n_jobs = -1  # joblib.cpu_count(only_physical_cores=True)
 
     # Stratified KFold for evaluation
     match algorithm:
-        case "linear" | "LinearRegression":
+        case "LinearRegression":
             estimator = linear_model.LinearRegression()
-        case "rforest" | "RandomForestRegressor":
+        case "RandomForestRegressor":
             estimator = ensemble.RandomForestRegressor(random_state=random_state)
-        case "xgb" | "XGBRegressor":
+        case "XGBRegressor":
             estimator = xgboost.XGBRegressor(random_state=random_state)
-        case "xgbrf" | "XGBRFRegressor":
+        case "XGBRFRegressor":
             estimator = xgboost.XGBRFRegressor(random_state=random_state)
-        case "knn" | "KNeighborsRegressor":
+        case "KNeighborsRegressor":
             estimator = neighbors.KNeighborsRegressor()
         case _:
             raise NotImplementedError
@@ -120,11 +132,87 @@ def cli(
     with joblib.parallel_backend("loky", n_jobs=n_jobs):
         gridsearch.fit(features, targets)
 
-    # Save best model
-    joblib.dump(gridsearch.best_estimator_, model_output_path)
+    model = gridsearch.best_estimator_
 
-    # Save best parameters
-    # TODO: Add train-time
+    reports = {
+        "predictions": {
+            "y_true": [],
+            "y_pred": [],
+        },
+        "model_metadata": {
+            "algorithm": algorithm,
+            "hyperparameters": gridsearch.best_params_,
+            "train_time": [],
+            "predict_time": [],
+        },
+        "split_metadata": {
+            "split_type": split_data["metadata"]["split_type"],
+        },
+    }
+
+    for train_indices, test_indices in cv.split(features, targets):
+        X_train = safe_indexing(features, train_indices)
+        y_train = safe_indexing(targets, train_indices)
+
+        X_test = safe_indexing(features, test_indices)
+        y_test = safe_indexing(targets, test_indices)
+
+        time_start = time.perf_counter()
+        with joblib.parallel_backend("loky", n_jobs=n_jobs):
+            model.fit(X_train, y_train)
+        time_end = time.perf_counter()
+
+        reports["model_metadata"]["train_time"].append(time_end - time_start)
+
+        time_start = time.perf_counter()
+        with joblib.parallel_backend("loky", n_jobs=n_jobs):
+            y_pred = model.predict(X_test)
+        time_end = time.perf_counter()
+
+        reports["model_metadata"]["predict_time"].append(time_end - time_start)
+
+        reports["predictions"]["y_true"].append(y_test)
+        reports["predictions"]["y_pred"].append(y_pred)
+
+    # reports = []
+
+    # for (train_indices, test_indices), split_metadata in zip(cv.split(features, targets), split_data["metadata"]):
+    #     X_train = safe_indexing(features, train_indices)
+    #     y_train = safe_indexing(targets, train_indices)
+
+    #     X_test = safe_indexing(features, test_indices)
+    #     y_test = safe_indexing(targets, test_indices)
+
+    #     time_start: float = time.perf_counter()
+    #     with joblib.parallel_backend("threading", n_jobs=n_jobs):
+    #         model.fit(X_train, y_train)
+    #     time_end: float = time.perf_counter()
+
+    #     y_pred = model.predict(X_test)
+
+    #     report = {
+    #         "predictions": {
+    #             "y_true": y_test,
+    #             "y_pred": y_pred,
+    #         },
+    #         "model_metadata": {
+    #             "algorithm": algorithm,
+    #             "hyperparameters": gridsearch.best_params_,
+    #             "training_time": time_end - time_start
+    #         },
+    #         "split_metadata": split_metadata,
+    #         # "train_metrics": {},
+    #         # "additional_info": {},
+    #     }
+
+    #     reports.append(report)
+
+    if output_report_path:
+        joblib.dump(reports, output_report_path)
+
+    # Save best model
+    if model_output_path:
+        joblib.dump(gridsearch.best_estimator_, model_output_path)
 
     if best_params_output_path:
         save_params(gridsearch.best_params_, best_params_output_path)

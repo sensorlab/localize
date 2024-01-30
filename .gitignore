@@ -291,17 +291,13 @@ tmp/
 /**/models/**
 !/**/models/**/
 
-#/**/reports/**
-#!/**/reports/**/
 
-/**/params/**
-!/**/params/**/
 #*.zip
 #*.json
 #*.h5
 #*.hdf5
 #*.pickle
-#*.pkl
+*.pkl
 
 #*.ckpt
 #*.joblib

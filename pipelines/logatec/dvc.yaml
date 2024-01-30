@@ -7,16 +7,15 @@
 
 vars:
   - logatec:
-      #models: [LinearRegression]
       #subsets: [spring]
-      #splits: [Random]
-      models: [LinearRegression, RandomForestRegressor, XGBRegressor, XGBRFRegressor, KNeighborsRegressor]
+      #models: [LinearRegression]
+      #splits: [Random, KFold, LeaveOneGroupOut]
       subsets: [winter, spring]
-      #splits: [random, kfold, exclude]
+      models: [LinearRegression, RandomForestRegressor, XGBRegressor, XGBRFRegressor, KNeighborsRegressor]
       splits: [Random, KFold, LeaveOneGroupOut]
 
 stages:
-  prepare-dataset:
+  prepare:
     desc: Download, unzip, and convert dataset to picke format
     matrix:
       subset: ${logatec.subsets}
@@ -45,8 +44,7 @@ stages:
     outs:
       - data/prepared/${item.subset}.pkl
 
-
-  prepare-split:
+  split:
     desc: Prepare train-test split indices for model training and evaluation
     matrix:
       subset: ${logatec.subsets}
@@ -66,7 +64,7 @@ stages:
       - data/splits/${item.subset}-${item.split}.pkl
 
 
-  train: # Should I name this "benchmark" or "optimization"
+  benchmark: # Should I name this "benchmark" or "optimization"
     desc: Run benchmarks to determine best hyper-parameters for algorithm
     matrix:
       subset: ${logatec.subsets}
@@ -77,8 +75,7 @@ stages:
       --use ${item.model}
       --data data/prepared/${item.subset}.pkl
       --split-indices data/splits/${item.subset}-${item.split}.pkl
-      --model-output models/${item.subset}-${item.model}-${item.split}.pkl
-      --best-params-output params/${item.subset}-${item.model}-${item.split}.json
+      --output-report models/reports/${item.subset}-${item.model}-${item.split}.pkl
     params:
       - seed
       - models.regression
@@ -87,29 +84,60 @@ stages:
       - data/prepared/${item.subset}.pkl
       - data/splits/${item.subset}-${item.split}.pkl
     outs:
-      - models/${item.subset}-${item.model}-${item.split}.pkl
-      - params/${item.subset}-${item.model}-${item.split}.json
+      - models/reports/${item.subset}-${item.model}-${item.split}.pkl
 
+
+  # evaluation:
+  #   matrix:
+  #     subset: ${logatec.subsets}
+  #     split: ${logatec.splits}
+  #     model: ${logatec.models}
+  #   cmd: >
+  #     python report.py
+  #     --input reports/${item.subset}-${item.model}-${item.split}.pkl
+  #     --output-report metrics/${item.subset}-${item.model}-${item.split}.json
+  #   deps:
+  #     - report.py
+  #     - reports/${item.subset}-${item.model}-${item.split}.pkl
+  #   metrics:
+  #     - metrics/${item.subset}-${item.model}-${item.split}.json:
+  #         cache: false
 
   evaluation:
-    desc: Perform evaluation of models.
     matrix:
       subset: ${logatec.subsets}
-      split: ${logatec.splits}
-      model: ${logatec.models}
     cmd: >
-      python ../../scripts/evaluate.py
-      --model models/${item.subset}-${item.model}-${item.split}.pkl
-      --data data/prepared/${item.subset}.pkl
-      --split-indices data/splits/${item.subset}-${item.split}.pkl
-      --output-summary reports/${item.subset}-${item.model}-${item.split}.json
-      --task regression
+      python report2.py
+      models/reports/${item.subset}-*.pkl
+      --output-report reports/metrics-${item.subset}.json
     deps:
-      - ../../scripts/evaluate.py
-      - models/${item.subset}-${item.model}-${item.split}.pkl
-      - data/prepared/${item.subset}.pkl
-      - data/splits/${item.subset}-${item.split}.pkl
-      - reports/${item.subset}-${item.model}-${item.split}.json
+      - report.py
+      - models/reports
+    metrics:
+      - reports/metrics-${item.subset}.json:
+          cache: false
+
+
+
+  # evaluation:
+  #   desc: Perform evaluation of models.
+  #   matrix:
+  #     subset: ${logatec.subsets}
+  #     split: ${logatec.splits}
+  #     model: ${logatec.models}
+  #   cmd: >
+  #     python ../../scripts/evaluate.py
+  #     --model models/${item.subset}-${item.model}-${item.split}.pkl
+  #     --data data/prepared/${item.subset}.pkl
+  #     --split-indices data/splits/${item.subset}-${item.split}.pkl
+  #     --output-summary reports/${item.subset}-${item.model}-${item.split}.json
+  #     --task regression
+  #   deps:
+  #     - ../../scripts/evaluate.py
+  #     - models/${item.subset}-${item.model}-${item.split}.pkl
+  #     - data/prepared/${item.subset}.pkl
+  #     - data/splits/${item.subset}-${item.split}.pkl
+  #     - reports/${item.subset}-${item.model}-${item.split}.json
 
   # summary:
   #   matrix:

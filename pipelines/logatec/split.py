@@ -83,14 +83,39 @@ def cli(input_path: Path, output_indices_path: Path, split: str):
         case _:
             raise NotImplementedError(f'Split type "{split}" not implemented')
 
-    subsets = []
+    # subsets = []
 
     # for idx, (train_idx, test_idx) in enumerate(cv.split(features, targets)):
     #    subsets.append((train_idx, test_idx))
 
-    subsets = list((train_idx, test_idx) for train_idx, test_idx in cv.split(features, targets, groups))
+    # indices_list = []
 
-    joblib.dump(subsets, output_indices_path)
+    # for idx, (train_indices, test_indices) in enumerate(cv.split(features, targets, groups)):
+    #     indices_list.append({
+    #         "indices": (train_indices, test_indices),
+    #         "metadata": {"split_type": split, "fold_idx": idx}
+    #     })
+
+    # indices_list = (
+    #    (train_indices, test_indices, {"split_type": split, "split_idx": idx})
+    #    for idx, (train_indices, test_indices) in enumerate(cv.split(features, targets, groups))
+    # )
+
+    indices = []
+    # metadata = []
+
+    for train_indices, test_indices in cv.split(features, targets, groups):
+        indices.append((train_indices, test_indices))
+        # metadata.append({"split_type": split, "split_idx": idx})
+
+    indices_list = {
+        "indices": tuple(indices),
+        "metadata": {"split_type": split},
+    }
+
+    # subsets = list((train_idx, test_idx) for train_idx, test_idx in cv.split(features, targets, groups))
+
+    joblib.dump(indices_list, output_indices_path)
 
 
 if __name__ == "__main__":
