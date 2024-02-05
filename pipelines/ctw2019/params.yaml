@@ -1,5 +1,10 @@
 seed: 42
 
+models:
+  regression:
+    # something
+    seed: 42
+
 split:
   n_splits: 5
   test_size: 0.20

@@ -2,24 +2,13 @@ from pathlib import Path
 
 import click
 import joblib
-import xgboost
-from sklearn import (
-    ensemble,
-    linear_model,
-    model_selection,
-    multioutput,
-    neighbors,
-    pipeline,
-    preprocessing,
-)
 import time
 
+import lightning as L
+import numpy as np
 
-from src import load_params, save_params, PredefinedSplit, safe_indexing
 
-
-def tune_model_hyperparameters(model, hparams: dict, data, indice):
-    pass
+from src import load_params, PredefinedSplit, safe_indexing
 
 
 @click.command()
@@ -39,9 +28,9 @@ def tune_model_hyperparameters(model, hparams: dict, data, indice):
 @click.option(
     "--algorithm",
     "--use",
-    "algorithm",
+    "architecture",
     type=click.Choice(
-        ["LinearRegression", "RandomForestRegressor", "XGBRegressor", "XGBRFRegressor", "KNeighborsRegressor"],
+        ["arnold2019localization"],
         case_sensitive=False,
     ),
     required=True,
@@ -85,15 +74,18 @@ def cli(
     model_output_path: Path,
     best_params_output_path: Path,
     output_report_path: Path,
-    algorithm: str,
+    architecture: str,
 ):
     params = load_params("./params.yaml")
     random_state = params["seed"]
-    mparams = params["models"].get("regression", {})
+    # mparams = params["models"].get("regression", {})
 
     # Load data
-    features, targets = joblib.load(input_dataset_path, mmap_mode=None)
-    split_data = joblib.load(split_indices_path, mmap_mode=None)
+    features, targets = joblib.load(input_dataset_path)
+    features = features["h"]
+    features = np.transpose(features, (0, 3, 1, 2))  # BHWC --> BCHW
+
+    split_data = joblib.load(split_indices_path)
     cv_indices = split_data["indices"]
     cv = PredefinedSplit(cv_indices)
 
@@ -101,53 +93,23 @@ def cli(
     n_jobs = joblib.cpu_count(only_physical_cores=False)
     backend = "threading"
 
-    # Pick the algorithm to evaluate
-    match algorithm:
-        case "LinearRegression":
-            estimator = linear_model.LinearRegression(n_jobs=-1)
-        case "RandomForestRegressor":
-            estimator = ensemble.RandomForestRegressor(random_state=random_state, n_jobs=-1)
-        case "XGBRegressor":
-            estimator = xgboost.XGBRegressor(random_state=random_state, n_jobs=-1)
-        case "XGBRFRegressor":
-            estimator = xgboost.XGBRFRegressor(random_state=random_state, n_jobs=-1)
-        case "KNeighborsRegressor":
-            estimator = neighbors.KNeighborsRegressor(n_jobs=-1)
+    match architecture:
+        case "arnold2019localization":
+            from src.models.arnold2019localization import (
+                Arnold2019LocalizationModel,
+                LightningRegressorWrapper,
+                _initialize_weights,
+            )
+
+            net = Arnold2019LocalizationModel()
+            L.seed_everything(random_state)
+            net.apply(_initialize_weights)
+            estimator = LightningRegressorWrapper(net, batch_size=64, max_epochs=100)
+
         case _:
-            raise NotImplementedError(f"Algorithm '{algorithm}' not implemented.")
+            raise NotImplementedError()
 
-    estimator = pipeline.Pipeline(
-        [
-            ("scale", preprocessing.StandardScaler()),
-            # ("pca", decomposition.PCA(n_components=0.7)),
-            ("regressor", multioutput.MultiOutputRegressor(estimator, n_jobs=-1)),
-        ]
-    )
-
-    # Prepare hyper-parameters:
-    hparams = mparams.get(algorithm, {})
-
-    # (Optional) hyper-parameter tuning
-    if hparams:
-        # Estimator expects `estimator__` prefix
-        hparams = {f"regressor__estimator__{k}": v for k, v in hparams.items()}
-
-        gridsearch = model_selection.GridSearchCV(
-            estimator=estimator,
-            param_grid=hparams,
-            refit="mse",
-            cv=cv,
-            n_jobs=-1,
-        )
-
-        with joblib.parallel_backend(backend, n_jobs=n_jobs):
-            gridsearch.fit(features, targets)
-
-        best_model = gridsearch.best_estimator_
-        best_params = gridsearch.best_params_
-    else:
-        best_model = estimator
-        best_params = hparams
+    best_model = estimator
 
     # Prepare empty report
     reports = {
@@ -156,15 +118,15 @@ def cli(
             "y_pred": [],
         },
         "model_metadata": {
-            "algorithm": algorithm,
-            "hyperparameters": best_params,
+            "algorithm": architecture,
+            "hyperparameters": {
+                "batch_size": 64,
+                "max_epochs": 100,
+            },
             "train_time": [],
             "predict_time": [],
         },
         "split_metadata": split_data["metadata"],
-        # "split_metadata": {
-        #    "split_type": split_data["metadata"]["split_type"],
-        # },
     }
 
     for train_indices, test_indices in cv.split(features, targets):
@@ -194,8 +156,8 @@ def cli(
     if output_report_path:
         joblib.dump(reports, output_report_path)
 
-    if best_params_output_path:
-        save_params(best_params, best_params_output_path)
+    # if best_params_output_path:
+    #    save_params(best_params, best_params_output_path)
 
 
 if __name__ == "__main__":

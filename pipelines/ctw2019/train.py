@@ -11,14 +11,31 @@ from sklearn import (
     neighbors,
     pipeline,
     preprocessing,
+    decomposition,
 )
 import time
 
+import numpy as np
 
-from src import load_params, save_params, PredefinedSplit, safe_indexing
+
+from src import load_data, load_params, save_params, PredefinedSplit, safe_indexing
 
 
-def tune_model_hyperparameters(model, hparams: dict, data, indice):
+def arnold2019localization():
+    """The model is based on:
+    Arnold et. al: On Deep Learning-based Massive MIMO Indoor User Localization
+    """
+    pass
+
+
+def arnold2019sounding():
+    """The model is based on:
+    Arnold et. al: Novel Massive MIMO Channel Sounding Data applied to Deep Learning-based Indoor Positioning
+    """
+    pass
+
+
+def cerar2021paper():
     pass
 
 
@@ -41,7 +58,7 @@ def tune_model_hyperparameters(model, hparams: dict, data, indice):
     "--use",
     "algorithm",
     type=click.Choice(
-        ["LinearRegression", "RandomForestRegressor", "XGBRegressor", "XGBRFRegressor", "KNeighborsRegressor"],
+        ["LinearRegression", "RandomForestRegressor", "XGBRegressor", "KNeighborsRegressor"],
         case_sensitive=False,
     ),
     required=True,
@@ -92,8 +109,16 @@ def cli(
     mparams = params["models"].get("regression", {})
 
     # Load data
-    features, targets = joblib.load(input_dataset_path, mmap_mode=None)
-    split_data = joblib.load(split_indices_path, mmap_mode=None)
+    features, targets = load_data(input_dataset_path)
+
+    # Modifications to dataset for machine learning
+    h, snr = features["h"], features["snr"]
+    h_flat = h.reshape(h.shape[0], -1)
+    features = np.concatenate((h_flat, snr), axis=1)
+    assert features.shape == (h.shape[0], 16 * 924 * 2 + 16)
+    ######
+
+    split_data = load_data(split_indices_path)
     cv_indices = split_data["indices"]
     cv = PredefinedSplit(cv_indices)
 
@@ -105,21 +130,26 @@ def cli(
     match algorithm:
         case "LinearRegression":
             estimator = linear_model.LinearRegression(n_jobs=-1)
+
         case "RandomForestRegressor":
             estimator = ensemble.RandomForestRegressor(random_state=random_state, n_jobs=-1)
+
         case "XGBRegressor":
             estimator = xgboost.XGBRegressor(random_state=random_state, n_jobs=-1)
-        case "XGBRFRegressor":
-            estimator = xgboost.XGBRFRegressor(random_state=random_state, n_jobs=-1)
+
         case "KNeighborsRegressor":
             estimator = neighbors.KNeighborsRegressor(n_jobs=-1)
+
+        case "arnold2019localization":
+            pass
+
         case _:
             raise NotImplementedError(f"Algorithm '{algorithm}' not implemented.")
 
     estimator = pipeline.Pipeline(
         [
             ("scale", preprocessing.StandardScaler()),
-            # ("pca", decomposition.PCA(n_components=0.7)),
+            ("pca", decomposition.PCA(n_components=0.7)),
             ("regressor", multioutput.MultiOutputRegressor(estimator, n_jobs=-1)),
         ]
     )

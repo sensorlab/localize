@@ -309,4 +309,5 @@ tmp/
 #!**/dvc.yml
 #!**/dvc.yaml
 !**/*.dvc
+!**/*.py
 #!**/dvc.lock

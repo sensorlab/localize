@@ -53,7 +53,7 @@ def save_params(obj: object, params_path: Path):
             raise NotImplementedError
 
 
-def load_data(path: Path) -> Any:
+def load_data(path: Path, mmap: bool = True) -> Any:
     match path.suffix:
         case ".pq" | ".parquet":
             return pd.read_parquet(path)

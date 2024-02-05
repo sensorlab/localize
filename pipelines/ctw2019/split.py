@@ -4,7 +4,7 @@ import click
 import joblib
 import numpy as np
 from sklearn import model_selection
-from src import load_data, load_params, PredefinedSplit
+from src import load_params, PredefinedSplit
 
 
 class CombineCVs(model_selection.BaseCrossValidator):
@@ -51,7 +51,7 @@ def cli(input_path: Path, output_indices_path: Path, split: str):
     split_params = params["split"]
 
     # Load dataset
-    features, targets = load_data(input_path)
+    _, targets = joblib.load(input_path)
     groups = None
 
     # TODO: ...
@@ -98,14 +98,17 @@ def cli(input_path: Path, output_indices_path: Path, split: str):
         case _:
             raise NotImplementedError('Split type "{split}" not implemented')
 
-    subsets = []
+    indices = []
 
-    # for idx, (train_idx, test_idx) in enumerate(cv.split(features, targets)):
-    #    subsets.append((train_idx, test_idx))
+    for train_indices, test_indices in cv.split(targets, groups=groups):
+        indices.append((train_indices, test_indices))
 
-    subsets = list((train_idx, test_idx) for train_idx, test_idx in cv.split(features, targets, groups))
+    indices_list = {
+        "indices": tuple(indices),
+        "metadata": {"split_type": split},
+    }
 
-    joblib.dump(subsets, output_indices_path)
+    joblib.dump(indices_list, output_indices_path)
 
 
 if __name__ == "__main__":

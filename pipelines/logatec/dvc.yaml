@@ -65,7 +65,7 @@ stages:
 
 
   benchmark: # Should I name this "benchmark" or "optimization"
-    desc: Run benchmarks to determine best hyper-parameters for algorithm
+    desc: Benchmarks determine best hyper-parameters for algorithm(s)
     matrix:
       subset: ${logatec.subsets}
       split: ${logatec.splits}
@@ -107,16 +107,15 @@ stages:
     matrix:
       subset: ${logatec.subsets}
     cmd: >
-      python report2.py
+      python ../../scripts/report.py
       models/reports/${item.subset}-*.pkl
       --output-report reports/metrics-${item.subset}.json
     deps:
-      - report.py
+      - ../../scripts/report.py
       - models/reports
     metrics:
       - reports/metrics-${item.subset}.json:
           cache: false
-
 
 
   # evaluation:
