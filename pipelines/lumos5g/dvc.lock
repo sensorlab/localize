@@ -1,0 +1,20 @@
+schema: '2.0'
+stages:
+  download-dataset:
+    cmd: "curl --insecure -o data/raw/Lumos5G-v1.0.zip https://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip\n
+      unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/\n
+      rm data/raw/Lumos5G-v1.0.zip\n"
+    outs:
+    - path: data/raw/Lumos5G-v1.0.csv
+      hash: md5
+      md5: dd525dac43a0823a94e117bbb9a23a14
+      size: 8480348
+  download:
+    cmd: "curl --insecure -o data/raw/Lumos5G-v1.0.zip https://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip\n
+      unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/\n
+      rm data/raw/Lumos5G-v1.0.zip\n"
+    outs:
+    - path: data/raw/Lumos5G-v1.0.csv
+      hash: md5
+      md5: dd525dac43a0823a94e117bbb9a23a14
+      size: 8480348

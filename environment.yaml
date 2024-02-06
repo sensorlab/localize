@@ -39,6 +39,8 @@ dependencies:
   - h5py
   - joblib
 
+  - snakemake
+
   - pip:
     - dvc
     - lightning~=2.1
@@ -46,8 +48,7 @@ dependencies:
     - torch-metrics
     - torchinfo
     - pre-commit
-    #- black
     - ruff
-    - -e .
+    - SciencePlots~=2.1
 
-    - SciencePlots~=2.0
+    - -e .

@@ -30,7 +30,7 @@ from src import load_params, PredefinedSplit, safe_indexing
     "--use",
     "architecture",
     type=click.Choice(
-        ["arnold2019localization"],
+        ["arnold2019sounding", "arnold2018deep"],
         case_sensitive=False,
     ),
     required=True,
@@ -82,8 +82,8 @@ def cli(
 
     # Load data
     features, targets = joblib.load(input_dataset_path)
-    features = features["h"]
-    features = np.transpose(features, (0, 3, 1, 2))  # BHWC --> BCHW
+    # features = features["h"]
+    # features = np.transpose(features, (0, 3, 1, 2))  # BHWC --> BCHW
 
     split_data = joblib.load(split_indices_path)
     cv_indices = split_data["indices"]
@@ -94,17 +94,30 @@ def cli(
     backend = "threading"
 
     match architecture:
-        case "arnold2019localization":
-            from src.models.arnold2019localization import (
-                Arnold2019LocalizationModel,
-                LightningRegressorWrapper,
-                _initialize_weights,
-            )
+        case "arnold2019sounding":
+            from src.models.arnold2019sounding import Arnold2019SoundingModel
+            from src.wrappers import LightningRegressorWrapper
 
-            net = Arnold2019LocalizationModel()
+            net = Arnold2019SoundingModel(random_state=random_state)
             L.seed_everything(random_state)
-            net.apply(_initialize_weights)
-            estimator = LightningRegressorWrapper(net, batch_size=64, max_epochs=100)
+            estimator = LightningRegressorWrapper(net, batch_size=64, max_epochs=100, random_state=random_state)
+
+            # BHWC --> BCHW
+            features = np.transpose(features["h"], (0, 3, 1, 2))
+            assert features.shape == (features.shape[0], 2, 16, 924)
+
+        case "arnold2018deep":
+            from src.models.arnold2018deep import Arnold2018DeepModel
+            from src.wrappers import LightningRegressorWrapper
+
+            net = Arnold2018DeepModel(in_channels=16 * 924 * 2 + 16, random_state=random_state)
+            L.seed_everything(random_state)
+            estimator = LightningRegressorWrapper(net, batch_size=64, max_epochs=100, random_state=random_state)
+
+            h, snr = features["h"], features["snr"]
+            h_flat = h.reshape(h.shape[0], -1)
+            features = np.concatenate((h_flat, snr), axis=1)
+            assert features.shape == (h.shape[0], 16 * 924 * 2 + 16)
 
         case _:
             raise NotImplementedError()

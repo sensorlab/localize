@@ -285,19 +285,24 @@ logs/
 tmp/
 
 
-/**/data/**
-!/**/data/**/
+#/**/data/**
+#!/**/data/**/
 
-/**/models/**
-!/**/models/**/
+#/**/models/**
+#!/**/models/**/
 
 
-#*.zip
 #*.json
 #*.h5
 #*.hdf5
 #*.pickle
+*.csv
 *.pkl
+*.zip
+*.h5
+*.joblib
+*.feather
+*.parquet
 
 #*.ckpt
 #*.joblib
@@ -305,9 +310,9 @@ tmp/
 #*.pq
 #*.parquet
 
-!**/.gitkeep
+#!**/.gitkeep
 #!**/dvc.yml
 #!**/dvc.yaml
-!**/*.dvc
-!**/*.py
+#!**/*.dvc
+#!**/*.py
 #!**/dvc.lock

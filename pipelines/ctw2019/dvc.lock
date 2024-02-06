@@ -47,8 +47,8 @@ stages:
       size: 2069503475
     - path: split.py
       hash: md5
-      md5: 281f415da2c1de418681aecac89b4713
-      size: 3454
+      md5: b582a09aaa69dbb7b6088932b61e009b
+      size: 3443
     params:
       params.yaml:
         seed: 42
@@ -70,8 +70,8 @@ stages:
       size: 2069503475
     - path: split.py
       hash: md5
-      md5: 281f415da2c1de418681aecac89b4713
-      size: 3454
+      md5: b582a09aaa69dbb7b6088932b61e009b
+      size: 3443
     params:
       params.yaml:
         seed: 42
@@ -93,8 +93,8 @@ stages:
       size: 2069503475
     - path: split.py
       hash: md5
-      md5: 281f415da2c1de418681aecac89b4713
-      size: 3454
+      md5: b582a09aaa69dbb7b6088932b61e009b
+      size: 3443
     params:
       params.yaml:
         seed: 42
@@ -139,8 +139,8 @@ stages:
       size: 2069503475
     - path: split.py
       hash: md5
-      md5: 281f415da2c1de418681aecac89b4713
-      size: 3454
+      md5: b582a09aaa69dbb7b6088932b61e009b
+      size: 3443
     params:
       params.yaml:
         seed: 42
@@ -183,18 +183,18 @@ stages:
     deps:
     - path: ../../scripts/report.py
       hash: md5
-      md5: 178ae6b58d20e3a454079f95757d35a0
-      size: 1465
+      md5: a4ccac28f1c11d3cc6eeb963ee3d9bc2
+      size: 1455
     - path: models/reports
       hash: md5
-      md5: 92743057c1716cc85a66c8307525798f.dir
-      size: 623189
-      nfiles: 6
+      md5: 7c74c8d0fbd62242a7cf3e785575a5b9.dir
+      size: 1118886
+      nfiles: 9
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: d3a2289456f9981cb1f47cc958a4c7a4
-      size: 1078
+      md5: 1c766722dd1b2350a2687b93cd3fe838
+      size: 1676
   benchmark@LongEdge-LinearRegression:
     cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl
       --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/LinearRegression-LongEdgeSplit.pkl\n"
@@ -325,3 +325,211 @@ stages:
       hash: md5
       md5: 8d3aa81c77b3e0a2c267563c33e95e3c
       size: 46409
+  benchmark-deeplearning@LongEdge-arnold2019sounding:
+    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/arnold2019sounding-LongEdgeSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 1e662e75bbce915da36b47246ed39fa3
+      size: 2069503475
+    - path: data/splits/LongEdgeSplit.pkl
+      hash: md5
+      md5: 55bfb893a099dcf434ab79cae12cd2b1
+      size: 140229
+    - path: train_deep.py
+      hash: md5
+      md5: d575c74ff2036fa5548989abec361edf
+      size: 5219
+    params:
+      params.yaml:
+        models.regression:
+          seed: 42
+        seed: 42
+    outs:
+    - path: models/reports/arnold2019sounding-LongEdgeSplit.pkl
+      hash: md5
+      md5: 0adf882610adf9914d1661a7ed3999e5
+      size: 47943
+  benchmark-deeplearning@Cutout-arnold2019sounding:
+    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/arnold2019sounding-CutoutSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 1e662e75bbce915da36b47246ed39fa3
+      size: 2069503475
+    - path: data/splits/CutoutSplit.pkl
+      hash: md5
+      md5: d482455520e5a6d583342d4096965fb8
+      size: 140227
+    - path: train_deep.py
+      hash: md5
+      md5: d575c74ff2036fa5548989abec361edf
+      size: 5219
+    params:
+      params.yaml:
+        models.regression:
+          seed: 42
+        seed: 42
+    outs:
+    - path: models/reports/arnold2019sounding-CutoutSplit.pkl
+      hash: md5
+      md5: 7d368e1724441f0b7ec09366615a382d
+      size: 46405
+  benchmark-deeplearning@Random-arnold2019sounding:
+    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/arnold2019sounding-RandomSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 1e662e75bbce915da36b47246ed39fa3
+      size: 2069503475
+    - path: data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 08d18bb17d58cd555431df2167ad3e25
+      size: 700227
+    - path: train_deep.py
+      hash: md5
+      md5: d575c74ff2036fa5548989abec361edf
+      size: 5219
+    params:
+      params.yaml:
+        models.regression:
+          seed: 42
+        seed: 42
+    outs:
+    - path: models/reports/arnold2019sounding-RandomSplit.pkl
+      hash: md5
+      md5: b6264b2d6806e1716ebc1010ba28a2bf
+      size: 420927
+  benchmark-deeplearning@ShortEdge-arnold2019sounding:
+    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/arnold2019sounding-ShortEdgeSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 1e662e75bbce915da36b47246ed39fa3
+      size: 2069503475
+    - path: data/splits/ShortEdgeSplit.pkl
+      hash: md5
+      md5: 92d487a26dcfddfdc8e272a1c4560062
+      size: 140238
+    - path: train_deep.py
+      hash: md5
+      md5: d575c74ff2036fa5548989abec361edf
+      size: 5219
+    params:
+      params.yaml:
+        models.regression:
+          seed: 42
+        seed: 42
+    outs:
+    - path: models/reports/arnold2019sounding-ShortEdgeSplit.pkl
+      hash: md5
+      md5: 2544f9f88aa512f00dd44e1168a0130c
+      size: 44176
+  benchmark-deeplearning@LongEdge-arnold2018deep:
+    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/arnold2018deep-LongEdgeSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 1e662e75bbce915da36b47246ed39fa3
+      size: 2069503475
+    - path: data/splits/LongEdgeSplit.pkl
+      hash: md5
+      md5: 55bfb893a099dcf434ab79cae12cd2b1
+      size: 140229
+    - path: train_deep.py
+      hash: md5
+      md5: d575c74ff2036fa5548989abec361edf
+      size: 5219
+    params:
+      params.yaml:
+        models.regression:
+          seed: 42
+        seed: 42
+    outs:
+    - path: models/reports/arnold2018deep-LongEdgeSplit.pkl
+      hash: md5
+      md5: 44ae5353abf5b507d9182aae7f165145
+      size: 47939
+  benchmark-deeplearning@ShortEdge-arnold2018deep:
+    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/arnold2018deep-ShortEdgeSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 1e662e75bbce915da36b47246ed39fa3
+      size: 2069503475
+    - path: data/splits/ShortEdgeSplit.pkl
+      hash: md5
+      md5: 92d487a26dcfddfdc8e272a1c4560062
+      size: 140238
+    - path: train_deep.py
+      hash: md5
+      md5: d575c74ff2036fa5548989abec361edf
+      size: 5219
+    params:
+      params.yaml:
+        models.regression:
+          seed: 42
+        seed: 42
+    outs:
+    - path: models/reports/arnold2018deep-ShortEdgeSplit.pkl
+      hash: md5
+      md5: db211b469dc8cd8646a24935e633115b
+      size: 44172
+  benchmark-deeplearning@Random-arnold2018deep:
+    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/arnold2018deep-RandomSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 1e662e75bbce915da36b47246ed39fa3
+      size: 2069503475
+    - path: data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 08d18bb17d58cd555431df2167ad3e25
+      size: 700227
+    - path: train_deep.py
+      hash: md5
+      md5: d575c74ff2036fa5548989abec361edf
+      size: 5219
+    params:
+      params.yaml:
+        models.regression:
+          seed: 42
+        seed: 42
+    outs:
+    - path: models/reports/arnold2018deep-RandomSplit.pkl
+      hash: md5
+      md5: 85fbe72b4d2d1f95b6c87fc059c10d47
+      size: 420923
+  benchmark-deeplearning@Cutout-arnold2018deep:
+    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/arnold2018deep-CutoutSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 1e662e75bbce915da36b47246ed39fa3
+      size: 2069503475
+    - path: data/splits/CutoutSplit.pkl
+      hash: md5
+      md5: d482455520e5a6d583342d4096965fb8
+      size: 140227
+    - path: train_deep.py
+      hash: md5
+      md5: d575c74ff2036fa5548989abec361edf
+      size: 5219
+    params:
+      params.yaml:
+        models.regression:
+          seed: 42
+        seed: 42
+    outs:
+    - path: models/reports/arnold2018deep-CutoutSplit.pkl
+      hash: md5
+      md5: 5c67318432b4e7df977a5a49dcf515be
+      size: 46401
