@@ -1,130 +1,86 @@
 stages:
 
-  download:
-    desc: Download dataset from authors website.
-    cmd: |
-      curl --insecure -o data/raw/Lumos5G-v1.0.zip https://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip
-      unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/
-      rm data/raw/Lumos5G-v1.0.zip
-    outs:
-      - data/raw/Lumos5G-v1.0.csv
+  # download:
+  #   desc: Download dataset from authors website.
+  #   cmd: |
+  #     curl --insecure -o data/raw/Lumos5G-v1.0.zip https://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip
+  #     unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/
+  #     rm data/raw/Lumos5G-v1.0.zip
+  #   outs:
+  #     - data/raw/Lumos5G-v1.0.csv
+
+
 
 
   prepare:
     desc: Prepare Lumos5G dataset for MLOps pipeline
-    cmd: >
-      python prepare.py
-      --input data/raw/Lumos5G-v1.0.csv
-      --output data/interim/lumos5g.pkl
-      --task regression
+    cmd: |
+      unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/
+      python prepare.py --input data/raw/Lumos5G-v1.0.csv --output data/interim/lumos5g.pkl
+      rm data/raw/Lumos5G-v1.0.csv
     deps:
-      - data/raw/Lumos5G-v1.0.csv
+      - data/raw/Lumos5G-v1.0.zip
       - prepare.py
     outs:
       - data/interim/lumos5g.pkl
 
+  featurize:
+    desc: Featurize dataset
+    cmd: >
+      python featurize.py
+      --input data/interim/lumos5g.pkl
+      --output data/prepared/lumos5g.pkl
+    deps:
+      - featurize.py
+      - data/interim/lumos5g.pkl
+    outs:
+      - data/prepared/lumos5g.pkl
 
-  # prepare:
-  #   desc: Prepare CTW2019 dataset for the MLOps pipeline
-  #   cmd:
-  #     - unzip data/raw/CTW2019_Dataset_h5.zip -d data/raw/
-  #     - >
-  #       python prepare.py
-  #       --data-h data/raw/h_Estimated_CTW_Train.h5
-  #       --data-snr data/raw/SNR_CTW_Train.h5
-  #       --data-pos data/raw/r_Position_CTW_Train.h5
-  #       --output data/interim/ctw2019.pkl
-  #       --task regression
-  #     - rm data/raw/*.h5
-  #   deps:
-  #     - data/raw/CTW2019_Dataset_h5.zip
-  #     - prepare.py
-  #   outs:
-  #     - data/interim/ctw2019.pkl
+  fit:
+    desc: Split dataset and store indices
+    matrix:
+      split: [KFold]
+    cmd: >
+      python split.py
+      --input data/prepared/lumos5g.pkl
+      --split ${item.split}
+      --indices data/splits/${item.split}Split.pkl
+    params:
+      - split
+    deps:
+      - data/prepared/lumos5g.pkl
+      - split.py
+    outs:
+      - data/splits/${item.split}Split.pkl
 
-  # featurize:
-  #   desc: Prepare CTW2019 dataset
-  #   cmd: >
-  #     python featurize.py
-  #     --input data/interim/ctw2019.pkl
-  #     --output data/prepared/ctw2019.pkl
-  #   deps:
-  #     - featurize.py
-  #     - data/interim/ctw2019.pkl
-  #   outs:
-  #     - data/prepared/ctw2019.pkl
+  benchmark:
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      split: [KFold]
+      algorithm: [XGBRegressor]
+    cmd: >
+      python ../../scripts/benchmark.py
+      --use ${item.algorithm}
+      --data data/prepared/lumos5g.pkl
+      --split-indices data/splits/${item.split}Split.pkl
+      --output-report models/reports/${item.algorithm}-${item.split}Split.pkl
+    params:
+      - models.${item.algorithm}
+    deps:
+      - ../../scripts/benchmark.py
+      - data/prepared/lumos5g.pkl
+      - data/splits/${item.split}Split.pkl
+    outs:
+      - models/reports/${item.algorithm}-${item.split}Split.pkl
 
-
-  # split:
-  #   desc: Prepare CTW2019 data split
-  #   matrix:
-  #     split: [Random, ShortEdge, LongEdge, Cutout]
-  #   cmd: >
-  #     python split.py
-  #     --input data/prepared/ctw2019.pkl
-  #     --split ${item.split}
-  #     --output-indices data/splits/${item.split}Split.pkl
-  #   params:
-  #     - seed
-  #     - split
-  #   deps:
-  #     - data/prepared/ctw2019.pkl
-  #     - split.py
-  #   outs:
-  #     - data/splits/${item.split}Split.pkl
-
-  # # benchmark:
-  # #   desc: Determine best hyper-parameters for algorithm on several CVs
-  # #   matrix:
-  # #     #split: [Random, ShortEdge, LongEdge, Cutout]
-  # #     #model: [LinearRegression, RandomForestRegressor, XGBRegressor, KNeighborsRegressor]
-  # #     split: [LongEdge]
-  # #     model: [LinearRegression]
-  # #   cmd: >
-  # #     python train.py
-  # #     --use ${item.model}
-  # #     --data data/prepared/ctw2019.pkl
-  # #     --split-indices data/splits/${item.split}Split.pkl
-  # #     --output-report models/reports/${item.model}-${item.split}Split.pkl
-  # #   params:
-  # #     - seed
-  # #     - models.regression
-  # #   deps:
-  # #     - train.py
-  # #     - data/prepared/ctw2019.pkl
-  # #     - data/splits/${item.split}Split.pkl
-  # #   outs:
-  # #     - models/reports/${item.model}-${item.split}Split.pkl
-
-  # benchmark-deeplearning:
-  #   matrix:
-  #     split: [Random, ShortEdge, LongEdge, Cutout]
-  #     # split: [LongEdge]
-  #     model: [arnold2019sounding, arnold2018deep]
-  #   cmd: >
-  #     python train_deep.py
-  #     --use ${item.model}
-  #     --data data/prepared/ctw2019.pkl
-  #     --split-indices data/splits/${item.split}Split.pkl
-  #     --output-report models/reports/${item.model}-${item.split}Split.pkl
-  #   params:
-  #     - seed
-  #     - models.regression
-  #   deps:
-  #     - train_deep.py
-  #     - data/prepared/ctw2019.pkl
-  #     - data/splits/${item.split}Split.pkl
-  #   outs:
-  #     - models/reports/${item.model}-${item.split}Split.pkl
-
-  # evaluation:
-  #   cmd: >
-  #     python ../../scripts/report.py
-  #     models/reports/*.pkl
-  #     --output-report reports/metrics.json
-  #   deps:
-  #     - ../../scripts/report.py
-  #     - models/reports
-  #   metrics:
-  #     - reports/metrics.json:
-  #         cache: false
+  evaluation:
+    cmd: >
+      python ../../scripts/report.py
+      models/reports/*.pkl
+      --output-report reports/metrics.json
+    deps:
+      - ../../scripts/report.py
+      - models/reports
+    metrics:
+      - reports/metrics.json:
+          cache: false

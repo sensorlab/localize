@@ -2,34 +2,11 @@ from pathlib import Path
 
 import click
 import pandas as pd
+import joblib
 
 
 def load_raw_data(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-
-    # TODO: Convert to relative coordinates (instead of absolute)
-
-    # TODO: Fill missing values for (nr_ssRsrp, nr_ssRsrq, nr_ssSinr)
-    # nr_ssRsrp [<-156, >-31] src: http://comtech.vsb.cz/qualmob/rsrp_5g.html
-    # nr_ssRsrq [<-43, 20]    src: http://comtech.vsb.cz/qualmob/rsrq_5g.html
-    # nr_ssSinr [<-23, >40]   src: http://comtech.vsb.cz/qualmob/sinr_5g.html
-
-    # Extra info: https://webhelp.tempered.io/kb_lte_signal.html
-
-    # TODO: Convert (nrStatus) to categorical
-    # Encode compas direction in sin, cos (for smothness around north)
-
-    # TODO: Is "lte_rssnr, mobility_mode" in dB or absolute value?
-    # TODO: Throughput unit? Can we make it relative to specs?
-
-    # TODO: What do I do with "trajectory_direction" and?
-
-    # TODO: Onehot-encode for "tower_id"
-
-    # TODO: Should I group by run_num? What to do with seq_num? Drop?
-
-    # TODO: Goal can be absolute localization, or link prediction (based on direction speed, etc.)
-
     return df
 
 
@@ -63,9 +40,9 @@ def load_raw_data(path: Path) -> pd.DataFrame:
     help="What is the target value",
 )
 def cli(input_path: Path, output_path: Path, task: str):
-    df = load_raw_data(input_path)
+    df = pd.read_csv(input_path)
 
-    print(df)
+    joblib.dump(df, output_path)
 
     # match task:
     #     case "regression":

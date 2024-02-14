@@ -2,8 +2,7 @@ schema: '2.0'
 stages:
   prepare@spring:
     cmd: "unzip -j data/raw/logatec.zip spring_data.json -d data/raw/\npython prepare.py
-      --input data/raw/spring_data.json --output data/interim/spring.pkl --task regression\n
-      rm data/raw/spring_data.json\n"
+      --input data/raw/spring_data.json --output data/interim/spring.pkl\nrm data/raw/spring_data.json\n"
     deps:
     - path: data/raw/logatec.zip
       hash: md5
@@ -11,37 +10,37 @@ stages:
       size: 1942041
     - path: prepare.py
       hash: md5
-      md5: 15677c95ff36e605129c386eb64c8888
-      size: 3917
+      md5: 91c43c29ab7ca0177d8aa0bb95f12749
+      size: 3193
     outs:
     - path: data/interim/spring.pkl
       hash: md5
-      md5: da33de3c4a20cba83a662ffbc17fdc6e
-      size: 263252
+      md5: 583a69820aa4cf1aee822e79c98596e1
+      size: 262439
   featurize@spring:
     cmd: "python featurize.py --input data/interim/spring.pkl --output data/prepared/spring.pkl\n"
     deps:
     - path: data/interim/spring.pkl
       hash: md5
-      md5: da33de3c4a20cba83a662ffbc17fdc6e
-      size: 263252
+      md5: 583a69820aa4cf1aee822e79c98596e1
+      size: 262439
     - path: featurize.py
       hash: md5
-      md5: 9838f7450c6569ed74a4c86ea7d82205
-      size: 752
+      md5: 297771086a90c255bc8868d3019e993e
+      size: 1377
     outs:
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
   split@spring-KFold:
     cmd: "python split.py --input data/prepared/spring.pkl --split KFold --output-indices
       data/splits/spring-KFold.pkl\n"
     deps:
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: split.py
       hash: md5
       md5: 9c4743c260a7308e81861fc0b2327592
@@ -59,8 +58,7 @@ stages:
       size: 303650
   prepare@winter:
     cmd: "unzip -j data/raw/logatec.zip winter_data.json -d data/raw/\npython prepare.py
-      --input data/raw/winter_data.json --output data/interim/winter.pkl --task regression\n
-      rm data/raw/winter_data.json\n"
+      --input data/raw/winter_data.json --output data/interim/winter.pkl\nrm data/raw/winter_data.json\n"
     deps:
     - path: data/raw/logatec.zip
       hash: md5
@@ -68,37 +66,37 @@ stages:
       size: 1942041
     - path: prepare.py
       hash: md5
-      md5: 15677c95ff36e605129c386eb64c8888
-      size: 3917
+      md5: 91c43c29ab7ca0177d8aa0bb95f12749
+      size: 3193
     outs:
     - path: data/interim/winter.pkl
       hash: md5
-      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
-      size: 33637
+      md5: 187f65b60a857caec3311e1281391e4d
+      size: 33514
   featurize@winter:
     cmd: "python featurize.py --input data/interim/winter.pkl --output data/prepared/winter.pkl\n"
     deps:
     - path: data/interim/winter.pkl
       hash: md5
-      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
-      size: 33637
+      md5: 187f65b60a857caec3311e1281391e4d
+      size: 33514
     - path: featurize.py
       hash: md5
-      md5: 9838f7450c6569ed74a4c86ea7d82205
-      size: 752
+      md5: 297771086a90c255bc8868d3019e993e
+      size: 1377
     outs:
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
   split@winter-KFold:
     cmd: "python split.py --input data/prepared/winter.pkl --split KFold --output-indices
       data/splits/winter-KFold.pkl\n"
     deps:
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: split.py
       hash: md5
       md5: 9c4743c260a7308e81861fc0b2327592
@@ -115,39 +113,65 @@ stages:
       md5: ef13c2dbd1b5bddce474733cd098f47c
       size: 40050
   benchmark@winter-KFold-KNeighborsRegressor:
-    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/winter.pkl
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/winter.pkl
       --split-indices data/splits/winter-KFold.pkl --output-report models/reports/winter-KNeighborsRegressor-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-KFold.pkl
       hash: md5
       md5: ef13c2dbd1b5bddce474733cd098f47c
       size: 40050
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          parameters:
+            n_jobs: -1
+          hyperparameters:
+            n_neighbors:
+            - 5
+            - 10
+            - 15
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
         seed: 42
     outs:
     - path: models/reports/winter-KNeighborsRegressor-KFold.pkl
       hash: md5
-      md5: 46aefe92973cba31f7c76ac6455804c8
-      size: 41535
+      md5: a5f5892542e2285c99d78812985c4326
+      size: 41647
   split@winter-Random:
     cmd: "python split.py --input data/prepared/winter.pkl --split Random --output-indices
       data/splits/winter-Random.pkl\n"
     deps:
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: split.py
       hash: md5
       md5: 9c4743c260a7308e81861fc0b2327592
@@ -164,56 +188,80 @@ stages:
       md5: 7c5124981d07197c5d4988e533b963b1
       size: 39995
   benchmark@winter-Random-LinearRegression:
-    cmd: "python train.py --use LinearRegression --data data/prepared/winter.pkl --split-indices
-      data/splits/winter-Random.pkl --output-report models/reports/winter-LinearRegression-Random.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-Random.pkl --output-report models/reports/winter-LinearRegression-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-Random.pkl
       hash: md5
       md5: 7c5124981d07197c5d4988e533b963b1
       size: 39995
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
         seed: 42
     outs:
     - path: models/reports/winter-LinearRegression-Random.pkl
       hash: md5
-      md5: 13607de37aab0de3c72ababd2955f0ab
-      size: 41661
+      md5: a144e58d406ec2167c66c4f898551e07
+      size: 41679
   benchmark@spring-KFold-RandomForestRegressor:
-    cmd: "python train.py --use RandomForestRegressor --data data/prepared/spring.pkl
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/spring.pkl
       --split-indices data/splits/spring-KFold.pkl --output-report models/reports/spring-RandomForestRegressor-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-KFold.pkl
       hash: md5
       md5: a87773e3c51c4f18b6f10dbd8fd3f619
       size: 303650
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
+          hyperparmeters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
         seed: 42
     outs:
     - path: models/reports/spring-RandomForestRegressor-KFold.pkl
       hash: md5
-      md5: a0171677519ec8d399a4e455bb49abbf
+      md5: e12684e5dd6fca311036674ef6a7d1b7
       size: 305249
   split@winter-LeaveOneGroupOut:
     cmd: "python split.py --input data/prepared/winter.pkl --split LeaveOneGroupOut
@@ -221,8 +269,8 @@ stages:
     deps:
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: split.py
       hash: md5
       md5: 9c4743c260a7308e81861fc0b2327592
@@ -239,377 +287,546 @@ stages:
       md5: 4336f1d24728db7abee30c2216f0d754
       size: 207197
   benchmark@winter-LeaveOneGroupOut-RandomForestRegressor:
-    cmd: "python train.py --use RandomForestRegressor --data data/prepared/winter.pkl
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/winter.pkl
       --split-indices data/splits/winter-LeaveOneGroupOut.pkl --output-report models/reports/winter-RandomForestRegressor-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-LeaveOneGroupOut.pkl
       hash: md5
       md5: 4336f1d24728db7abee30c2216f0d754
       size: 207197
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
+          hyperparmeters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
         seed: 42
     outs:
     - path: models/reports/winter-RandomForestRegressor-LeaveOneGroupOut.pkl
       hash: md5
-      md5: e57e538250244514eb3ec5d2758dc451
+      md5: b30ba8bcd1d1991b6849aa62d1c5a94f
       size: 47302
   benchmark@spring-KFold-KNeighborsRegressor:
-    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/spring.pkl
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/spring.pkl
       --split-indices data/splits/spring-KFold.pkl --output-report models/reports/spring-KNeighborsRegressor-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-KFold.pkl
       hash: md5
       md5: a87773e3c51c4f18b6f10dbd8fd3f619
       size: 303650
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          parameters:
+            n_jobs: -1
+          hyperparameters:
+            n_neighbors:
+            - 5
+            - 10
+            - 15
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
         seed: 42
     outs:
     - path: models/reports/spring-KNeighborsRegressor-KFold.pkl
       hash: md5
-      md5: 10faf267de5075685fb175a9970726fb
-      size: 305215
+      md5: e39ffe0a3d9300f4c78f3c99de6e8fc1
+      size: 305327
   benchmark@winter-Random-RandomForestRegressor:
-    cmd: "python train.py --use RandomForestRegressor --data data/prepared/winter.pkl
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/winter.pkl
       --split-indices data/splits/winter-Random.pkl --output-report models/reports/winter-RandomForestRegressor-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-Random.pkl
       hash: md5
       md5: 7c5124981d07197c5d4988e533b963b1
       size: 39995
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
+          hyperparmeters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
         seed: 42
     outs:
     - path: models/reports/winter-RandomForestRegressor-Random.pkl
       hash: md5
-      md5: bda7c0e2de6c7040ba32d9cd07d875d6
+      md5: dc2b580da4f6087a584d1b30faa2f6c4
       size: 41698
   benchmark@winter-Random-XGBRegressor:
-    cmd: "python train.py --use XGBRegressor --data data/prepared/winter.pkl --split-indices
-      data/splits/winter-Random.pkl --output-report models/reports/winter-XGBRegressor-Random.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-Random.pkl --output-report models/reports/winter-XGBRegressor-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-Random.pkl
       hash: md5
       md5: 7c5124981d07197c5d4988e533b963b1
       size: 39995
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/winter-XGBRegressor-Random.pkl
       hash: md5
-      md5: ece98ea96a9e38e1bf1eb6d3417c80c5
+      md5: ad488a5cb5644ccfa736ab528d433d0a
       size: 33841
   benchmark@winter-Random-XGBRFRegressor:
-    cmd: "python train.py --use XGBRFRegressor --data data/prepared/winter.pkl --split-indices
-      data/splits/winter-Random.pkl --output-report models/reports/winter-XGBRFRegressor-Random.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-Random.pkl --output-report models/reports/winter-XGBRFRegressor-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-Random.pkl
       hash: md5
       md5: 7c5124981d07197c5d4988e533b963b1
       size: 39995
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRFRegressor:
+          module: xgboost
+          class: XGBRFRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/winter-XGBRFRegressor-Random.pkl
       hash: md5
-      md5: 779bb4c2e0a3aa2855c431aedc06cb3c
+      md5: 160d002df7e95693412448550cd6bfa5
       size: 33843
   benchmark@winter-Random-KNeighborsRegressor:
-    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/winter.pkl
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/winter.pkl
       --split-indices data/splits/winter-Random.pkl --output-report models/reports/winter-KNeighborsRegressor-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-Random.pkl
       hash: md5
       md5: 7c5124981d07197c5d4988e533b963b1
       size: 39995
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          parameters:
+            n_jobs: -1
+          hyperparameters:
+            n_neighbors:
+            - 5
+            - 10
+            - 15
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
         seed: 42
     outs:
     - path: models/reports/winter-KNeighborsRegressor-Random.pkl
       hash: md5
-      md5: daf838c4859fefc0039317f3d598e6ab
-      size: 41664
+      md5: 0ea8d16415f325217abf0e9c8eae52b5
+      size: 41776
   benchmark@winter-KFold-LinearRegression:
-    cmd: "python train.py --use LinearRegression --data data/prepared/winter.pkl --split-indices
-      data/splits/winter-KFold.pkl --output-report models/reports/winter-LinearRegression-KFold.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-KFold.pkl --output-report models/reports/winter-LinearRegression-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-KFold.pkl
       hash: md5
       md5: ef13c2dbd1b5bddce474733cd098f47c
       size: 40050
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
         seed: 42
     outs:
     - path: models/reports/winter-LinearRegression-KFold.pkl
       hash: md5
-      md5: 558ffef6912079ee3af3b2a3dcb2771f
-      size: 41532
+      md5: 954d498f2d491628cab55508dff72840
+      size: 41534
   benchmark@winter-KFold-RandomForestRegressor:
-    cmd: "python train.py --use RandomForestRegressor --data data/prepared/winter.pkl
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/winter.pkl
       --split-indices data/splits/winter-KFold.pkl --output-report models/reports/winter-RandomForestRegressor-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-KFold.pkl
       hash: md5
       md5: ef13c2dbd1b5bddce474733cd098f47c
       size: 40050
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
+          hyperparmeters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
         seed: 42
     outs:
     - path: models/reports/winter-RandomForestRegressor-KFold.pkl
       hash: md5
-      md5: 58b32b060d001780aa96caab89f8c69d
+      md5: bd974ce1bcaa642a8daadcedcac394d2
       size: 41569
   benchmark@winter-KFold-XGBRegressor:
-    cmd: "python train.py --use XGBRegressor --data data/prepared/winter.pkl --split-indices
-      data/splits/winter-KFold.pkl --output-report models/reports/winter-XGBRegressor-KFold.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-KFold.pkl --output-report models/reports/winter-XGBRegressor-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-KFold.pkl
       hash: md5
       md5: ef13c2dbd1b5bddce474733cd098f47c
       size: 40050
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/winter-XGBRegressor-KFold.pkl
       hash: md5
-      md5: 849e724cb3444e24ddcff8c405b3c5a4
+      md5: 40e81f9834cdf152bf7b5fd6a1dfd403
       size: 33720
   benchmark@winter-KFold-XGBRFRegressor:
-    cmd: "python train.py --use XGBRFRegressor --data data/prepared/winter.pkl --split-indices
-      data/splits/winter-KFold.pkl --output-report models/reports/winter-XGBRFRegressor-KFold.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-KFold.pkl --output-report models/reports/winter-XGBRFRegressor-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-KFold.pkl
       hash: md5
       md5: ef13c2dbd1b5bddce474733cd098f47c
       size: 40050
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRFRegressor:
+          module: xgboost
+          class: XGBRFRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/winter-XGBRFRegressor-KFold.pkl
       hash: md5
-      md5: e9294f430c4359ed8efa8780dc457ae8
+      md5: 12806e43a44b95c0129bdcfd7da96b7e
       size: 33722
   benchmark@winter-LeaveOneGroupOut-LinearRegression:
-    cmd: "python train.py --use LinearRegression --data data/prepared/winter.pkl --split-indices
-      data/splits/winter-LeaveOneGroupOut.pkl --output-report models/reports/winter-LinearRegression-LeaveOneGroupOut.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-LeaveOneGroupOut.pkl --output-report models/reports/winter-LinearRegression-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-LeaveOneGroupOut.pkl
       hash: md5
       md5: 4336f1d24728db7abee30c2216f0d754
       size: 207197
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
         seed: 42
     outs:
     - path: models/reports/winter-LinearRegression-LeaveOneGroupOut.pkl
       hash: md5
-      md5: 0a3264fd8befa0a7359fab4885acc652
-      size: 47265
+      md5: 39462e8040d89ca83000486f9c9b7be3
+      size: 46867
   benchmark@winter-LeaveOneGroupOut-XGBRegressor:
-    cmd: "python train.py --use XGBRegressor --data data/prepared/winter.pkl --split-indices
-      data/splits/winter-LeaveOneGroupOut.pkl --output-report models/reports/winter-XGBRegressor-LeaveOneGroupOut.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-LeaveOneGroupOut.pkl --output-report models/reports/winter-XGBRegressor-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-LeaveOneGroupOut.pkl
       hash: md5
       md5: 4336f1d24728db7abee30c2216f0d754
       size: 207197
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/winter-XGBRegressor-LeaveOneGroupOut.pkl
       hash: md5
-      md5: ae338b8b8db64344fa6c77f816b37c92
+      md5: 967d2da73ea1f798847dff5f27f6ea07
       size: 39341
   benchmark@winter-LeaveOneGroupOut-XGBRFRegressor:
-    cmd: "python train.py --use XGBRFRegressor --data data/prepared/winter.pkl --split-indices
-      data/splits/winter-LeaveOneGroupOut.pkl --output-report models/reports/winter-XGBRFRegressor-LeaveOneGroupOut.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/winter.pkl
+      --split-indices data/splits/winter-LeaveOneGroupOut.pkl --output-report models/reports/winter-XGBRFRegressor-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-LeaveOneGroupOut.pkl
       hash: md5
       md5: 4336f1d24728db7abee30c2216f0d754
       size: 207197
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRFRegressor:
+          module: xgboost
+          class: XGBRFRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/winter-XGBRFRegressor-LeaveOneGroupOut.pkl
       hash: md5
-      md5: 8b8d3798b22a5289bb7ffd0ab08c7c22
+      md5: e222357f2515ab768b7c2105a08f0e15
       size: 39343
   benchmark@winter-LeaveOneGroupOut-KNeighborsRegressor:
-    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/winter.pkl
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/winter.pkl
       --split-indices data/splits/winter-LeaveOneGroupOut.pkl --output-report models/reports/winter-KNeighborsRegressor-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/winter.pkl
       hash: md5
-      md5: 96a5b42d36ebb2fd2501ab1a2d78b823
-      size: 197853
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
     - path: data/splits/winter-LeaveOneGroupOut.pkl
       hash: md5
       md5: 4336f1d24728db7abee30c2216f0d754
       size: 207197
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          parameters:
+            n_jobs: -1
+          hyperparameters:
+            n_neighbors:
+            - 5
+            - 10
+            - 15
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
         seed: 42
     outs:
     - path: models/reports/winter-KNeighborsRegressor-LeaveOneGroupOut.pkl
       hash: md5
-      md5: 4a94e9ec8b925a823016471f11b717eb
-      size: 47268
+      md5: 58e253eac504cd9e311fd7a03745703e
+      size: 47380
   split@spring-Random:
     cmd: "python split.py --input data/prepared/spring.pkl --split Random --output-indices
       data/splits/spring-Random.pkl\n"
     deps:
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: split.py
       hash: md5
       md5: 9c4743c260a7308e81861fc0b2327592
@@ -626,212 +843,283 @@ stages:
       md5: d3fbbd43a6ef43a6c928b8e6a338ee1c
       size: 303595
   benchmark@spring-Random-LinearRegression:
-    cmd: "python train.py --use LinearRegression --data data/prepared/spring.pkl --split-indices
-      data/splits/spring-Random.pkl --output-report models/reports/spring-LinearRegression-Random.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --output-report models/reports/spring-LinearRegression-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-Random.pkl
       hash: md5
       md5: d3fbbd43a6ef43a6c928b8e6a338ee1c
       size: 303595
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
         seed: 42
     outs:
     - path: models/reports/spring-LinearRegression-Random.pkl
       hash: md5
-      md5: d35b755116486e3d6096232e8a102690
-      size: 305341
+      md5: 1e844c12e0af5ba439a2ec31de886e3b
+      size: 305359
   benchmark@spring-Random-RandomForestRegressor:
-    cmd: "python train.py --use RandomForestRegressor --data data/prepared/spring.pkl
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/spring.pkl
       --split-indices data/splits/spring-Random.pkl --output-report models/reports/spring-RandomForestRegressor-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-Random.pkl
       hash: md5
       md5: d3fbbd43a6ef43a6c928b8e6a338ee1c
       size: 303595
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
+          hyperparmeters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
         seed: 42
     outs:
     - path: models/reports/spring-RandomForestRegressor-Random.pkl
       hash: md5
-      md5: eca333ad1ffcec2b6beaa7745b1c11cf
+      md5: a9dbd86d8311e762b1ecd667ead1726f
       size: 305378
   benchmark@spring-Random-XGBRegressor:
-    cmd: "python train.py --use XGBRegressor --data data/prepared/spring.pkl --split-indices
-      data/splits/spring-Random.pkl --output-report models/reports/spring-XGBRegressor-Random.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --output-report models/reports/spring-XGBRegressor-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-Random.pkl
       hash: md5
       md5: d3fbbd43a6ef43a6c928b8e6a338ee1c
       size: 303595
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/spring-XGBRegressor-Random.pkl
       hash: md5
-      md5: 0ff44ecf67906896daca8cc96f12cfe4
+      md5: 91f549725a6ea5f514c64879c220443d
       size: 244737
   benchmark@spring-Random-XGBRFRegressor:
-    cmd: "python train.py --use XGBRFRegressor --data data/prepared/spring.pkl --split-indices
-      data/splits/spring-Random.pkl --output-report models/reports/spring-XGBRFRegressor-Random.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-Random.pkl --output-report models/reports/spring-XGBRFRegressor-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-Random.pkl
       hash: md5
       md5: d3fbbd43a6ef43a6c928b8e6a338ee1c
       size: 303595
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRFRegressor:
+          module: xgboost
+          class: XGBRFRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/spring-XGBRFRegressor-Random.pkl
       hash: md5
-      md5: beac4f78a4ea292218369150a33ace1b
+      md5: 18429966eeb7481d5f4bb1a27c3443ae
       size: 244739
   benchmark@spring-Random-KNeighborsRegressor:
-    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/spring.pkl
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/spring.pkl
       --split-indices data/splits/spring-Random.pkl --output-report models/reports/spring-KNeighborsRegressor-Random.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-Random.pkl
       hash: md5
       md5: d3fbbd43a6ef43a6c928b8e6a338ee1c
       size: 303595
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          parameters:
+            n_jobs: -1
+          hyperparameters:
+            n_neighbors:
+            - 5
+            - 10
+            - 15
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
         seed: 42
     outs:
     - path: models/reports/spring-KNeighborsRegressor-Random.pkl
       hash: md5
-      md5: c91df1f102d35fb5b238612c5f333ff8
-      size: 305344
+      md5: 2b54ea550f625ac0883d4e1d02beccca
+      size: 305456
   benchmark@spring-KFold-LinearRegression:
-    cmd: "python train.py --use LinearRegression --data data/prepared/spring.pkl --split-indices
-      data/splits/spring-KFold.pkl --output-report models/reports/spring-LinearRegression-KFold.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --output-report models/reports/spring-LinearRegression-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-KFold.pkl
       hash: md5
       md5: a87773e3c51c4f18b6f10dbd8fd3f619
       size: 303650
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
         seed: 42
     outs:
     - path: models/reports/spring-LinearRegression-KFold.pkl
       hash: md5
-      md5: 8a6d042907d277ce1822d378c3b0c11a
-      size: 305212
+      md5: f32c78c0ba85c03a55beb2896e5e8287
+      size: 305230
   benchmark@spring-KFold-XGBRegressor:
-    cmd: "python train.py --use XGBRegressor --data data/prepared/spring.pkl --split-indices
-      data/splits/spring-KFold.pkl --output-report models/reports/spring-XGBRegressor-KFold.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --output-report models/reports/spring-XGBRegressor-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-KFold.pkl
       hash: md5
       md5: a87773e3c51c4f18b6f10dbd8fd3f619
       size: 303650
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/spring-XGBRegressor-KFold.pkl
       hash: md5
-      md5: ddbf4d20e1578c50aff491e00d087df3
+      md5: 3f781649155b414a6572f2ad1bca94f5
       size: 244664
   benchmark@spring-KFold-XGBRFRegressor:
-    cmd: "python train.py --use XGBRFRegressor --data data/prepared/spring.pkl --split-indices
-      data/splits/spring-KFold.pkl --output-report models/reports/spring-XGBRFRegressor-KFold.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-KFold.pkl --output-report models/reports/spring-XGBRFRegressor-KFold.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-KFold.pkl
       hash: md5
       md5: a87773e3c51c4f18b6f10dbd8fd3f619
       size: 303650
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRFRegressor:
+          module: xgboost
+          class: XGBRFRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/spring-XGBRFRegressor-KFold.pkl
       hash: md5
-      md5: b064e115327377f89a116848ef36cbbc
+      md5: e008238e8d5ac9f8f866fb93d19afdaa
       size: 244666
   split@spring-LeaveOneGroupOut:
     cmd: "python split.py --input data/prepared/spring.pkl --split LeaveOneGroupOut
@@ -839,8 +1127,8 @@ stages:
     deps:
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: split.py
       hash: md5
       md5: 9c4743c260a7308e81861fc0b2327592
@@ -857,168 +1145,226 @@ stages:
       md5: 0446f2e5efc3a4940a214c39289c1bf2
       size: 7888581
   benchmark@spring-LeaveOneGroupOut-LinearRegression:
-    cmd: "python train.py --use LinearRegression --data data/prepared/spring.pkl --split-indices
-      data/splits/spring-LeaveOneGroupOut.pkl --output-report models/reports/spring-LinearRegression-LeaveOneGroupOut.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --output-report models/reports/spring-LinearRegression-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-LeaveOneGroupOut.pkl
       hash: md5
       md5: 0446f2e5efc3a4940a214c39289c1bf2
       size: 7888581
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
         seed: 42
     outs:
     - path: models/reports/spring-LinearRegression-LeaveOneGroupOut.pkl
       hash: md5
-      md5: 096e4af25840690e3dc7af547aa7ee30
-      size: 338913
+      md5: 53dc313bb119380c7371cd29aa0adaad
+      size: 336867
   benchmark@spring-LeaveOneGroupOut-RandomForestRegressor:
-    cmd: "python train.py --use RandomForestRegressor --data data/prepared/spring.pkl
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/spring.pkl
       --split-indices data/splits/spring-LeaveOneGroupOut.pkl --output-report models/reports/spring-RandomForestRegressor-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-LeaveOneGroupOut.pkl
       hash: md5
       md5: 0446f2e5efc3a4940a214c39289c1bf2
       size: 7888581
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
+          hyperparmeters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
         seed: 42
     outs:
     - path: models/reports/spring-RandomForestRegressor-LeaveOneGroupOut.pkl
       hash: md5
-      md5: 21857a2d2d32be6b659aaa7c10fc17dc
+      md5: 6678c555f2d4700a3af70fd2a279d982
       size: 338950
   benchmark@spring-LeaveOneGroupOut-XGBRegressor:
-    cmd: "python train.py --use XGBRegressor --data data/prepared/spring.pkl --split-indices
-      data/splits/spring-LeaveOneGroupOut.pkl --output-report models/reports/spring-XGBRegressor-LeaveOneGroupOut.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --output-report models/reports/spring-XGBRegressor-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-LeaveOneGroupOut.pkl
       hash: md5
       md5: 0446f2e5efc3a4940a214c39289c1bf2
       size: 7888581
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/spring-XGBRegressor-LeaveOneGroupOut.pkl
       hash: md5
-      md5: 56e086c519555f17f0b91ca8a26a3b83
+      md5: 518af22d73771ef0e7ca86c4abb1fbba
       size: 277829
   benchmark@spring-LeaveOneGroupOut-XGBRFRegressor:
-    cmd: "python train.py --use XGBRFRegressor --data data/prepared/spring.pkl --split-indices
-      data/splits/spring-LeaveOneGroupOut.pkl --output-report models/reports/spring-XGBRFRegressor-LeaveOneGroupOut.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/spring.pkl
+      --split-indices data/splits/spring-LeaveOneGroupOut.pkl --output-report models/reports/spring-XGBRFRegressor-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-LeaveOneGroupOut.pkl
       hash: md5
       md5: 0446f2e5efc3a4940a214c39289c1bf2
       size: 7888581
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.XGBRFRegressor:
+          module: xgboost
+          class: XGBRFRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
         seed: 42
     outs:
     - path: models/reports/spring-XGBRFRegressor-LeaveOneGroupOut.pkl
       hash: md5
-      md5: b76c2436a8d8a657a95b872a3277bd92
+      md5: a81040485e42c1dca5c98fcebf8ba019
       size: 277831
   benchmark@spring-LeaveOneGroupOut-KNeighborsRegressor:
-    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/spring.pkl
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/spring.pkl
       --split-indices data/splits/spring-LeaveOneGroupOut.pkl --output-report models/reports/spring-KNeighborsRegressor-LeaveOneGroupOut.pkl\n"
     deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 1ab4ae61b8edeb322ddc47c6e98fccc9
+      size: 5821
     - path: data/prepared/spring.pkl
       hash: md5
-      md5: c2ee00768ad0b238f79a6fbe8c53d227
-      size: 1637021
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
     - path: data/splits/spring-LeaveOneGroupOut.pkl
       hash: md5
       md5: 0446f2e5efc3a4940a214c39289c1bf2
       size: 7888581
-    - path: train.py
-      hash: md5
-      md5: fd6b66955ab64b3a6dcf087bdf84b9d9
-      size: 5849
     params:
       params.yaml:
-        models.regression:
-          seed: 42
+        models.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          parameters:
+            n_jobs: -1
+          hyperparameters:
+            n_neighbors:
+            - 5
+            - 10
+            - 15
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            - 3
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            - 45
+            metric:
+            - minkowski
+            - euclidean
+            - cosine
+            - manhattan
         seed: 42
     outs:
     - path: models/reports/spring-KNeighborsRegressor-LeaveOneGroupOut.pkl
       hash: md5
-      md5: 89f13615c68c50c6c004cb472a40059e
-      size: 338916
+      md5: 3f5c8566864911a490c63768bcf7af41
+      size: 339028
   evaluation@winter:
     cmd: "python ../../scripts/report.py models/reports/winter-*.pkl --output-report
       reports/metrics-winter.json\n"
     deps:
     - path: ../../scripts/report.py
       hash: md5
-      md5: 178ae6b58d20e3a454079f95757d35a0
-      size: 1465
+      md5: a4ccac28f1c11d3cc6eeb963ee3d9bc2
+      size: 1455
     - path: models/reports
       hash: md5
-      md5: d8611ddadf304dc604e560e0c9d380c8.dir
-      size: 4988288
+      md5: ee5142db281db91f7429f5480a7fbf8e.dir
+      size: 4986572
       nfiles: 31
     outs:
     - path: reports/metrics-winter.json
       hash: md5
-      md5: 5d0a1a13eb9b35d091377770c4576594
-      size: 3218
+      md5: 9c25643f6b418a4b68c1bb9db2a4e98e
+      size: 3216
   evaluation@spring:
     cmd: "python ../../scripts/report.py models/reports/spring-*.pkl --output-report
       reports/metrics-spring.json\n"
     deps:
     - path: ../../scripts/report.py
       hash: md5
-      md5: 178ae6b58d20e3a454079f95757d35a0
-      size: 1465
+      md5: a4ccac28f1c11d3cc6eeb963ee3d9bc2
+      size: 1455
     - path: models/reports
       hash: md5
-      md5: d8611ddadf304dc604e560e0c9d380c8.dir
-      size: 4988288
+      md5: ee5142db281db91f7429f5480a7fbf8e.dir
+      size: 4986572
       nfiles: 31
     outs:
     - path: reports/metrics-spring.json
       hash: md5
-      md5: c949d41e2ad4201dc5498f44b258d638
-      size: 3188
+      md5: f6947820db1e4994cb568d94cbc42fd4
+      size: 3187

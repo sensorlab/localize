@@ -21,7 +21,7 @@ stages:
       subset: ${logatec.subsets}
     cmd: |
       unzip -j data/raw/logatec.zip ${item.subset}_data.json -d data/raw/
-      python prepare.py --input data/raw/${item.subset}_data.json --output data/interim/${item.subset}.pkl --task regression
+      python prepare.py --input data/raw/${item.subset}_data.json --output data/interim/${item.subset}.pkl
       rm data/raw/${item.subset}_data.json
     deps:
       - prepare.py
@@ -53,7 +53,7 @@ stages:
       python split.py
       --input data/prepared/${item.subset}.pkl
       --split ${item.split}
-      --output-indices data/splits/${item.subset}-${item.split}.pkl
+      --output-indices data/splits/${item.subset}-${item.split}Split.pkl
     params:
       - seed
       - split
@@ -61,7 +61,7 @@ stages:
       - split.py
       - data/prepared/${item.subset}.pkl
     outs:
-      - data/splits/${item.subset}-${item.split}.pkl
+      - data/splits/${item.subset}-${item.split}Split.pkl
 
 
   benchmark: # Should I name this "benchmark" or "optimization"
@@ -71,20 +71,20 @@ stages:
       split: ${logatec.splits}
       model: ${logatec.models}
     cmd: >
-      python train.py
+      python ../../scripts/benchmark.py
       --use ${item.model}
       --data data/prepared/${item.subset}.pkl
-      --split-indices data/splits/${item.subset}-${item.split}.pkl
-      --output-report models/reports/${item.subset}-${item.model}-${item.split}.pkl
+      --split-indices data/splits/${item.subset}-${item.split}Split.pkl
+      --output-report models/reports/${item.subset}-${item.model}-${item.split}Split.pkl
     params:
       - seed
-      - models.regression
+      - models.${item.model}
     deps:
-      - train.py
+      - ../../scripts/benchmark.py
       - data/prepared/${item.subset}.pkl
-      - data/splits/${item.subset}-${item.split}.pkl
+      - data/splits/${item.subset}-${item.split}Split.pkl
     outs:
-      - models/reports/${item.subset}-${item.model}-${item.split}.pkl
+      - models/reports/${item.subset}-${item.model}-${item.split}Split.pkl
 
 
   # evaluation:

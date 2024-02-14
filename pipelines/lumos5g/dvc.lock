@@ -18,3 +18,135 @@ stages:
       hash: md5
       md5: dd525dac43a0823a94e117bbb9a23a14
       size: 8480348
+  prepare:
+    cmd: "unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/\n
+      python prepare.py --input data/raw/Lumos5G-v1.0.csv --output data/interim/lumos5g.pkl\n
+      rm data/raw/Lumos5G-v1.0.csv\n"
+    deps:
+    - path: data/raw/Lumos5G-v1.0.zip
+      hash: md5
+      md5: 4f5f75277bd564bb00a23d8e94e11c24
+      size: 1604062
+    - path: prepare.py
+      hash: md5
+      md5: a6403e1c7321f82c3e0e8b5af1c9d41e
+      size: 3007
+    outs:
+    - path: data/interim/lumos5g.pkl
+      hash: md5
+      md5: 0e961b6b7a0f74e9f03e0ebf4f27d7cf
+      size: 1527516
+  featurize:
+    cmd: "python featurize.py --input data/interim/lumos5g.pkl --output data/prepared/lumos5g.pkl\n"
+    deps:
+    - path: data/interim/lumos5g.pkl
+      hash: md5
+      md5: 0e961b6b7a0f74e9f03e0ebf4f27d7cf
+      size: 1527516
+    - path: featurize.py
+      hash: md5
+      md5: 439b9b60bbbdd647e5bb9885d1f89af6
+      size: 4500
+    outs:
+    - path: data/prepared/lumos5g.pkl
+      hash: md5
+      md5: e338fcf3f00568951e0b0290a13cec77
+      size: 1846201
+  fit@KFold:
+    cmd: "python split.py --input data/prepared/lumos5g.pkl --split KFold --indices
+      data/splits/KFoldSplit.pkl\n"
+    deps:
+    - path: data/prepared/lumos5g.pkl
+      hash: md5
+      md5: e338fcf3f00568951e0b0290a13cec77
+      size: 1846201
+    - path: split.py
+      hash: md5
+      md5: 3534fd2cff56008efe09f73e8f1711aa
+      size: 2301
+    params:
+      params.yaml:
+        split:
+          seed: 42
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8e0253c0cf2d49630b20c8facdbd95f1
+      size: 2725514
+  benchmark@KFold-LinearRegression:
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/lumos5g.pkl
+      --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/LinearRegression-KFoldSplit.pkl\n"
+    deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: d3f8aadc45e2a5ac95c84edbcb2d81aa
+      size: 7324
+    - path: data/prepared/lumos5g.pkl
+      hash: md5
+      md5: e338fcf3f00568951e0b0290a13cec77
+      size: 1846201
+    - path: data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8e0253c0cf2d49630b20c8facdbd95f1
+      size: 2725514
+    params:
+      params.yaml:
+        models.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparmeters:
+            fit_intercept:
+            - true
+            - false
+    outs:
+    - path: models/reports/LinearRegression-KFoldSplit.pkl
+      hash: md5
+      md5: 9203bc552b1c8c31b01d9fe9cb042a0b
+      size: 2727420
+  evaluation:
+    cmd: "python ../../scripts/report.py models/reports/*.pkl --output-report reports/metrics.json\n"
+    deps:
+    - path: ../../scripts/report.py
+      hash: md5
+      md5: a4ccac28f1c11d3cc6eeb963ee3d9bc2
+      size: 1455
+    - path: models/reports
+      hash: md5
+      md5: 07644912b10f1f76fb268ceba814c9ed.dir
+      size: 4909884
+      nfiles: 3
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: c7ee73beaac0508624fb37cc5bd7f7f8
+      size: 449
+  benchmark@KFold-XGBRegressor:
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/lumos5g.pkl
+      --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/XGBRegressor-KFoldSplit.pkl\n"
+    deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 414db98a32a87e76608944b376f311d8
+      size: 7753
+    - path: data/prepared/lumos5g.pkl
+      hash: md5
+      md5: e338fcf3f00568951e0b0290a13cec77
+      size: 1846201
+    - path: data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8e0253c0cf2d49630b20c8facdbd95f1
+      size: 2725514
+    params:
+      params.yaml:
+        models.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+    outs:
+    - path: models/reports/XGBRegressor-KFoldSplit.pkl
+      hash: md5
+      md5: 95af49b93ea7dd8bb0476083b252e304
+      size: 2182464

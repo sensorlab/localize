@@ -62,24 +62,8 @@ def load_raw_data(path: Path) -> pd.DataFrame:
     show_default=True,
     help="Method to harmonize values",
 )
-@click.option(
-    "--task",
-    type=click.Choice(["classification", "regression"], case_sensitive=False),
-    default="regression",
-    show_default=True,
-    help="What is the target value",
-)
-def cli(input_path: Path, output_path: Path, task: str, method: str):
+def cli(input_path: Path, output_path: Path, method: str):
     df = load_raw_data(input_path)
-
-    match task:
-        case "regression":
-            # Convert discrete values to meters
-            df.pos_x = (df.pos_x - 1) * 1.2  # meters
-            df.pos_y = (df.pos_y - 1) * 1.2  # meters
-
-        case _:
-            raise NotImplementedError
 
     match method:
         # Average samples in one second. If there are none, the value is NaN.
@@ -99,8 +83,6 @@ def cli(input_path: Path, output_path: Path, task: str, method: str):
             # After pivot, column names become tuples. Fix that.
             df.columns = ["".join(map(str, col)).strip().replace("value", "node") for col in df.columns.values]
 
-            df = df.rename(columns={"pos_x": "target_x", "pos_y": "target_y"})
-
             # Fill the NaN values with some extremely low RSS value
             df = df.fillna(-180)
 
@@ -113,13 +95,7 @@ def cli(input_path: Path, output_path: Path, task: str, method: str):
         case _:
             raise NotImplementedError
 
-    # Find target column(s)
-    targets = [col for col in df.columns if col.startswith("target")]
-
-    # X are features, y are target(s)
-    X, y = df.drop(targets, axis=1), df[targets]
-
-    joblib.dump((X, y), output_path, compress=9)
+    joblib.dump(df, output_path, compress=9)
 
 
 if __name__ == "__main__":

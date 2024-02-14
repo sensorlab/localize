@@ -9,6 +9,7 @@ clean:
 	find . -type d -name "__cache__" -ls -exec rm -rv {} +
 
 	find ./pipelines -type f -name "*.pkl" -delete
+	find ./pipelines -type f -name "*.tmp" -delete
 
 ## Lint using black and isort
 lint:

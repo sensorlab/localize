@@ -24,7 +24,7 @@ import numpy as np
 #     "--adapt",
 #     "--adapt-for",
 #     "adaptation",
-#     type=click.Choice(["sklearn", "pytorch"], case_sensitive=False),
+#     type=click.Choice(["concat"], case_sensitive=False),
 #     help="Adapt dataset for certain framework",
 # )
 def cli(input_path: Path, output_path: Path):
@@ -35,20 +35,12 @@ def cli(input_path: Path, output_path: Path):
     targets = np.delete(pos, -1, axis=-1)
     assert targets.shape == (pos.shape[0], 2)
 
-    # if adaptation.lower() == "sklearn":
-    #     h_flat = h.reshape(h.shape[0], -1)
-    #     features = np.concatenate((h_flat, snr), axis=1)
-    #     assert features.shape == (h.shape[0], 16 * 924 * 2 + 16)
-
-    # elif adaptation.lower() == "pytorch":
-    #     features = {"h": h, "snr": snr}
-
-    # else:
-    #     raise NotImplementedError('Data adaptation for "{adaptation}" not implemented!')
-
-    features = {"h": h, "snr": snr}
+    # Fix #2: Swap axes from BHWC --> BCHW
+    h = np.transpose(h, (0, 3, 1, 2))
 
     # TODO: Do some additional feature engineering.
+
+    features = {"h": h, "snr": snr}
 
     # Save newly transformed dataset
     joblib.dump((features, targets), output_path)

@@ -30,6 +30,34 @@ INTERIM_DATA_PATH = PROJECT_PATH / "data" / "interim"
 PROCESSED_DATA_PATH = PROJECT_PATH / "data" / "processed"
 
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()  # Convert arrays to lists
+        elif isinstance(
+            obj,
+            (
+                np.int_,
+                np.intc,
+                np.intp,
+                np.int8,
+                np.int16,
+                np.int32,
+                np.int64,
+                np.uint8,
+                np.uint16,
+                np.uint32,
+                np.uint64,
+            ),
+        ):
+            return int(obj)  # Convert np integers to Python int
+        elif isinstance(obj, (np.float_, np.float16, np.float32, np.float64)):
+            return float(obj)  # Convert np floats to Python float
+        elif isinstance(obj, (np.bool_)):
+            return bool(obj)  # Convert np bools to Python bool
+        return json.JSONEncoder.default(self, obj)
+
+
 def load_params(params_path: Path) -> dict:
     with open(params_path) as fp:
         params = yaml.safe_load(fp)
@@ -40,7 +68,7 @@ def save_params(obj: object, params_path: Path):
     match params_path.suffix:
         case ".json":
             with open(params_path, mode="w") as fp:
-                json.dump(obj, fp, sort_keys=True, indent=2)
+                json.dump(obj, fp, sort_keys=True, indent=2, cls=NumpyEncoder)
 
         case ".pkl" | ".joblib":
             joblib.dump(obj, params_path)
@@ -68,6 +96,22 @@ def safe_indexing(X: Any, indices, *, axis=0):
 
     if X is None:
         return X
+
+    # if isinstance(X, dict):
+    #     print("Safe index on dicts")
+    #     #indexed_dict = {key: value[indices] for key, value in X.items()}
+    #     # Initialize an empty list to store the indexed dictionaries
+    #     indexed_samples = []
+    #     for idx in indices:
+    #         # For each index, create a new dictionary where each key is a feature name
+    #         # and its value is the feature value for the current index.
+    #         sample_dict = {key: X[key][idx] for key in X}
+    #         indexed_samples.append(sample_dict)
+    #     return indexed_samples
+
+    # subsets = {key: value[indices] for key, value in X.items()}
+    # X = [for ]
+    # return X
 
     if hasattr(X, "iloc"):  # Most likely Pandas DataFrame
         return X.iloc[indices]

@@ -4,8 +4,7 @@ stages:
     cmd:
     - unzip data/raw/CTW2019_Dataset_h5.zip -d data/raw/
     - "python prepare.py --data-h data/raw/h_Estimated_CTW_Train.h5 --data-snr data/raw/SNR_CTW_Train.h5
-      --data-pos data/raw/r_Position_CTW_Train.h5 --output data/interim/ctw2019.pkl
-      --task regression\n"
+      --data-pos data/raw/r_Position_CTW_Train.h5 --output data/interim/ctw2019.pkl\n"
     - rm data/raw/*.h5
     deps:
     - path: data/raw/CTW2019_Dataset_h5.zip
@@ -14,37 +13,37 @@ stages:
       size: 3961470982
     - path: prepare.py
       hash: md5
-      md5: e41dcc0e0a7adc97bf5bc3ffc4980ab2
-      size: 2143
+      md5: 10a1926dbcb28b0215800a78634302e3
+      size: 2161
     outs:
     - path: data/interim/ctw2019.pkl
       hash: md5
-      md5: e0f06d2aa22b431135752547308da442
-      size: 1917741295
+      md5: 807f71d680efdd2dd84458d9120d1659
+      size: 2069433498
   featurize:
     cmd: "python featurize.py --input data/interim/ctw2019.pkl --output data/prepared/ctw2019.pkl\n"
     deps:
     - path: data/interim/ctw2019.pkl
       hash: md5
-      md5: e0f06d2aa22b431135752547308da442
-      size: 1917741295
+      md5: 807f71d680efdd2dd84458d9120d1659
+      size: 2069433498
     - path: featurize.py
       hash: md5
-      md5: 4577498aa21dd663145bedbe31fa8baf
-      size: 1529
+      md5: 525ad784aedd833a94ec8b02d6c486db
+      size: 1194
     outs:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 1e662e75bbce915da36b47246ed39fa3
-      size: 2069503475
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
   split@ShortEdge:
     cmd: "python split.py --input data/prepared/ctw2019.pkl --split ShortEdge --output-indices
       data/splits/ShortEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 1e662e75bbce915da36b47246ed39fa3
-      size: 2069503475
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
     - path: split.py
       hash: md5
       md5: b582a09aaa69dbb7b6088932b61e009b
@@ -66,8 +65,8 @@ stages:
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 1e662e75bbce915da36b47246ed39fa3
-      size: 2069503475
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
     - path: split.py
       hash: md5
       md5: b582a09aaa69dbb7b6088932b61e009b
@@ -89,8 +88,8 @@ stages:
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 1e662e75bbce915da36b47246ed39fa3
-      size: 2069503475
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
     - path: split.py
       hash: md5
       md5: b582a09aaa69dbb7b6088932b61e009b
@@ -135,8 +134,8 @@ stages:
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 1e662e75bbce915da36b47246ed39fa3
-      size: 2069503475
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
     - path: split.py
       hash: md5
       md5: b582a09aaa69dbb7b6088932b61e009b
@@ -187,14 +186,14 @@ stages:
       size: 1455
     - path: models/reports
       hash: md5
-      md5: 7c74c8d0fbd62242a7cf3e785575a5b9.dir
-      size: 1118886
+      md5: b1ac3ecd6052397f95050f1ca2005df7.dir
+      size: 747750
       nfiles: 9
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 1c766722dd1b2350a2687b93cd3fe838
-      size: 1676
+      md5: 1019cd43bdd5409d94553e2cd5957484
+      size: 1684
   benchmark@LongEdge-LinearRegression:
     cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl
       --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/LinearRegression-LongEdgeSplit.pkl\n"
@@ -533,3 +532,371 @@ stages:
       hash: md5
       md5: 5c67318432b4e7df977a5a49dcf515be
       size: 46401
+  flatten:
+    cmd: "python flatten.py --input data/prepared/ctw2019.pkl --output data/prepared/ctw2019.flatten.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
+    - path: flatten.py
+      hash: md5
+      md5: 9c095a3cf2418515c7359b929293db03
+      size: 855
+    outs:
+    - path: data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 21e0c77ba40499fd3ccf1a8d61402e05
+      size: 2069363523
+  benchmark-deeplearning@Random-model0:
+    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Arnold2018DeepModel-RandomSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 21e0c77ba40499fd3ccf1a8d61402e05
+      size: 2069363523
+    - path: data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 08d18bb17d58cd555431df2167ad3e25
+      size: 700227
+    - path: train_deep.py
+      hash: md5
+      md5: 6c179214ff48da04741ae33010b5b8e6
+      size: 5221
+    params:
+      params.yaml:
+        models.Arnold2018DeepModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2018DeepModel
+          parameters:
+            module__in_features: 29584
+            module__random_state: 42
+          hyperparameters:
+            lr:
+            - 0.01
+            - 0.001
+            - 0.0001
+        seed: 42
+    outs:
+    - path: models/reports/Arnold2018DeepModel-RandomSplit.pkl
+      hash: md5
+      md5: dd47e99078e41f7cdfe22ebb73975e82
+      size: 280991
+  benchmark-deeplearning@ShortEdge-model0:
+    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/Arnold2018DeepModel-ShortEdgeSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 21e0c77ba40499fd3ccf1a8d61402e05
+      size: 2069363523
+    - path: data/splits/ShortEdgeSplit.pkl
+      hash: md5
+      md5: 92d487a26dcfddfdc8e272a1c4560062
+      size: 140238
+    - path: train_deep.py
+      hash: md5
+      md5: 6c179214ff48da04741ae33010b5b8e6
+      size: 5221
+    params:
+      params.yaml:
+        models.Arnold2018DeepModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2018DeepModel
+          parameters:
+            module__in_features: 29584
+            module__random_state: 42
+          hyperparameters:
+            lr:
+            - 0.01
+            - 0.001
+            - 0.0001
+        seed: 42
+    outs:
+    - path: models/reports/Arnold2018DeepModel-ShortEdgeSplit.pkl
+      hash: md5
+      md5: 13e006b8c79df03a9a45546ad45d88fa
+      size: 29632
+  benchmark-deeplearning@Cutout-model0:
+    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl
+      --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/Arnold2018DeepModel-CutoutSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 21e0c77ba40499fd3ccf1a8d61402e05
+      size: 2069363523
+    - path: data/splits/CutoutSplit.pkl
+      hash: md5
+      md5: d482455520e5a6d583342d4096965fb8
+      size: 140227
+    - path: train_deep.py
+      hash: md5
+      md5: 6c179214ff48da04741ae33010b5b8e6
+      size: 5221
+    params:
+      params.yaml:
+        models.Arnold2018DeepModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2018DeepModel
+          parameters:
+            module__in_features: 29584
+            module__random_state: 42
+          hyperparameters:
+            lr:
+            - 0.01
+            - 0.001
+            - 0.0001
+        seed: 42
+    outs:
+    - path: models/reports/Arnold2018DeepModel-CutoutSplit.pkl
+      hash: md5
+      md5: 757ea6ce0531b7b72012469f321110fb
+      size: 31109
+  benchmark-deeplearning@LongEdge-model0:
+    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/Arnold2018DeepModel-LongEdgeSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 21e0c77ba40499fd3ccf1a8d61402e05
+      size: 2069363523
+    - path: data/splits/LongEdgeSplit.pkl
+      hash: md5
+      md5: 55bfb893a099dcf434ab79cae12cd2b1
+      size: 140229
+    - path: train_deep.py
+      hash: md5
+      md5: 6c179214ff48da04741ae33010b5b8e6
+      size: 5221
+    params:
+      params.yaml:
+        models.Arnold2018DeepModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2018DeepModel
+          parameters:
+            module__in_features: 29584
+            module__random_state: 42
+          hyperparameters:
+            lr:
+            - 0.01
+            - 0.001
+            - 0.0001
+        seed: 42
+    outs:
+    - path: models/reports/Arnold2018DeepModel-LongEdgeSplit.pkl
+      hash: md5
+      md5: a85c3bb6d953ff2d2d87443350e0c23d
+      size: 32135
+  benchmark-deeplearning@Cutout-model1:
+    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/Arnold2019SoundingModel-CutoutSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
+    - path: data/splits/CutoutSplit.pkl
+      hash: md5
+      md5: d482455520e5a6d583342d4096965fb8
+      size: 140227
+    - path: train_deep.py
+      hash: md5
+      md5: 6c179214ff48da04741ae33010b5b8e6
+      size: 5221
+    params:
+      params.yaml:
+        models.Arnold2019SoundingModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2019SoundingModel
+          parameters:
+            optimizer:
+              module: torch.optim
+              class: Adam
+            callbacks:
+            - module: skorch.callbacks
+              class: EarlyStopping
+            module__random_state: 42
+            iterator_train__shuffle: true
+            iterator_train__num_workers: 8
+            optimizer__weight_decay: 0.01
+            max_epochs: 100
+            batch_size: 64
+            device: cuda
+            compile: true
+          hyperparameters:
+            lr:
+            - 0.01
+            - 0.001
+            - 0.0001
+        seed: 42
+    outs:
+    - path: models/reports/Arnold2019SoundingModel-CutoutSplit.pkl
+      hash: md5
+      md5: b9ec64f290f8506ae05b663ea32eaa5b
+      size: 31113
+  benchmark-deeplearning@Random-model1:
+    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Arnold2019SoundingModel-RandomSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
+    - path: data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 08d18bb17d58cd555431df2167ad3e25
+      size: 700227
+    - path: train_deep.py
+      hash: md5
+      md5: 6c179214ff48da04741ae33010b5b8e6
+      size: 5221
+    params:
+      params.yaml:
+        models.Arnold2019SoundingModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2019SoundingModel
+          parameters:
+            optimizer:
+              module: torch.optim
+              class: Adam
+            callbacks:
+            - module: skorch.callbacks
+              class: EarlyStopping
+            module__random_state: 42
+            iterator_train__shuffle: true
+            iterator_train__num_workers: 8
+            optimizer__weight_decay: 0.01
+            max_epochs: 100
+            batch_size: 64
+            device: cuda
+            compile: true
+          hyperparameters:
+            lr:
+            - 0.01
+            - 0.001
+            - 0.0001
+        seed: 42
+    outs:
+    - path: models/reports/Arnold2019SoundingModel-RandomSplit.pkl
+      hash: md5
+      md5: 31844c8763d17f820bea562abdf2ef13
+      size: 280995
+  benchmark-deeplearning@ShortEdge-model1:
+    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/Arnold2019SoundingModel-ShortEdgeSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
+    - path: data/splits/ShortEdgeSplit.pkl
+      hash: md5
+      md5: 92d487a26dcfddfdc8e272a1c4560062
+      size: 140238
+    - path: train_deep.py
+      hash: md5
+      md5: 6c179214ff48da04741ae33010b5b8e6
+      size: 5221
+    params:
+      params.yaml:
+        models.Arnold2019SoundingModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2019SoundingModel
+          parameters:
+            optimizer:
+              module: torch.optim
+              class: Adam
+            callbacks:
+            - module: skorch.callbacks
+              class: EarlyStopping
+            module__random_state: 42
+            iterator_train__shuffle: true
+            iterator_train__num_workers: 8
+            optimizer__weight_decay: 0.01
+            max_epochs: 100
+            batch_size: 64
+            device: cuda
+            compile: true
+          hyperparameters:
+            lr:
+            - 0.01
+            - 0.001
+            - 0.0001
+        seed: 42
+    outs:
+    - path: models/reports/Arnold2019SoundingModel-ShortEdgeSplit.pkl
+      hash: md5
+      md5: 020df54cfaf67fb6b49a01c249a109f6
+      size: 29636
+  benchmark-deeplearning@LongEdge-model1:
+    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/Arnold2019SoundingModel-LongEdgeSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      size: 2069363555
+    - path: data/splits/LongEdgeSplit.pkl
+      hash: md5
+      md5: 55bfb893a099dcf434ab79cae12cd2b1
+      size: 140229
+    - path: train_deep.py
+      hash: md5
+      md5: 6c179214ff48da04741ae33010b5b8e6
+      size: 5221
+    params:
+      params.yaml:
+        models.Arnold2019SoundingModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2019SoundingModel
+          parameters:
+            optimizer:
+              module: torch.optim
+              class: Adam
+            callbacks:
+            - module: skorch.callbacks
+              class: EarlyStopping
+            module__random_state: 42
+            iterator_train__shuffle: true
+            iterator_train__num_workers: 8
+            optimizer__weight_decay: 0.01
+            max_epochs: 100
+            batch_size: 64
+            device: cuda
+            compile: true
+          hyperparameters:
+            lr:
+            - 0.01
+            - 0.001
+            - 0.0001
+        seed: 42
+    outs:
+    - path: models/reports/Arnold2019SoundingModel-LongEdgeSplit.pkl
+      hash: md5
+      md5: 0dc37e3b0696de04f5a78e645bd43595
+      size: 32139

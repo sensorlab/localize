@@ -5,6 +5,7 @@ channels:
   - nvidia
   - anaconda
   - conda-forge
+  - nodefaults
 
 dependencies:
   - python~=3.11.0
@@ -12,12 +13,13 @@ dependencies:
 
   - nodejs~=18.0
 
-  - pytorch~=2.1.0
+  - pytorch~=2.2.0
   - pytorch-cuda=12.1
   - torchvision
   - torchaudio
+  - skorch~=0.15.0
 
-  #- nomkl
+  - nomkl
 
   - numpy
   - scipy
@@ -39,7 +41,7 @@ dependencies:
   - h5py
   - joblib
 
-  - snakemake
+  #- snakemake
 
   - pip:
     - dvc

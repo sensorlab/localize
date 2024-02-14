@@ -2,7 +2,6 @@ from pathlib import Path
 
 import click
 import joblib
-from src import load_data
 
 
 @click.command()
@@ -24,12 +23,34 @@ from src import load_data
     type=click.Path(dir_okay=False, writable=True, path_type=Path),
     required=True,
 )
-def cli(input_path: Path, output_path: Path):
-    X, y = load_data(input_path)
+@click.option(
+    "--task",
+    type=click.Choice(["regression"], case_sensitive=False),
+    default="regression",
+    show_default=True,
+    help="What is the target value",
+)
+def cli(input_path: Path, output_path: Path, task: str):
+    df = joblib.load(input_path)
 
-    # TODO: Do some feature engineering. Currently is just a passthrough.
+    match task:
+        case "regression":
+            # Convert discrete values to meters
+            df.pos_x = (df.pos_x - 1) * 1.2  # meters
+            df.pos_y = (df.pos_y - 1) * 1.2  # meters
 
-    joblib.dump((X, y), output_path)
+            df = df.rename(columns={"pos_x": "target_x", "pos_y": "target_y"})
+
+        case _:
+            raise NotImplementedError
+
+    # Find target column(s)
+    targets = ["target_x", "target_y"]
+
+    # X are features, y are target(s)
+    X, y = df.drop(targets, axis=1), df[targets]
+
+    joblib.dump((X, y), output_path, compress=9)
 
 
 if __name__ == "__main__":

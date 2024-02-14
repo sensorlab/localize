@@ -10,7 +10,6 @@ stages:
         --data-snr data/raw/SNR_CTW_Train.h5
         --data-pos data/raw/r_Position_CTW_Train.h5
         --output data/interim/ctw2019.pkl
-        --task regression
       - rm data/raw/*.h5
     deps:
       - data/raw/CTW2019_Dataset_h5.zip
@@ -29,6 +28,19 @@ stages:
       - data/interim/ctw2019.pkl
     outs:
       - data/prepared/ctw2019.pkl
+
+
+  flatten:
+    desc: Prepare CTW2019 dataset
+    cmd: >
+      python flatten.py
+      --input data/prepared/ctw2019.pkl
+      --output data/prepared/ctw2019.flatten.pkl
+    deps:
+      - flatten.py
+      - data/prepared/ctw2019.pkl
+    outs:
+      - data/prepared/ctw2019.flatten.pkl
 
 
   split:
@@ -72,26 +84,55 @@ stages:
   #   outs:
   #     - models/reports/${item.model}-${item.split}Split.pkl
 
+  # benchmark-deeplearning:
+  #   matrix:
+  #     split: [Random, ShortEdge, LongEdge, Cutout]
+  #     model:
+  #       - name: LinearRegression
+  #         inputs: data/prepared/ctw2019.flatten.pkl
+  #       - name: Arnold2018DeepModel
+  #         inputs: data/prepared/ctw2019.pkl
+  #   cmd: >
+  #     python train_deep.py
+  #     --use ${item.model.name}
+  #     --data ${item.model.inputs}
+  #     --split-indices data/splits/${item.split}Split.pkl
+  #     --output-report models/reports/${item.model}-${item.split}Split.pkl
+  #   params:
+  #     - seed
+  #     - models.regression
+  #   deps:
+  #     - train_deep.py
+  #     - ${item.model.inputs}
+  #     - data/splits/${item.split}Split.pkl
+  #   outs:
+  #     - models/reports/${item.model.name}-${item.split}Split.pkl
+
   benchmark-deeplearning:
     matrix:
       split: [Random, ShortEdge, LongEdge, Cutout]
-      # split: [LongEdge]
-      model: [arnold2019sounding, arnold2018deep]
+      model:
+        #- name: LinearRegression
+        #  input: data/prepared/ctw2019.flatten.pkl
+        - name: Arnold2018DeepModel
+          input: data/prepared/ctw2019.flatten.pkl
+        - name: Arnold2019SoundingModel
+          input: data/prepared/ctw2019.pkl
     cmd: >
-      python train_deep.py
-      --use ${item.model}
-      --data data/prepared/ctw2019.pkl
+      python ../../scripts/benchmark.py
+      --use ${item.model.name}
+      --data ${item.model.input}
       --split-indices data/splits/${item.split}Split.pkl
-      --output-report models/reports/${item.model}-${item.split}Split.pkl
+      --output-report models/reports/${item.model.name}-${item.split}Split.pkl
     params:
       - seed
-      - models.regression
+      - models.${item.model.name}
     deps:
       - train_deep.py
-      - data/prepared/ctw2019.pkl
+      - ${item.model.input}
       - data/splits/${item.split}Split.pkl
     outs:
-      - models/reports/${item.model}-${item.split}Split.pkl
+      - models/reports/${item.model.name}-${item.split}Split.pkl
 
   evaluation:
     cmd: >

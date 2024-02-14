@@ -5,27 +5,45 @@ split:
   test_size: 0.20
 
 models:
+  LinearRegression:
+    module: sklearn.linear_model
+    class: LinearRegression
+    hyperparameters:
+      fit_intercept: [true, false]
 
-  regression:
 
-    seed: 42
+  RandomForestRegressor:
+    module: sklearn.ensemble
+    class: RandomForestRegressor
+    parameters:
+      random_state: 42
+      n_jobs: -1
+    hyperparmeters:
+      n_estimators: [10, 50, 100, 250, 400]
+      max_depth: [5, 10, 30, 50, 150, 200, null]
 
-    # RandomForestRegressor:
-    #   n_estimators: [10, 50, 100, 250, 400]
-    #   max_depth: [5, 10, 30, 50, 150, 200, null]
+  XGBRegressor:
+    module: xgboost
+    class: XGBRegressor
+    parameters:
+      random_state: 42
+      n_jobs: -1
 
-    # KNeighborsRegressor:
-    #   weights: [uniform, distance]
-    #   #algorithm: [ball_tree, brute]
-    #   p: [1, 2, 3]
-    #   leaf_size: [5, 10, 15, 30, 45]
-    #   metric: [minkowski, euclidean, cosine, manhattan]
+  XGBRFRegressor:
+    module: xgboost
+    class: XGBRFRegressor
+    parameters:
+      random_state: 42
+      n_jobs: -1
 
-#data:
-#  #preprocessing:
-#  #  scale: [True, False]
-#  #  encoding: ["label", "one_hot"]
-#
-#train:
-#  batch_size: [16, 32, 64]
-#  learning_rate: [0.01, 0.001, 0.0001]
+  KNeighborsRegressor:
+    module: sklearn.neighbors
+    class: KNeighborsRegressor
+    parameters:
+      n_jobs: -1
+    hyperparameters:
+      n_neighbors: [5, 10, 15]
+      weights: [uniform, distance]
+      p: [1, 2, 3]
+      leaf_size: [5, 10, 15, 30, 45]
+      metric: [minkowski, euclidean, cosine, manhattan]

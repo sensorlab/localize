@@ -4,6 +4,22 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from typing import Union, Iterable
 
 
+# class FlattenAndCombine(BaseEstimator, TransformerMixin):
+#     def __init__(self, keys: Iterable[str]):
+#         self.keys = keys
+
+#     def fit(self, X, y=None, **fit_params):
+#         return self
+
+#     def fit_transform(self, X, y=None, **fit_params) -> np.ndarray:
+#         # Input is expected to be dict
+#         data = [X[key].reshape(shape=(len(X[key]), -1)) for key in self.keys]
+
+#         pass
+
+#         return super().fit_transform(X, y, **fit_params)
+
+
 class ReshapeTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, sample_shape: Iterable[int] = None, copy=True) -> None:
         super().__init__()
