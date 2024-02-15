@@ -11,8 +11,8 @@ from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 
 
-def lat_lon_to_meters(origin_lat, origin_lon, point_lat, point_lon):
-    """Fine for distances <100km"""
+def lat_lon_to_meters(origin_lat, origin_lon, point_lat, point_lon) -> tuple[float, float]:
+    """Works "fine" for distances less than 100km"""
 
     # Earth's radius in meters
     R = 6_378_137

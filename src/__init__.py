@@ -34,27 +34,16 @@ class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()  # Convert arrays to lists
-        elif isinstance(
-            obj,
-            (
-                np.int_,
-                np.intc,
-                np.intp,
-                np.int8,
-                np.int16,
-                np.int32,
-                np.int64,
-                np.uint8,
-                np.uint16,
-                np.uint32,
-                np.uint64,
-            ),
-        ):
+
+        elif np.issubdtype(obj, np.integer):
             return int(obj)  # Convert np integers to Python int
-        elif isinstance(obj, (np.float_, np.float16, np.float32, np.float64)):
+
+        elif np.issubdtype(obj, np.floating):
             return float(obj)  # Convert np floats to Python float
-        elif isinstance(obj, (np.bool_)):
+
+        elif np.issubdtype(obj, np.bool_):
             return bool(obj)  # Convert np bools to Python bool
+
         return json.JSONEncoder.default(self, obj)
 
 

@@ -36,11 +36,13 @@ def construct_model_or_pipeline(model_config: dict) -> BaseEstimator:
         ModelClass = getattr(module, model_config["class"])
         parameters = model_config.get("parameters", {})
 
+        # TODO: should `optimizer` be part of parameter or on same model as declaration
         if "optimizer" in parameters:
             optimizer_module = importlib.import_module(parameters["optimizer"]["module"])
             OptimizerClass = getattr(optimizer_module, parameters["optimizer"]["class"])
             parameters["optimizer"] = OptimizerClass
 
+        # TODO: should `optimizer` be part of parameter or on same model as declaration
         if "callbacks" in parameters:
             callbacks = [construct_model_or_pipeline(callback) for callback in parameters["callbacks"]]
             parameters["callbacks"] = callbacks
@@ -143,7 +145,7 @@ def cli(
     cv = PredefinedSplit(cv_indices)
 
     # general train parameters
-    n_jobs = joblib.cpu_count()
+    n_jobs = joblib.cpu_count(only_physical_cores=True)
     backend = "loky"
 
     # Path to your YAML configuration file
@@ -163,7 +165,7 @@ def cli(
             estimator=model_or_pipeline,
             param_grid=hyperparameters,
             scoring="neg_mean_squared_error",
-            n_jobs=1,
+            n_jobs=2,
             cv=cv,
             verbose=1,
         )

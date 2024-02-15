@@ -4,7 +4,6 @@ from src import save_params
 from typing import Any
 import numpy as np
 from sklearn import metrics
-from src.metrics import mean_percentage_error
 import joblib
 
 
@@ -26,13 +25,16 @@ def cli(
         y_true = np.concatenate(report["predictions"]["y_true"], axis=0)
         y_pred = np.concatenate(report["predictions"]["y_pred"], axis=0)
 
+        assert y_true.shape == y_pred.shape
+
         # Calculate loss metrics
         losses = {
             "rmse": metrics.root_mean_squared_error(y_true, y_pred),
             "euclidean": np.sqrt(np.sum((y_true - y_pred) ** 2, axis=1)).mean(),
             "r_squared": metrics.r2_score(y_true, y_pred),
             "mae": metrics.mean_absolute_error(y_true, y_pred),
-            "mpe": mean_percentage_error(y_true, y_pred),
+            # TODO: Fix MPE/sMPE, wwMPE metric
+            # "mpe": mean_percentage_error(y_true, y_pred),
         }
 
         output[algorithm] = output.get(algorithm, {})

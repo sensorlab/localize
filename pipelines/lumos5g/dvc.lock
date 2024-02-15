@@ -29,41 +29,41 @@ stages:
       size: 1604062
     - path: prepare.py
       hash: md5
-      md5: a6403e1c7321f82c3e0e8b5af1c9d41e
-      size: 3007
+      md5: fb533bf6db1ddce0f38c4c88025f7341
+      size: 2986
     outs:
     - path: data/interim/lumos5g.pkl
       hash: md5
-      md5: 0e961b6b7a0f74e9f03e0ebf4f27d7cf
-      size: 1527516
+      md5: 9ab1c77407345d4c82615d6b46c9f01b
+      size: 9130367
   featurize:
     cmd: "python featurize.py --input data/interim/lumos5g.pkl --output data/prepared/lumos5g.pkl\n"
     deps:
     - path: data/interim/lumos5g.pkl
       hash: md5
-      md5: 0e961b6b7a0f74e9f03e0ebf4f27d7cf
-      size: 1527516
+      md5: 9ab1c77407345d4c82615d6b46c9f01b
+      size: 9130367
     - path: featurize.py
       hash: md5
-      md5: 439b9b60bbbdd647e5bb9885d1f89af6
-      size: 4500
+      md5: f3922d9a867c6c50a12d43924ef2b5f8
+      size: 4523
     outs:
     - path: data/prepared/lumos5g.pkl
       hash: md5
-      md5: e338fcf3f00568951e0b0290a13cec77
-      size: 1846201
+      md5: b5c856ba0fc031e57fdeee1da02e074b
+      size: 10901113
   fit@KFold:
     cmd: "python split.py --input data/prepared/lumos5g.pkl --split KFold --indices
       data/splits/KFoldSplit.pkl\n"
     deps:
     - path: data/prepared/lumos5g.pkl
       hash: md5
-      md5: e338fcf3f00568951e0b0290a13cec77
-      size: 1846201
+      md5: b5c856ba0fc031e57fdeee1da02e074b
+      size: 10901113
     - path: split.py
       hash: md5
-      md5: 3534fd2cff56008efe09f73e8f1711aa
-      size: 2301
+      md5: e19e63e3fd0a276f5cd52dbe6d71b00f
+      size: 2282
     params:
       params.yaml:
         split:
@@ -81,12 +81,12 @@ stages:
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: d3f8aadc45e2a5ac95c84edbcb2d81aa
-      size: 7324
+      md5: f523f601cd2de870c8ce180d73e27ac3
+      size: 7464
     - path: data/prepared/lumos5g.pkl
       hash: md5
-      md5: e338fcf3f00568951e0b0290a13cec77
-      size: 1846201
+      md5: b5c856ba0fc031e57fdeee1da02e074b
+      size: 10901113
     - path: data/splits/KFoldSplit.pkl
       hash: md5
       md5: 8e0253c0cf2d49630b20c8facdbd95f1
@@ -94,46 +94,56 @@ stages:
     params:
       params.yaml:
         models.LinearRegression:
-          module: sklearn.linear_model
-          class: LinearRegression
-          hyperparmeters:
-            fit_intercept:
+          pipeline:
+          - step: scaler
+            module: sklearn.preprocessing
+            class: StandardScaler
+          - step: regressor
+            module: sklearn.multioutput
+            class: MultiOutputRegressor
+            estimator:
+              module: sklearn.linear_model
+              class: LinearRegression
+              parameters:
+                n_jobs: -1
+          hyperparameters:
+            regressor__estimator__fit_intercept:
             - true
             - false
     outs:
     - path: models/reports/LinearRegression-KFoldSplit.pkl
       hash: md5
-      md5: 9203bc552b1c8c31b01d9fe9cb042a0b
-      size: 2727420
+      md5: f2ffa52817447880d82a47796addc59f
+      size: 2727460
   evaluation:
     cmd: "python ../../scripts/report.py models/reports/*.pkl --output-report reports/metrics.json\n"
     deps:
     - path: ../../scripts/report.py
       hash: md5
-      md5: a4ccac28f1c11d3cc6eeb963ee3d9bc2
-      size: 1455
+      md5: 9a901f85b0972bb3040550b7a0fb73c2
+      size: 1500
     - path: models/reports
       hash: md5
-      md5: 07644912b10f1f76fb268ceba814c9ed.dir
-      size: 4909884
-      nfiles: 3
+      md5: abe54aea5db552cfe9ac1b56d079ee4c.dir
+      size: 7637383
+      nfiles: 4
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: c7ee73beaac0508624fb37cc5bd7f7f8
-      size: 449
+      md5: 230a557dfdb66eb0bfb3aae16d1a1a8c
+      size: 677
   benchmark@KFold-XGBRegressor:
     cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/lumos5g.pkl
       --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/XGBRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 414db98a32a87e76608944b376f311d8
-      size: 7753
+      md5: f523f601cd2de870c8ce180d73e27ac3
+      size: 7464
     - path: data/prepared/lumos5g.pkl
       hash: md5
-      md5: e338fcf3f00568951e0b0290a13cec77
-      size: 1846201
+      md5: b5c856ba0fc031e57fdeee1da02e074b
+      size: 10901113
     - path: data/splits/KFoldSplit.pkl
       hash: md5
       md5: 8e0253c0cf2d49630b20c8facdbd95f1
@@ -145,8 +155,53 @@ stages:
           class: XGBRegressor
           parameters:
             random_state: 42
+            n_jobs: -1
     outs:
     - path: models/reports/XGBRegressor-KFoldSplit.pkl
       hash: md5
-      md5: 95af49b93ea7dd8bb0476083b252e304
+      md5: 223b849c8a19895e47a409b8641298c6
       size: 2182464
+  benchmark@KFold-RandomForestRegressor:
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/lumos5g.pkl
+      --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/RandomForestRegressor-KFoldSplit.pkl\n"
+    deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: f523f601cd2de870c8ce180d73e27ac3
+      size: 7464
+    - path: data/prepared/lumos5g.pkl
+      hash: md5
+      md5: b5c856ba0fc031e57fdeee1da02e074b
+      size: 10901113
+    - path: data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8e0253c0cf2d49630b20c8facdbd95f1
+      size: 2725514
+    params:
+      params.yaml:
+        models.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+            n_jobs: -1
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+    outs:
+    - path: models/reports/RandomForestRegressor-KFoldSplit.pkl
+      hash: md5
+      md5: 293a0c03dac41dd6331e5904113d14df
+      size: 2727459
