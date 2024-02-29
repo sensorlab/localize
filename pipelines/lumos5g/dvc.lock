@@ -1,26 +1,26 @@
 schema: '2.0'
 stages:
   download-dataset:
-    cmd: "curl --insecure -o data/raw/Lumos5G-v1.0.zip https://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip\n
-      unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/\n
-      rm data/raw/Lumos5G-v1.0.zip\n"
+    cmd: "curl --insecure -o data/raw/Lumos5G-v1.0.zip https://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip\n\
+      \ unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/\n\
+      \ rm data/raw/Lumos5G-v1.0.zip\n"
     outs:
     - path: data/raw/Lumos5G-v1.0.csv
       hash: md5
       md5: dd525dac43a0823a94e117bbb9a23a14
       size: 8480348
   download:
-    cmd: "curl --insecure -o data/raw/Lumos5G-v1.0.zip https://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip\n
-      unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/\n
-      rm data/raw/Lumos5G-v1.0.zip\n"
+    cmd: "curl --insecure -o data/raw/Lumos5G-v1.0.zip https://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip\n\
+      \ unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/\n\
+      \ rm data/raw/Lumos5G-v1.0.zip\n"
     outs:
     - path: data/raw/Lumos5G-v1.0.csv
       hash: md5
       md5: dd525dac43a0823a94e117bbb9a23a14
       size: 8480348
   prepare:
-    cmd: "unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/\n
-      python prepare.py --input data/raw/Lumos5G-v1.0.csv --output data/interim/lumos5g.pkl\n
+    cmd: "unzip -j data/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d data/raw/\n\
+      python prepare.py --input data/raw/Lumos5G-v1.0.csv --output data/interim/lumos5g.pkl\n\
       rm data/raw/Lumos5G-v1.0.csv\n"
     deps:
     - path: data/raw/Lumos5G-v1.0.zip
@@ -45,16 +45,16 @@ stages:
       size: 9130367
     - path: featurize.py
       hash: md5
-      md5: f3922d9a867c6c50a12d43924ef2b5f8
-      size: 4523
+      md5: 8365fbe738d98ec6b12839d901834971
+      size: 5073
     outs:
     - path: data/prepared/lumos5g.pkl
       hash: md5
       md5: b5c856ba0fc031e57fdeee1da02e074b
       size: 10901113
   fit@KFold:
-    cmd: "python split.py --input data/prepared/lumos5g.pkl --split KFold --indices
-      data/splits/KFoldSplit.pkl\n"
+    cmd: "python split.py --input data/prepared/lumos5g.pkl --split KFold --indices\
+      \ data/splits/KFoldSplit.pkl\n"
     deps:
     - path: data/prepared/lumos5g.pkl
       hash: md5
@@ -76,13 +76,13 @@ stages:
       md5: 8e0253c0cf2d49630b20c8facdbd95f1
       size: 2725514
   benchmark@KFold-LinearRegression:
-    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/lumos5g.pkl
-      --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/LinearRegression-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/lumos5g.pkl\
+      \ --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/LinearRegression-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: f523f601cd2de870c8ce180d73e27ac3
-      size: 7464
+      md5: b8ac1ad0eaf05298b45bbfcbebc2b4ff
+      size: 8056
     - path: data/prepared/lumos5g.pkl
       hash: md5
       md5: b5c856ba0fc031e57fdeee1da02e074b
@@ -104,42 +104,36 @@ stages:
             estimator:
               module: sklearn.linear_model
               class: LinearRegression
-              parameters:
-                n_jobs: -1
-          hyperparameters:
-            regressor__estimator__fit_intercept:
-            - true
-            - false
     outs:
     - path: models/reports/LinearRegression-KFoldSplit.pkl
       hash: md5
-      md5: f2ffa52817447880d82a47796addc59f
-      size: 2727460
+      md5: 042691b3cbb02fd29c1189d8e8f5b584
+      size: 2727420
   evaluation:
     cmd: "python ../../scripts/report.py models/reports/*.pkl --output-report reports/metrics.json\n"
     deps:
     - path: ../../scripts/report.py
       hash: md5
-      md5: 9a901f85b0972bb3040550b7a0fb73c2
-      size: 1500
+      md5: 81c8fd3a554b55990b55a54a82423019
+      size: 1503
     - path: models/reports
       hash: md5
-      md5: abe54aea5db552cfe9ac1b56d079ee4c.dir
-      size: 7637383
-      nfiles: 4
+      md5: ebaa882fc26716356c827a950c479ce4.dir
+      size: 10364846
+      nfiles: 5
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 230a557dfdb66eb0bfb3aae16d1a1a8c
-      size: 677
+      md5: 7b3296d77f7d5bd4361993df23279e5b
+      size: 772
   benchmark@KFold-XGBRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/lumos5g.pkl
-      --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/XGBRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/lumos5g.pkl\
+      \ --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/XGBRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: f523f601cd2de870c8ce180d73e27ac3
-      size: 7464
+      md5: b8ac1ad0eaf05298b45bbfcbebc2b4ff
+      size: 8056
     - path: data/prepared/lumos5g.pkl
       hash: md5
       md5: b5c856ba0fc031e57fdeee1da02e074b
@@ -155,20 +149,20 @@ stages:
           class: XGBRegressor
           parameters:
             random_state: 42
-            n_jobs: -1
+            enable_categorical: true
     outs:
     - path: models/reports/XGBRegressor-KFoldSplit.pkl
       hash: md5
-      md5: 223b849c8a19895e47a409b8641298c6
+      md5: 3de49757552849ba26c8808305bae059
       size: 2182464
   benchmark@KFold-RandomForestRegressor:
-    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/lumos5g.pkl
-      --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/RandomForestRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/lumos5g.pkl\
+      \ --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/RandomForestRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: f523f601cd2de870c8ce180d73e27ac3
-      size: 7464
+      md5: b8ac1ad0eaf05298b45bbfcbebc2b4ff
+      size: 8056
     - path: data/prepared/lumos5g.pkl
       hash: md5
       md5: b5c856ba0fc031e57fdeee1da02e074b
@@ -184,7 +178,6 @@ stages:
           class: RandomForestRegressor
           parameters:
             random_state: 42
-            n_jobs: -1
           hyperparameters:
             n_estimators:
             - 10
@@ -203,5 +196,49 @@ stages:
     outs:
     - path: models/reports/RandomForestRegressor-KFoldSplit.pkl
       hash: md5
-      md5: 293a0c03dac41dd6331e5904113d14df
+      md5: f49e9e4c0ddcc4bb29b4aaab6af08bb8
       size: 2727459
+  benchmark@KFold-KNeighborsRegressor:
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/lumos5g.pkl\
+      \ --split-indices data/splits/KFoldSplit.pkl --output-report models/reports/KNeighborsRegressor-KFoldSplit.pkl\n"
+    deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: b8ac1ad0eaf05298b45bbfcbebc2b4ff
+      size: 8056
+    - path: data/prepared/lumos5g.pkl
+      hash: md5
+      md5: b5c856ba0fc031e57fdeee1da02e074b
+      size: 10901113
+    - path: data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8e0253c0cf2d49630b20c8facdbd95f1
+      size: 2725514
+    params:
+      params.yaml:
+        models.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          hyperparameters:
+            n_neighbors:
+            - 3
+            - 5
+            - 10
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            leaf_size:
+            - 10
+            - 15
+            - 30
+            metric:
+            - minkowski
+            - euclidean
+    outs:
+    - path: models/reports/KNeighborsRegressor-KFoldSplit.pkl
+      hash: md5
+      md5: 97e865adff5cbfc0675fa11554dc6175
+      size: 2727503

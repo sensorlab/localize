@@ -115,7 +115,7 @@ def cli(input_path: Path, output_indices_path: Path, split: str):
 
     # subsets = list((train_idx, test_idx) for train_idx, test_idx in cv.split(features, targets, groups))
 
-    joblib.dump(indices_list, output_indices_path)
+    joblib.dump(indices_list, output_indices_path, compress=9)
 
 
 if __name__ == "__main__":

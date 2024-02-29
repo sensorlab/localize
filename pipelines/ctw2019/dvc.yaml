@@ -1,3 +1,9 @@
+vars:
+  - ctw2019:
+      models: [LinearRegression, RandomForestRegressor, XGBRegressor, KNeighborsRegressor]
+      #splits: [Random, ShortEdge, LongEdge, Cutout]
+      splits: [Random]
+
 stages:
 
   prepare:
@@ -46,7 +52,7 @@ stages:
   split:
     desc: Prepare CTW2019 data split
     matrix:
-      split: [Random, ShortEdge, LongEdge, Cutout]
+      split: ${ctw2019.splits}
     cmd: >
       python split.py
       --input data/prepared/ctw2019.pkl
@@ -66,8 +72,8 @@ stages:
   #   matrix:
   #     #split: [Random, ShortEdge, LongEdge, Cutout]
   #     #model: [LinearRegression, RandomForestRegressor, XGBRegressor, KNeighborsRegressor]
-  #     split: [LongEdge]
-  #     model: [LinearRegression]
+  #     split: ${ctw2019.splits}
+  #     model: ${ctw2019.models}
   #   cmd: >
   #     python train.py
   #     --use ${item.model}
@@ -110,10 +116,8 @@ stages:
 
   benchmark-deeplearning:
     matrix:
-      split: [Random, ShortEdge, LongEdge, Cutout]
+      split: ${ctw2019.splits}
       model:
-        #- name: LinearRegression
-        #  input: data/prepared/ctw2019.flatten.pkl
         - name: Arnold2018DeepModel
           input: data/prepared/ctw2019.flatten.pkl
         - name: Arnold2019SoundingModel
@@ -128,11 +132,27 @@ stages:
       - seed
       - models.${item.model.name}
     deps:
-      - train_deep.py
+      - ../../scripts/benchmark.py
       - ${item.model.input}
       - data/splits/${item.split}Split.pkl
     outs:
       - models/reports/${item.model.name}-${item.split}Split.pkl
+
+  AutoML:
+    matrix:
+      split: ${ctw2019.splits}
+    cmd: >
+      python automl.py
+      --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/${item.split}Split.pkl
+      --output-report models/reports/autokeras-${item.split}Split.pkl
+    deps:
+      - automl.py
+      - data/prepared/ctw2019.pkl
+      - data/splits/${item.split}Split.pkl
+    outs:
+      - models/reports/autokeras-${item.split}Split.pkl
+
 
   evaluation:
     cmd: >

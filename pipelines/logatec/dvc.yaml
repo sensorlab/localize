@@ -18,7 +18,7 @@ stages:
       subset: ${logatec.subsets}
     cmd: |
       unzip -j data/raw/logatec.zip ${item.subset}_data.json -d data/raw/
-      python prepare.py --input data/raw/${item.subset}_data.json --output data/interim/${item.subset}.pkl
+      python prepare.py --method average --input data/raw/${item.subset}_data.json --output data/interim/${item.subset}.pkl
       rm data/raw/${item.subset}_data.json
     deps:
       - prepare.py

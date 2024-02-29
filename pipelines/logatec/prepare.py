@@ -1,6 +1,7 @@
 import json
 import re
 from pathlib import Path
+import numpy as np
 
 import click
 import joblib
@@ -57,7 +58,7 @@ def load_raw_data(path: Path) -> pd.DataFrame:
 )
 @click.option(
     "--method",
-    type=click.Choice(["average"], case_sensitive=False),
+    type=click.Choice(["average", "resample"], case_sensitive=False),
     default="average",
     show_default=True,
     help="Method to harmonize values",
@@ -66,6 +67,56 @@ def cli(input_path: Path, output_path: Path, method: str):
     df = load_raw_data(input_path)
 
     match method:
+        case "augmentation" | "resample":
+            n_augmented_samples = 1_000
+
+            data = {}
+
+            for (x, y, node), subset in df.groupby(by=["pos_x", "pos_y", "node"]):
+                # Make sure there is a position and node in the data structure
+                data[(x, y)] = data.get((x, y), {})
+                data[(x, y)][node] = data[(x, y)].get(node, [])
+
+                data[(x, y)][node] = subset.value.to_list()
+
+            # Resample datapoints
+            # max_samples = 0
+            for position in data:
+                # Find max number of samples per position.
+                # We assume that's the number of transmitted packets.
+                max_samples = 0
+                for node in data[position]:
+                    if max_samples < len(data[position][node]):
+                        max_samples = len(data[position][node])
+
+                # print(max_samples)
+                for node in data[position]:
+                    current = len(data[position][node])
+                    for _ in range(max_samples - current):
+                        data[position][node].append(np.nan)
+
+                    assert len(data[position][node]) == max_samples
+
+            rng = np.random.default_rng(seed=0)
+            df = []
+
+            for position in data:
+                x, y = position
+                for _ in range(n_augmented_samples):
+                    values = {f"node_{node}": rng.choice(samples) for node, samples in data[position].items()}
+
+                    item = dict(pos_x=x, pos_y=y, **values)
+                    df.append(item)
+
+            df = pd.DataFrame(df)
+
+            # Fill the NaN values with some extremely low RSS value
+            df = df.fillna(-180)
+
+            for column in df.columns:
+                if column.startswith("node_"):
+                    df[column] = df[column].astype(np.float32)
+
         # Average samples in one second. If there are none, the value is NaN.
         case "average":
             data = []

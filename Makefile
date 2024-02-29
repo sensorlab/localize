@@ -11,6 +11,8 @@ clean:
 	find ./pipelines -type f -name "*.pkl" -delete
 	find ./pipelines -type f -name "*.tmp" -delete
 
+	find . -type d -name "auto_model" -delete
+
 ## Lint using black and isort
 lint:
 	ruff .

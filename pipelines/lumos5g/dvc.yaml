@@ -57,7 +57,7 @@ stages:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
       split: [KFold]
-      algorithm: [LinearRegression, XGBRegressor, RandomForestRegressor]
+      algorithm: [LinearRegression, XGBRegressor, RandomForestRegressor, KNeighborsRegressor]
     cmd: >
       python ../../scripts/benchmark.py
       --use ${item.algorithm}

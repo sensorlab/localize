@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
 
+try:
+    from sklearnex import patch_sklearn
+
+    patch_sklearn()
+except ImportError:
+    pass
+
 import importlib
+import inspect
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV
 import yaml
 import joblib
 from skorch import NeuralNetClassifier, NeuralNetRegressor
+import torch
 
 
 import click
@@ -16,6 +25,13 @@ from src import save_params, PredefinedSplit, safe_indexing
 import numpy as np
 import time
 from skorch.helper import SliceDict
+
+torch.set_float32_matmul_precision("high")
+
+# Constants
+
+# Fix #1: Skorch and GridSearch don't play well with
+SKORCH_WORKAROUND = False
 
 
 def load_yaml_config(path: str | Path) -> dict:
@@ -36,6 +52,9 @@ def construct_model_or_pipeline(model_config: dict) -> BaseEstimator:
         ModelClass = getattr(module, model_config["class"])
         parameters = model_config.get("parameters", {})
 
+        if "n_jobs" in inspect.signature(ModelClass).parameters:
+            parameters["n_jobs"] = joblib.cpu_count(only_physical_cores=True)
+
         # TODO: should `optimizer` be part of parameter or on same model as declaration
         if "optimizer" in parameters:
             optimizer_module = importlib.import_module(parameters["optimizer"]["module"])
@@ -50,6 +69,8 @@ def construct_model_or_pipeline(model_config: dict) -> BaseEstimator:
         if "estimator" in model_config:  # Handling nested models
             # Check if the current model is a Skorch model and requires a PyTorch model class instead of instance
             if ModelClass in [NeuralNetRegressor, NeuralNetClassifier]:
+                global SKORCH_WORKAROUND
+                SKORCH_WORKAROUND = True
                 # Import the PyTorch model class without instantiating it
                 inner_module = importlib.import_module(model_config["estimator"]["module"])
                 InnerModelClass = getattr(inner_module, model_config["estimator"]["class"])
@@ -144,10 +165,6 @@ def cli(
     cv_indices: list[tuple[np.ndarray, np.ndarray]] = splits["indices"]
     cv = PredefinedSplit(cv_indices)
 
-    # general train parameters
-    n_jobs = joblib.cpu_count(only_physical_cores=True)
-    backend = "loky"
-
     # Path to your YAML configuration file
     config_path = "./params.yaml"
 
@@ -155,23 +172,34 @@ def cli(
     config = load_yaml_config(config_path)
     model_config = config["models"][model_name]
 
+    # construct pipeline from YAML file and obtain hyperparameters
     model_or_pipeline = construct_model_or_pipeline(model_config)
     hyperparameters = get_hyperparameters(model_name, config["models"])
 
+    # general train parameters
+    # n_jobs = joblib.cpu_count()
+    gridsearch_jobs = 2
+    # backend = "threading"
+
+    if SKORCH_WORKAROUND:
+        gridsearch_jobs = 1
+
     print(model_or_pipeline)
+    print(f"{hyperparameters=}")
 
     if hyperparameters:
         grid_search = GridSearchCV(
             estimator=model_or_pipeline,
             param_grid=hyperparameters,
             scoring="neg_mean_squared_error",
-            n_jobs=2,
+            n_jobs=gridsearch_jobs,
             cv=cv,
-            verbose=1,
+            verbose=2,
+            error_score="raise",
         )
 
-        with joblib.parallel_backend(backend, n_jobs=n_jobs):
-            grid_search.fit(features, targets)
+        # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
+        grid_search.fit(features, targets)
 
         model_or_pipeline = grid_search.best_estimator_
         best_hparams = grid_search.best_params_
@@ -179,7 +207,7 @@ def cli(
     else:
         best_hparams = hyperparameters
 
-    print(best_hparams)
+    print(f"{best_hparams=}")
 
     # Prepare template for the final report
     reports = {
@@ -205,8 +233,8 @@ def cli(
 
         time_start = time.perf_counter()
 
-        with joblib.parallel_backend(backend, n_jobs=n_jobs):
-            model_or_pipeline.fit(X_train, y_train)
+        # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
+        model_or_pipeline.fit(X_train, y_train)
 
         time_end = time.perf_counter()
 
@@ -214,8 +242,8 @@ def cli(
 
         time_start = time.perf_counter()
 
-        with joblib.parallel_backend(backend, n_jobs=n_jobs):
-            y_pred = model_or_pipeline.predict(X_test)
+        # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
+        y_pred = model_or_pipeline.predict(X_test)
 
         time_end = time.perf_counter()
 

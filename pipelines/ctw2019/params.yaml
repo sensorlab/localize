@@ -8,15 +8,12 @@ models:
   LinearRegression:
     module: sklearn.linear_model
     class: LinearRegression
-    hyperparameters:
-      fit_intercept: [true, false]
 
   RandomForestRegressor:
     module: sklearn.ensemble
     class: RandomForestRegressor
     parameters:
       random_state: 42
-      n_jobs: -1
     hyperparmeters:
       n_estimators: [10, 50, 100, 250, 400]
       max_depth: [5, 10, 30, 50, 150, 200, null]
@@ -26,20 +23,18 @@ models:
     class: XGBRegressor
     parameters:
       random_state: 42
-      n_jobs: -1
+      enable_categorical: true
 
   XGBRFRegressor:
     module: xgboost
     class: XGBRFRegressor
     parameters:
       random_state: 42
-      n_jobs: -1
+      enable_categorical: true
 
   KNeighborsRegressor:
     module: sklearn.neighbors
     class: KNeighborsRegressor
-    parameters:
-      n_jobs: -1
     hyperparameters:
       n_neighbors: [5, 10, 15]
       weights: [uniform, distance]
@@ -55,11 +50,24 @@ models:
       module: src.models
       class: Arnold2018DeepModel
     parameters:
+      optimizer:
+        module: torch.optim
+        class: Adam
+      callbacks:
+        - module: skorch.callbacks
+          class: EarlyStopping
+          parameters:
+            patience: 20
       module__in_features: 29584 # 16*924*2+16
       module__random_state: 42
-
-    hyperparameters:
-      lr: [0.01, 0.001, 0.0001]
+      iterator_train__shuffle: true
+      iterator_train__num_workers: 8
+      optimizer__weight_decay: 0.01
+      optimizer__lr: 0.0005
+      max_epochs: 250
+      batch_size: 64
+      device: cuda
+      compile: false
 
   Arnold2019SoundingModel:
     module: skorch
@@ -74,18 +82,17 @@ models:
       callbacks:
         - module: skorch.callbacks
           class: EarlyStopping
+          parameters:
+            patience: 20
       module__random_state: 42
       iterator_train__shuffle: true
       iterator_train__num_workers: 8
       optimizer__weight_decay: 0.01
-      max_epochs: 100
+      optimizer__lr: 0.0005
+      #callbacks__EarlyStopping__patience: 10
+      #callbacks__LRScheduler__policy: ReduceLROnPlateau
+      #callbacks__LRScheduler__patience: 4
+      max_epochs: 250
       batch_size: 64
       device: cuda
-      compile: true
-    hyperparameters:
-      lr: [0.01, 0.001, 0.0001]
-
-
-  regression:
-    # something
-    seed: 42
+      compile: false

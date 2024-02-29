@@ -27,6 +27,8 @@ def cli(
 
         assert y_true.shape == y_pred.shape
 
+        print(algorithm, y_true.dtype, y_pred.dtype)
+
         # Calculate loss metrics
         losses = {
             "rmse": metrics.root_mean_squared_error(y_true, y_pred),

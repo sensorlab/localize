@@ -304,6 +304,8 @@ tmp/
 *.feather
 *.parquet
 
+auto_model/
+
 #*.ckpt
 #*.joblib
 #*.pkl
