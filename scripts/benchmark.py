@@ -232,24 +232,22 @@ def cli(
         y_test = safe_indexing(targets, test_indices)
 
         time_start = time.perf_counter()
-
         # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
         model_or_pipeline.fit(X_train, y_train)
-
         time_end = time.perf_counter()
 
         reports["model_metadata"]["train_time"].append(time_end - time_start)
 
         time_start = time.perf_counter()
-
         # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
         y_pred = model_or_pipeline.predict(X_test)
-
         time_end = time.perf_counter()
 
         reports["model_metadata"]["predict_time"].append(time_end - time_start)
 
         reports["predictions"]["y_true"].append(y_test)
+
+        y_pred = y_pred.astype(np.float32)
         reports["predictions"]["y_pred"].append(y_pred)
 
     if output_report_path:

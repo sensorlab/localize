@@ -20,6 +20,18 @@ from typing import Union, Iterable
 #         return super().fit_transform(X, y, **fit_params)
 
 
+class ExtractByKeyword(BaseEstimator, TransformerMixin):
+    def __init__(self, keyname: str):
+        super().__init__()
+        self.keyname = keyname
+
+    def fit(self, X, y=None, **fit_params):
+        return self
+
+    def transform(self, X: Union[dict, np.ndarray, pd.DataFrame], copy=None):
+        return X[self.keyname]
+
+
 class ReshapeTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, sample_shape: Iterable[int] = None, copy=True) -> None:
         super().__init__()

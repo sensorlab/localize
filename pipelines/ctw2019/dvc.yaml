@@ -70,8 +70,6 @@ stages:
   # benchmark:
   #   desc: Determine best hyper-parameters for algorithm on several CVs
   #   matrix:
-  #     #split: [Random, ShortEdge, LongEdge, Cutout]
-  #     #model: [LinearRegression, RandomForestRegressor, XGBRegressor, KNeighborsRegressor]
   #     split: ${ctw2019.splits}
   #     model: ${ctw2019.models}
   #   cmd: >
@@ -121,6 +119,8 @@ stages:
         - name: Arnold2018DeepModel
           input: data/prepared/ctw2019.flatten.pkl
         - name: Arnold2019SoundingModel
+          input: data/prepared/ctw2019.pkl
+        - name: Pirnat2022Pirnat1G
           input: data/prepared/ctw2019.pkl
     cmd: >
       python ../../scripts/benchmark.py

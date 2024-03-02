@@ -61,10 +61,16 @@ def cli(
     with h5py.File(data_pos_path, mode="r", swmr=True) as fp:
         pos = fp["r_Position"][:].astype(np.float32).T
 
-    # Fix #2: Correction of position data. Antenna will now be in the center.
+    # Fix #1: Correction of position data. Antenna will now be in the center.
     pos = pos - ANTENNA_OFFSET
 
-    # Fix #1: Correct the order of FFT components. In Data: (1 to 511, -512 to 0)
+    # Fix #2: remove measurements from time when device was placed on (or taken off) table
+    idx = np.argwhere(pos[:, 2] < -0.515).flatten()
+    h = h[idx]
+    snr = snr[idx]
+    pos = pos[idx]
+
+    # Fix #3: Correct the order of FFT components. In Data: (1 to 511, -512 to 0)
     h = np.fft.fftshift(h, axes=2)
     assert h.shape[1:] == (16, 924, 2)
     assert h.dtype == np.float32

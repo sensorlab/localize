@@ -43,5 +43,5 @@ models:
       n_neighbors: [3, 5, 10]
       weights: [uniform, distance]
       p: [1, 2]
-      leaf_size: [10, 15, 30]
+      leaf_size: [5, 10, 15, 30]
       metric: [minkowski, euclidean]

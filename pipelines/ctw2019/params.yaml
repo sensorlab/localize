@@ -38,9 +38,21 @@ models:
     hyperparameters:
       n_neighbors: [5, 10, 15]
       weights: [uniform, distance]
-      p: [1, 2, 3]
+      p: [1, 2]
       leaf_size: [5, 10, 15, 30, 45]
-      metric: [minkowski, euclidean, cosine, manhattan]
+      metric: [minkowski, euclidean]
+
+
+  Pirnat2022Pirnat1G:
+    pipeline:
+      - step: preparation
+        module: src.data
+        class: ExtractByKeyword
+        parameters:
+          keyname: h
+      - step: regressor
+        module: src.models_keras
+        class: Pirnat1G
 
 
   Arnold2018DeepModel:
@@ -57,7 +69,7 @@ models:
         - module: skorch.callbacks
           class: EarlyStopping
           parameters:
-            patience: 20
+            patience: 10
       module__in_features: 29584 # 16*924*2+16
       module__random_state: 42
       iterator_train__shuffle: true
@@ -83,7 +95,7 @@ models:
         - module: skorch.callbacks
           class: EarlyStopping
           parameters:
-            patience: 20
+            patience: 10
       module__random_state: 42
       iterator_train__shuffle: true
       iterator_train__num_workers: 8

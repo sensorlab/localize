@@ -13,19 +13,19 @@ stages:
       size: 3961470982
     - path: prepare.py
       hash: md5
-      md5: 10a1926dbcb28b0215800a78634302e3
-      size: 2161
+      md5: 86d66d39396fa439291bb0e43baa5e73
+      size: 2357
     outs:
     - path: data/interim/ctw2019.pkl
       hash: md5
-      md5: 807f71d680efdd2dd84458d9120d1659
+      md5: f7da6e25307f7305fa2ac405ae9ffb7c
       size: 2069433498
   featurize:
     cmd: "python featurize.py --input data/interim/ctw2019.pkl --output data/prepared/ctw2019.pkl\n"
     deps:
     - path: data/interim/ctw2019.pkl
       hash: md5
-      md5: 807f71d680efdd2dd84458d9120d1659
+      md5: f7da6e25307f7305fa2ac405ae9ffb7c
       size: 2069433498
     - path: featurize.py
       hash: md5
@@ -34,7 +34,7 @@ stages:
     outs:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
       size: 2069363555
   split@ShortEdge:
     cmd: "python split.py --input data/prepared/ctw2019.pkl --split ShortEdge --output-indices\
@@ -42,7 +42,7 @@ stages:
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
       size: 2069363555
     - path: split.py
       hash: md5
@@ -65,7 +65,7 @@ stages:
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
       size: 2069363555
     - path: split.py
       hash: md5
@@ -88,7 +88,7 @@ stages:
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
       size: 2069363555
     - path: split.py
       hash: md5
@@ -134,7 +134,7 @@ stages:
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
       size: 2069363555
     - path: split.py
       hash: md5
@@ -182,18 +182,18 @@ stages:
     deps:
     - path: ../../scripts/report.py
       hash: md5
-      md5: a898ace93cedad26901032501fa8f80a
-      size: 1557
+      md5: f06890f8e4bdc52a56a1bcd996ee19b8
+      size: 1640
     - path: models/reports
       hash: md5
-      md5: 5e0f5c95e1c1fde0bf1c6a4e83df1367.dir
-      size: 842919
-      nfiles: 4
+      md5: ceef464358a21747b1081bca45a37d2d.dir
+      size: 1123894
+      nfiles: 5
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: cc3ad344b24190c6b7ee934823dac586
-      size: 588
+      md5: ed44b74e1c7eff5b738d755b12dc4124
+      size: 768
   benchmark@LongEdge-LinearRegression:
     cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl\
       \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/LinearRegression-LongEdgeSplit.pkl\n"
@@ -537,7 +537,7 @@ stages:
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
       size: 2069363555
     - path: flatten.py
       hash: md5
@@ -546,7 +546,7 @@ stages:
     outs:
     - path: data/prepared/ctw2019.flatten.pkl
       hash: md5
-      md5: 21e0c77ba40499fd3ccf1a8d61402e05
+      md5: 411b70954fa29aeb9ea4880de3440cef
       size: 2069363523
   benchmark-deeplearning@Random-model0:
     cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl\
@@ -554,11 +554,11 @@ stages:
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: b8ac1ad0eaf05298b45bbfcbebc2b4ff
-      size: 8056
+      md5: 5cc032d6bcf557625181cc084bab8588
+      size: 8108
     - path: data/prepared/ctw2019.flatten.pkl
       hash: md5
-      md5: 21e0c77ba40499fd3ccf1a8d61402e05
+      md5: 411b70954fa29aeb9ea4880de3440cef
       size: 2069363523
     - path: data/splits/RandomSplit.pkl
       hash: md5
@@ -580,7 +580,7 @@ stages:
             - module: skorch.callbacks
               class: EarlyStopping
               parameters:
-                patience: 20
+                patience: 10
             module__in_features: 29584
             module__random_state: 42
             iterator_train__shuffle: true
@@ -595,7 +595,7 @@ stages:
     outs:
     - path: models/reports/Arnold2018DeepModel-RandomSplit.pkl
       hash: md5
-      md5: df0850277b0dded4a4b82a76869585ca
+      md5: a8d8be27afef36f375088c70af9870b5
       size: 280976
   benchmark-deeplearning@ShortEdge-model0:
     cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl\
@@ -798,11 +798,11 @@ stages:
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: b8ac1ad0eaf05298b45bbfcbebc2b4ff
-      size: 8056
+      md5: 5cc032d6bcf557625181cc084bab8588
+      size: 8108
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
       size: 2069363555
     - path: data/splits/RandomSplit.pkl
       hash: md5
@@ -824,7 +824,7 @@ stages:
             - module: skorch.callbacks
               class: EarlyStopping
               parameters:
-                patience: 20
+                patience: 10
             module__random_state: 42
             iterator_train__shuffle: true
             iterator_train__num_workers: 8
@@ -838,7 +838,7 @@ stages:
     outs:
     - path: models/reports/Arnold2019SoundingModel-RandomSplit.pkl
       hash: md5
-      md5: 09a325bd08a124daefbbf53bc11810a2
+      md5: ad5cc11453835cec3fb9be0ecf80513e
       size: 280980
   benchmark-deeplearning@ShortEdge-model1:
     cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl\
@@ -1124,11 +1124,11 @@ stages:
     deps:
     - path: automl.py
       hash: md5
-      md5: fe09fd266f6306da0a881c68df8bc80b
-      size: 5908
+      md5: 19a5360b4a6210863915f3110b2be078
+      size: 6274
     - path: data/prepared/ctw2019.pkl
       hash: md5
-      md5: 92e3fe5ddf9d63d4b470e69679252aee
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
       size: 2069363555
     - path: data/splits/RandomSplit.pkl
       hash: md5
@@ -1137,7 +1137,7 @@ stages:
     outs:
     - path: models/reports/autokeras-RandomSplit.pkl
       hash: md5
-      md5: bdb7bfbb53907bb5ae48054a82c78ac2
+      md5: 79ef8e7fc7806ab9f14f4c614ea5e997
       size: 280963
   AutoML@ShortEdge:
     cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/ShortEdgeSplit.pkl\
@@ -1202,3 +1202,37 @@ stages:
       hash: md5
       md5: 26efe0a5a5152751feed0358bba05ce1
       size: 24229
+  benchmark-deeplearning@Random-model2:
+    cmd: "python ../../scripts/benchmark.py --use Pirnat2022Pirnat1G --data data/prepared/ctw2019.pkl\
+      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Pirnat2022Pirnat1G-RandomSplit.pkl\n"
+    deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: 5cc032d6bcf557625181cc084bab8588
+      size: 8108
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 08d18bb17d58cd555431df2167ad3e25
+      size: 700227
+    params:
+      params.yaml:
+        models.Pirnat2022Pirnat1G:
+          pipeline:
+          - step: preparation
+            module: src.data
+            class: ExtractByKeyword
+            parameters:
+              keyname: h
+          - step: regressor
+            module: src.models_keras
+            class: Pirnat1G
+        seed: 42
+    outs:
+    - path: models/reports/Pirnat2022Pirnat1G-RandomSplit.pkl
+      hash: md5
+      md5: 1ae52a51fd409b7a35e9910e2b111da2
+      size: 280975

@@ -32,9 +32,10 @@ def cli(
         # Calculate loss metrics
         losses = {
             "rmse": metrics.root_mean_squared_error(y_true, y_pred),
-            "euclidean": np.sqrt(np.sum((y_true - y_pred) ** 2, axis=1)).mean(),
+            # "euclidean": np.sqrt(np.sum((y_true - y_pred) ** 2, axis=1)).mean(),
             "r_squared": metrics.r2_score(y_true, y_pred),
             "mae": metrics.mean_absolute_error(y_true, y_pred),
+            "mede": np.mean(np.sqrt(np.sum(np.square(y_true - y_pred), axis=-1))),
             # TODO: Fix MPE/sMPE, wwMPE metric
             # "mpe": mean_percentage_error(y_true, y_pred),
         }

@@ -8,9 +8,10 @@ from src import PredefinedSplit, safe_indexing
 import numpy as np
 import time
 
+# keras.mixed_precision.set_global_policy("mixed_bfloat16")
 
-MAX_EPOCHS = 1
-MAX_TRIALS = 1
+MAX_EPOCHS = 100
+MAX_TRIALS = 100
 
 
 def reset_weights(model):
@@ -37,9 +38,6 @@ def reset_weights(model):
 
             var.assign(initializer(var.shape, var.dtype))
             # use the initializer
-
-
-keras.mixed_precision.set_global_policy("mixed_bfloat16")
 
 
 def load_yaml_config(path: str | Path) -> dict:
@@ -99,6 +97,10 @@ def cli(
     H, snr = features["h"], features["snr"]
     print(H.dtype, snr.dtype)
 
+    if H.shape[1:] == (2, 16, 924):
+        print("Change shape to channel-last")
+        H = np.transpose(H, (0, 2, 3, 1))  # (None, 2, 16, 924) --> (None, 16, 924, 2)
+
     # load split indices
     splits = joblib.load(split_indices_path, mmap_mode=None)
 
@@ -108,15 +110,18 @@ def cli(
 
     # DEFINE autokeras model
     # Initialize the multi with multiple inputs and outputs.
-    h_input = ak.ImageInput()
-    h_output = ak.ConvBlock()(h_input)
-    h_output = ak.Flatten()(h_output)
-
     snr_input = ak.StructuredDataInput()
     snr_output = ak.DenseBlock()(snr_input)
     snr_output = ak.Flatten()(snr_output)
 
-    output = ak.Merge(merge_type="concatenate")([h_output, snr_output])
+    h_input = ak.ImageInput()
+    h_cnn_output = ak.ConvBlock(kernel_size=3, separable=False, dropout=0)(h_input)
+    h_cnn_output = ak.Flatten()(h_cnn_output)
+
+    # h_resnet_output = ak.ResNetBlock(version="v2", pretrained=False)(h_input)
+    # h_resnet_output = ak.Flatten()(h_resnet_output)
+
+    output = ak.Merge(merge_type="concatenate")([h_cnn_output, snr_output])
     output = ak.RegressionHead(metrics=["mse"])(output)
 
     regressor = ak.AutoModel(
@@ -124,6 +129,7 @@ def cli(
         outputs=output,
         overwrite=True,
         max_trials=MAX_TRIALS,
+        tuner="hyperband",
         seed=42,
     )
 
@@ -131,10 +137,10 @@ def cli(
 
     # Fit the model with prepared data.
     regressor.fit(
-        [H, snr],
-        targets,
+        x=[H, snr],
+        y=targets,
         batch_size=64,
-        validation_split=0.10,
+        validation_split=0.20,
         epochs=MAX_EPOCHS,
         callbacks=[early_stop],
     )
