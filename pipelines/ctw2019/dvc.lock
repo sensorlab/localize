@@ -13,8 +13,8 @@ stages:
       size: 3961470982
     - path: prepare.py
       hash: md5
-      md5: 86d66d39396fa439291bb0e43baa5e73
-      size: 2357
+      md5: f0a02486b90a6ff7e0090383afd1d656
+      size: 2358
     outs:
     - path: data/interim/ctw2019.pkl
       hash: md5
@@ -182,18 +182,18 @@ stages:
     deps:
     - path: ../../scripts/report.py
       hash: md5
-      md5: f06890f8e4bdc52a56a1bcd996ee19b8
-      size: 1640
+      md5: fc8ffb4da9fc3d6287ed870e370153ff
+      size: 1642
     - path: models/reports
       hash: md5
-      md5: ceef464358a21747b1081bca45a37d2d.dir
-      size: 1123894
-      nfiles: 5
+      md5: 7a4a5da61903c4db2981861e16362522.dir
+      size: 1404872
+      nfiles: 6
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: ed44b74e1c7eff5b738d755b12dc4124
-      size: 768
+      md5: 5983b8925824e2da12dcefd700481925
+      size: 964
   benchmark@LongEdge-LinearRegression:
     cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl\
       \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/LinearRegression-LongEdgeSplit.pkl\n"
@@ -554,8 +554,8 @@ stages:
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 5cc032d6bcf557625181cc084bab8588
-      size: 8108
+      md5: e1e6e10cb3c24439940fb64d1c373dbf
+      size: 8100
     - path: data/prepared/ctw2019.flatten.pkl
       hash: md5
       md5: 411b70954fa29aeb9ea4880de3440cef
@@ -595,7 +595,7 @@ stages:
     outs:
     - path: models/reports/Arnold2018DeepModel-RandomSplit.pkl
       hash: md5
-      md5: a8d8be27afef36f375088c70af9870b5
+      md5: 25d3a6c2827f6f6f6470343da48bc1be
       size: 280976
   benchmark-deeplearning@ShortEdge-model0:
     cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl\
@@ -798,8 +798,8 @@ stages:
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 5cc032d6bcf557625181cc084bab8588
-      size: 8108
+      md5: e1e6e10cb3c24439940fb64d1c373dbf
+      size: 8100
     - path: data/prepared/ctw2019.pkl
       hash: md5
       md5: 3fe82724f38155d4a7a78f2b2855eff3
@@ -838,7 +838,7 @@ stages:
     outs:
     - path: models/reports/Arnold2019SoundingModel-RandomSplit.pkl
       hash: md5
-      md5: ad5cc11453835cec3fb9be0ecf80513e
+      md5: db7c180d7eaeff86acbe42f87e355ee0
       size: 280980
   benchmark-deeplearning@ShortEdge-model1:
     cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl\
@@ -1124,8 +1124,8 @@ stages:
     deps:
     - path: automl.py
       hash: md5
-      md5: 19a5360b4a6210863915f3110b2be078
-      size: 6274
+      md5: b4a571e86e3e1ed0f5a660f65092a9be
+      size: 6273
     - path: data/prepared/ctw2019.pkl
       hash: md5
       md5: 3fe82724f38155d4a7a78f2b2855eff3
@@ -1137,7 +1137,7 @@ stages:
     outs:
     - path: models/reports/autokeras-RandomSplit.pkl
       hash: md5
-      md5: 79ef8e7fc7806ab9f14f4c614ea5e997
+      md5: 5035099bf772bb33931d715f53be54b6
       size: 280963
   AutoML@ShortEdge:
     cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/ShortEdgeSplit.pkl\
@@ -1208,8 +1208,8 @@ stages:
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 5cc032d6bcf557625181cc084bab8588
-      size: 8108
+      md5: e1e6e10cb3c24439940fb64d1c373dbf
+      size: 8100
     - path: data/prepared/ctw2019.pkl
       hash: md5
       md5: 3fe82724f38155d4a7a78f2b2855eff3
@@ -1234,5 +1234,39 @@ stages:
     outs:
     - path: models/reports/Pirnat2022Pirnat1G-RandomSplit.pkl
       hash: md5
-      md5: 1ae52a51fd409b7a35e9910e2b111da2
+      md5: 5dbc2b13db6e64770e88ff6bfc9008c9
       size: 280975
+  benchmark-deeplearning@Random-model3:
+    cmd: "python ../../scripts/benchmark.py --use Cerar2021Localization --data data/prepared/ctw2019.pkl\
+      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Cerar2021Localization-RandomSplit.pkl\n"
+    deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: e1e6e10cb3c24439940fb64d1c373dbf
+      size: 8100
+    - path: data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 08d18bb17d58cd555431df2167ad3e25
+      size: 700227
+    params:
+      params.yaml:
+        models.Cerar2021Localization:
+          pipeline:
+          - step: preparation
+            module: src.data
+            class: ExtractByKeyword
+            parameters:
+              keyname: h
+          - step: regressor
+            module: src.models_keras
+            class: Cerar2021
+        seed: 42
+    outs:
+    - path: models/reports/Cerar2021Localization-RandomSplit.pkl
+      hash: md5
+      md5: 4d66a1f09aeafe328635761118535df1
+      size: 280978

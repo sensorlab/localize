@@ -122,6 +122,8 @@ stages:
           input: data/prepared/ctw2019.pkl
         - name: Pirnat2022Pirnat1G
           input: data/prepared/ctw2019.pkl
+        - name: Cerar2021Localization
+          input: data/prepared/ctw2019.pkl
     cmd: >
       python ../../scripts/benchmark.py
       --use ${item.model.name}
