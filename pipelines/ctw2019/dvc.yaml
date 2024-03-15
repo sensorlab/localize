@@ -67,55 +67,13 @@ stages:
     outs:
       - data/splits/${item.split}Split.pkl
 
-  # benchmark:
-  #   desc: Determine best hyper-parameters for algorithm on several CVs
-  #   matrix:
-  #     split: ${ctw2019.splits}
-  #     model: ${ctw2019.models}
-  #   cmd: >
-  #     python train.py
-  #     --use ${item.model}
-  #     --data data/prepared/ctw2019.pkl
-  #     --split-indices data/splits/${item.split}Split.pkl
-  #     --output-report models/reports/${item.model}-${item.split}Split.pkl
-  #   params:
-  #     - seed
-  #     - models.regression
-  #   deps:
-  #     - train.py
-  #     - data/prepared/ctw2019.pkl
-  #     - data/splits/${item.split}Split.pkl
-  #   outs:
-  #     - models/reports/${item.model}-${item.split}Split.pkl
-
-  # benchmark-deeplearning:
-  #   matrix:
-  #     split: [Random, ShortEdge, LongEdge, Cutout]
-  #     model:
-  #       - name: LinearRegression
-  #         inputs: data/prepared/ctw2019.flatten.pkl
-  #       - name: Arnold2018DeepModel
-  #         inputs: data/prepared/ctw2019.pkl
-  #   cmd: >
-  #     python train_deep.py
-  #     --use ${item.model.name}
-  #     --data ${item.model.inputs}
-  #     --split-indices data/splits/${item.split}Split.pkl
-  #     --output-report models/reports/${item.model}-${item.split}Split.pkl
-  #   params:
-  #     - seed
-  #     - models.regression
-  #   deps:
-  #     - train_deep.py
-  #     - ${item.model.inputs}
-  #     - data/splits/${item.split}Split.pkl
-  #   outs:
-  #     - models/reports/${item.model.name}-${item.split}Split.pkl
 
   benchmark-deeplearning:
     matrix:
       split: ${ctw2019.splits}
       model:
+        - name: RandomForestRegressor
+          input: data/prepared/ctw2019.flatten.pkl
         - name: Arnold2018DeepModel
           input: data/prepared/ctw2019.flatten.pkl
         - name: Arnold2019SoundingModel
