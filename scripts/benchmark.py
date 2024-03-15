@@ -52,6 +52,7 @@ def construct_model_or_pipeline(model_config: dict) -> BaseEstimator:
         ModelClass = getattr(module, model_config["class"])
         parameters = model_config.get("parameters", {})
 
+        # Check if ModelClass has n_jobs parameter. If so, set it to number of cores (not threads)
         if "n_jobs" in inspect.signature(ModelClass).parameters:
             parameters["n_jobs"] = joblib.cpu_count(only_physical_cores=True)
 

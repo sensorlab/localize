@@ -1,8 +1,8 @@
 schema: '2.0'
 stages:
   prepare@spring:
-    cmd: "unzip -j data/raw/logatec.zip spring_data.json -d data/raw/\npython prepare.py
-      --method average --input data/raw/spring_data.json --output data/interim/spring.pkl\n
+    cmd: "unzip -j data/raw/logatec.zip spring_data.json -d data/raw/\npython prepare.py\
+      \ --method average --input data/raw/spring_data.json --output data/interim/spring.pkl\n\
       rm data/raw/spring_data.json\n"
     deps:
     - path: data/raw/logatec.zip
@@ -11,8 +11,8 @@ stages:
       size: 1942041
     - path: prepare.py
       hash: md5
-      md5: d96d6ceed300693b2098721e6e838860
-      size: 5205
+      md5: 6b58673c8ab4c7f8cd8886a934812ce7
+      size: 5102
     outs:
     - path: data/interim/spring.pkl
       hash: md5
@@ -35,8 +35,8 @@ stages:
       md5: da33de3c4a20cba83a662ffbc17fdc6e
       size: 263252
   split@spring-KFold:
-    cmd: "python split.py --input data/prepared/spring.pkl --split KFold --output-indices
-      data/splits/spring-KFoldSplit.pkl\n"
+    cmd: "python split.py --input data/prepared/spring.pkl --split KFold --output-indices\
+      \ data/splits/spring-KFoldSplit.pkl\n"
     deps:
     - path: data/prepared/spring.pkl
       hash: md5
@@ -58,8 +58,8 @@ stages:
       md5: b2731f140461906fb7290da6070d30f8
       size: 60212
   prepare@winter:
-    cmd: "unzip -j data/raw/logatec.zip winter_data.json -d data/raw/\npython prepare.py
-      --method average --input data/raw/winter_data.json --output data/interim/winter.pkl\n
+    cmd: "unzip -j data/raw/logatec.zip winter_data.json -d data/raw/\npython prepare.py\
+      \ --method average --input data/raw/winter_data.json --output data/interim/winter.pkl\n\
       rm data/raw/winter_data.json\n"
     deps:
     - path: data/raw/logatec.zip
@@ -68,8 +68,8 @@ stages:
       size: 1942041
     - path: prepare.py
       hash: md5
-      md5: d96d6ceed300693b2098721e6e838860
-      size: 5205
+      md5: 6b58673c8ab4c7f8cd8886a934812ce7
+      size: 5102
     outs:
     - path: data/interim/winter.pkl
       hash: md5
@@ -92,8 +92,8 @@ stages:
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
       size: 33637
   split@winter-KFold:
-    cmd: "python split.py --input data/prepared/winter.pkl --split KFold --output-indices
-      data/splits/winter-KFoldSplit.pkl\n"
+    cmd: "python split.py --input data/prepared/winter.pkl --split KFold --output-indices\
+      \ data/splits/winter-KFoldSplit.pkl\n"
     deps:
     - path: data/prepared/winter.pkl
       hash: md5
@@ -115,13 +115,13 @@ stages:
       md5: c5cf5429af9d05ff0600a019c403b763
       size: 5753
   benchmark@winter-KFold-KNeighborsRegressor:
-    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-KNeighborsRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-KNeighborsRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -147,6 +147,7 @@ stages:
             - 1
             - 2
             leaf_size:
+            - 5
             - 10
             - 15
             - 30
@@ -157,11 +158,11 @@ stages:
     outs:
     - path: models/reports/winter-KNeighborsRegressor-KFoldSplit.pkl
       hash: md5
-      md5: 4dd884942f88a46ed07fad32ecf67b2c
-      size: 41647
+      md5: 33c4c788ba10365f130b85211643441f
+      size: 33807
   split@winter-Random:
-    cmd: "python split.py --input data/prepared/winter.pkl --split Random --output-indices
-      data/splits/winter-RandomSplit.pkl\n"
+    cmd: "python split.py --input data/prepared/winter.pkl --split Random --output-indices\
+      \ data/splits/winter-RandomSplit.pkl\n"
     deps:
     - path: data/prepared/winter.pkl
       hash: md5
@@ -183,13 +184,13 @@ stages:
       md5: 9e9f0704e55d3c07ee20cf9736397111
       size: 10172
   benchmark@winter-Random-LinearRegression:
-    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-LinearRegression-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-LinearRegression-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -203,24 +204,20 @@ stages:
         models.LinearRegression:
           module: sklearn.linear_model
           class: LinearRegression
-          hyperparameters:
-            fit_intercept:
-            - true
-            - false
         seed: 42
     outs:
     - path: models/reports/winter-LinearRegression-RandomSplit.pkl
       hash: md5
-      md5: 0e23c95218a2d14c76a39c18c5b285c8
-      size: 22079
+      md5: a2ec4329874d91b157f08bbb4fa7efb7
+      size: 18165
   benchmark@spring-KFold-RandomForestRegressor:
-    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-RandomForestRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-RandomForestRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -255,11 +252,11 @@ stages:
     outs:
     - path: models/reports/spring-RandomForestRegressor-KFoldSplit.pkl
       hash: md5
-      md5: f44432cb1b9de663cd4b54984791952f
-      size: 305283
+      md5: 4ed9d0f1b4cc5d2d23019980361393bd
+      size: 244707
   split@winter-LeaveOneGroupOut:
-    cmd: "python split.py --input data/prepared/winter.pkl --split LeaveOneGroupOut
-      --output-indices data/splits/winter-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python split.py --input data/prepared/winter.pkl --split LeaveOneGroupOut\
+      \ --output-indices data/splits/winter-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: data/prepared/winter.pkl
       hash: md5
@@ -281,14 +278,14 @@ stages:
       md5: e6f23c75a3311e4240952e6a104a8476
       size: 5327
   benchmark@winter-LeaveOneGroupOut-RandomForestRegressor:
-    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/winter-RandomForestRegressor-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/winter-RandomForestRegressor-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -323,16 +320,16 @@ stages:
     outs:
     - path: models/reports/winter-RandomForestRegressor-LeaveOneGroupOutSplit.pkl
       hash: md5
-      md5: 7a59b9b4620ffc85e83895926ac8d1fe
-      size: 47336
+      md5: eab4bcd26b46ec5d8af4b19b0c1d7b0a
+      size: 39384
   benchmark@spring-KFold-KNeighborsRegressor:
-    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-KNeighborsRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-KNeighborsRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -358,6 +355,7 @@ stages:
             - 1
             - 2
             leaf_size:
+            - 5
             - 10
             - 15
             - 30
@@ -368,16 +366,16 @@ stages:
     outs:
     - path: models/reports/spring-KNeighborsRegressor-KFoldSplit.pkl
       hash: md5
-      md5: c1ba1dd62c78a3401e48a327b3e520d5
-      size: 305327
+      md5: 19ed1b9d6383abe969816b055db16f4a
+      size: 244751
   benchmark@winter-Random-RandomForestRegressor:
-    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-RandomForestRegressor-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-RandomForestRegressor-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -412,16 +410,16 @@ stages:
     outs:
     - path: models/reports/winter-RandomForestRegressor-RandomSplit.pkl
       hash: md5
-      md5: 6b881a4bd9ef3dafa69ca8ee74427c76
-      size: 22132
+      md5: 1178398f09223fe5f89bd0e83dbdc12a
+      size: 18204
   benchmark@winter-Random-XGBRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-XGBRegressor-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-XGBRegressor-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -437,15 +435,16 @@ stages:
           class: XGBRegressor
           parameters:
             random_state: 42
+            enable_categorical: true
         seed: 42
     outs:
     - path: models/reports/winter-XGBRegressor-RandomSplit.pkl
       hash: md5
-      md5: c5d417ad0d6fc935a89c7aaf0d57e4d2
+      md5: c8ba246741abab42cc301658fc830394
       size: 18161
   benchmark@winter-Random-XGBRFRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-XGBRFRegressor-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-XGBRFRegressor-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -473,13 +472,13 @@ stages:
       md5: 523b3bed99fb70adc9bd1dda5fd0809b
       size: 18163
   benchmark@winter-Random-KNeighborsRegressor:
-    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-KNeighborsRegressor-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-RandomSplit.pkl --output-report models/reports/winter-KNeighborsRegressor-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -505,6 +504,7 @@ stages:
             - 1
             - 2
             leaf_size:
+            - 5
             - 10
             - 15
             - 30
@@ -515,16 +515,16 @@ stages:
     outs:
     - path: models/reports/winter-KNeighborsRegressor-RandomSplit.pkl
       hash: md5
-      md5: ce0701398c285287c984603b225a04dd
-      size: 22176
+      md5: b7f77c39b7b021d8bda57ba15fcfa005
+      size: 18248
   benchmark@winter-KFold-LinearRegression:
-    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-LinearRegression-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-LinearRegression-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -538,24 +538,20 @@ stages:
         models.LinearRegression:
           module: sklearn.linear_model
           class: LinearRegression
-          hyperparameters:
-            fit_intercept:
-            - true
-            - false
         seed: 42
     outs:
     - path: models/reports/winter-LinearRegression-KFoldSplit.pkl
       hash: md5
-      md5: 41971a9dc65504fb31f8f60496bd5e6d
-      size: 41534
+      md5: 37a75174d398cc53b0c24202b59e9198
+      size: 33724
   benchmark@winter-KFold-RandomForestRegressor:
-    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-RandomForestRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-RandomForestRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -590,16 +586,16 @@ stages:
     outs:
     - path: models/reports/winter-RandomForestRegressor-KFoldSplit.pkl
       hash: md5
-      md5: dd689cb9fa4f3620f5f0ad7d306163ad
-      size: 41602
+      md5: be950174cf505a885fbd0692456a2658
+      size: 33762
   benchmark@winter-KFold-XGBRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-XGBRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-XGBRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -615,15 +611,16 @@ stages:
           class: XGBRegressor
           parameters:
             random_state: 42
+            enable_categorical: true
         seed: 42
     outs:
     - path: models/reports/winter-XGBRegressor-KFoldSplit.pkl
       hash: md5
-      md5: 6eda3ffb666a75196f2f36b6407dccb1
+      md5: f08cc6cd2046b666940aa947acb7e53c
       size: 33720
   benchmark@winter-KFold-XGBRFRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-XGBRFRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-KFoldSplit.pkl --output-report models/reports/winter-XGBRFRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -651,14 +648,14 @@ stages:
       md5: d053c3b4d82a763419fcbfc460b2fe39
       size: 33722
   benchmark@winter-LeaveOneGroupOut-LinearRegression:
-    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/winter-LinearRegression-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/winter-LinearRegression-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -672,25 +669,21 @@ stages:
         models.LinearRegression:
           module: sklearn.linear_model
           class: LinearRegression
-          hyperparameters:
-            fit_intercept:
-            - true
-            - false
         seed: 42
     outs:
     - path: models/reports/winter-LinearRegression-LeaveOneGroupOutSplit.pkl
       hash: md5
-      md5: fc55fdeb45a99a4aafba8fb9148e3dd6
-      size: 46867
+      md5: 06392d13fad72e7c7e373385e3682153
+      size: 39345
   benchmark@winter-LeaveOneGroupOut-XGBRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/winter-XGBRegressor-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/winter-XGBRegressor-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -706,16 +699,17 @@ stages:
           class: XGBRegressor
           parameters:
             random_state: 42
+            enable_categorical: true
         seed: 42
     outs:
     - path: models/reports/winter-XGBRegressor-LeaveOneGroupOutSplit.pkl
       hash: md5
-      md5: ed50ab6b048dfde14eef04ba4a0c71c6
+      md5: abcb60920526f046ab4c51e4a26c84a8
       size: 39341
   benchmark@winter-LeaveOneGroupOut-XGBRFRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/winter-XGBRFRegressor-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/winter-XGBRFRegressor-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -743,14 +737,14 @@ stages:
       md5: 2fb371533dd550e5a31be7f0b147d7ac
       size: 39343
   benchmark@winter-LeaveOneGroupOut-KNeighborsRegressor:
-    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/winter.pkl
-      --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/winter-KNeighborsRegressor-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/winter.pkl\
+      \ --split-indices data/splits/winter-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/winter-KNeighborsRegressor-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/winter.pkl
       hash: md5
       md5: 0ee674076b940ad1b1fa7f6553a3ec7d
@@ -776,6 +770,7 @@ stages:
             - 1
             - 2
             leaf_size:
+            - 5
             - 10
             - 15
             - 30
@@ -786,11 +781,11 @@ stages:
     outs:
     - path: models/reports/winter-KNeighborsRegressor-LeaveOneGroupOutSplit.pkl
       hash: md5
-      md5: 9efda1a650737ee0322af79dc07a28f9
-      size: 47380
+      md5: e16f68a3539c80f065034b41a1edbc8c
+      size: 39428
   split@spring-Random:
-    cmd: "python split.py --input data/prepared/spring.pkl --split Random --output-indices
-      data/splits/spring-RandomSplit.pkl\n"
+    cmd: "python split.py --input data/prepared/spring.pkl --split Random --output-indices\
+      \ data/splits/spring-RandomSplit.pkl\n"
     deps:
     - path: data/prepared/spring.pkl
       hash: md5
@@ -812,13 +807,13 @@ stages:
       md5: 4e9ceaa65527ebbf053881b4a4bcac35
       size: 94615
   benchmark@spring-Random-LinearRegression:
-    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-LinearRegression-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-LinearRegression-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -832,24 +827,20 @@ stages:
         models.LinearRegression:
           module: sklearn.linear_model
           class: LinearRegression
-          hyperparameters:
-            fit_intercept:
-            - true
-            - false
         seed: 42
     outs:
     - path: models/reports/spring-LinearRegression-RandomSplit.pkl
       hash: md5
-      md5: 60bc92c9271df22bf6fdb71ab52636d9
-      size: 153983
+      md5: b9ce872b175e85b42b710905a7b7e8be
+      size: 123677
   benchmark@spring-Random-RandomForestRegressor:
-    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-RandomForestRegressor-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-RandomForestRegressor-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -884,16 +875,16 @@ stages:
     outs:
     - path: models/reports/spring-RandomForestRegressor-RandomSplit.pkl
       hash: md5
-      md5: 01d7c5f1808a7b02b463679f4999f2c6
-      size: 154036
+      md5: 6b6aa5021bfb690448ca5a32a87df358
+      size: 123716
   benchmark@spring-Random-XGBRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-XGBRegressor-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-XGBRegressor-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -909,15 +900,16 @@ stages:
           class: XGBRegressor
           parameters:
             random_state: 42
+            enable_categorical: true
         seed: 42
     outs:
     - path: models/reports/spring-XGBRegressor-RandomSplit.pkl
       hash: md5
-      md5: d782d87698084356a3febb305b5e8c72
+      md5: e805a5278cb007f033c2f9ef8bedae9c
       size: 123673
   benchmark@spring-Random-XGBRFRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-XGBRFRegressor-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-XGBRFRegressor-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -945,13 +937,13 @@ stages:
       md5: 89afad1525573057c60fca9a99efccba
       size: 123675
   benchmark@spring-Random-KNeighborsRegressor:
-    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-KNeighborsRegressor-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-RandomSplit.pkl --output-report models/reports/spring-KNeighborsRegressor-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -977,6 +969,7 @@ stages:
             - 1
             - 2
             leaf_size:
+            - 5
             - 10
             - 15
             - 30
@@ -987,16 +980,16 @@ stages:
     outs:
     - path: models/reports/spring-KNeighborsRegressor-RandomSplit.pkl
       hash: md5
-      md5: 44dff8f775d382be8ad4c151db58179d
-      size: 154080
+      md5: 6b24e1b9f10a5905e11712d280219071
+      size: 123760
   benchmark@spring-KFold-LinearRegression:
-    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-LinearRegression-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-LinearRegression-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -1010,24 +1003,20 @@ stages:
         models.LinearRegression:
           module: sklearn.linear_model
           class: LinearRegression
-          hyperparameters:
-            fit_intercept:
-            - true
-            - false
         seed: 42
     outs:
     - path: models/reports/spring-LinearRegression-KFoldSplit.pkl
       hash: md5
-      md5: 8a07790d7f118d10b05cfe6149527c73
-      size: 305230
+      md5: b10d48ac37bfc0539fca9418bf825c4b
+      size: 244668
   benchmark@spring-KFold-XGBRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-XGBRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-XGBRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -1043,15 +1032,16 @@ stages:
           class: XGBRegressor
           parameters:
             random_state: 42
+            enable_categorical: true
         seed: 42
     outs:
     - path: models/reports/spring-XGBRegressor-KFoldSplit.pkl
       hash: md5
-      md5: 6f08f505b60dfaab26dd80ea72b58e27
+      md5: 33eeedc8a15d4ecf151ac3d75e3d8972
       size: 244664
   benchmark@spring-KFold-XGBRFRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-XGBRFRegressor-KFoldSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-KFoldSplit.pkl --output-report models/reports/spring-XGBRFRegressor-KFoldSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -1079,8 +1069,8 @@ stages:
       md5: f60ead0a58c80a8dde1c2ca552c2b8e3
       size: 244666
   split@spring-LeaveOneGroupOut:
-    cmd: "python split.py --input data/prepared/spring.pkl --split LeaveOneGroupOut
-      --output-indices data/splits/spring-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python split.py --input data/prepared/spring.pkl --split LeaveOneGroupOut\
+      \ --output-indices data/splits/spring-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: data/prepared/spring.pkl
       hash: md5
@@ -1102,14 +1092,14 @@ stages:
       md5: c10550b5a5596bab1857399ca5121514
       size: 1495050
   benchmark@spring-LeaveOneGroupOut-LinearRegression:
-    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/spring-LinearRegression-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use LinearRegression --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/spring-LinearRegression-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -1123,25 +1113,21 @@ stages:
         models.LinearRegression:
           module: sklearn.linear_model
           class: LinearRegression
-          hyperparameters:
-            fit_intercept:
-            - true
-            - false
         seed: 42
     outs:
     - path: models/reports/spring-LinearRegression-LeaveOneGroupOutSplit.pkl
       hash: md5
-      md5: 480e64eb436fdb407c0f208987bd5f1a
-      size: 336867
+      md5: 79183d2af396bd46e433bbb1f0151a51
+      size: 277833
   benchmark@spring-LeaveOneGroupOut-RandomForestRegressor:
-    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/spring-RandomForestRegressor-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/spring-RandomForestRegressor-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -1176,17 +1162,17 @@ stages:
     outs:
     - path: models/reports/spring-RandomForestRegressor-LeaveOneGroupOutSplit.pkl
       hash: md5
-      md5: 494afc3851469c93e4bb38b2642f33f6
-      size: 338984
+      md5: 2c50af932b7d8661728ab8c1f6154f5e
+      size: 277872
   benchmark@spring-LeaveOneGroupOut-XGBRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/spring-XGBRegressor-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/spring-XGBRegressor-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -1202,16 +1188,17 @@ stages:
           class: XGBRegressor
           parameters:
             random_state: 42
+            enable_categorical: true
         seed: 42
     outs:
     - path: models/reports/spring-XGBRegressor-LeaveOneGroupOutSplit.pkl
       hash: md5
-      md5: 8c3a1ecc7e091c010c845a80e832542d
+      md5: f2efdff3e405c832809747d2218fecf3
       size: 277829
   benchmark@spring-LeaveOneGroupOut-XGBRFRegressor:
-    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/spring-XGBRFRegressor-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use XGBRFRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/spring-XGBRFRegressor-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -1239,14 +1226,14 @@ stages:
       md5: 0ca543757c48aaee34acad856627235c
       size: 277831
   benchmark@spring-LeaveOneGroupOut-KNeighborsRegressor:
-    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/spring.pkl
-      --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report
-      models/reports/spring-KNeighborsRegressor-LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use KNeighborsRegressor --data data/prepared/spring.pkl\
+      \ --split-indices data/splits/spring-LeaveOneGroupOutSplit.pkl --output-report\
+      \ models/reports/spring-KNeighborsRegressor-LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
-      md5: 30a4f4913fe659a9a1a15d4dad130ac1
-      size: 7346
+      md5: 4b553a741ce9c311915c3372c2b31220
+      size: 8198
     - path: data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
@@ -1272,6 +1259,7 @@ stages:
             - 1
             - 2
             leaf_size:
+            - 5
             - 10
             - 15
             - 30
@@ -1282,41 +1270,41 @@ stages:
     outs:
     - path: models/reports/spring-KNeighborsRegressor-LeaveOneGroupOutSplit.pkl
       hash: md5
-      md5: 27baf8f4a996f3cfdafe0625f1ea7ed6
-      size: 339028
+      md5: c0afe899dcf1feb5a30fc5205e0d0ba0
+      size: 277916
   evaluation@winter:
-    cmd: "python ../../scripts/report.py models/reports/winter-*.pkl --output-report
-      reports/metrics-winter.json\n"
+    cmd: "python ../../scripts/report.py models/reports/winter-*.pkl --output-report\
+      \ reports/metrics-winter.json\n"
     deps:
     - path: ../../scripts/report.py
       hash: md5
-      md5: 81c8fd3a554b55990b55a54a82423019
-      size: 1503
+      md5: fc8ffb4da9fc3d6287ed870e370153ff
+      size: 1642
     - path: models/reports
       hash: md5
-      md5: 580bc58a31c949ae8de790e98b226e04.dir
-      size: 4200359
-      nfiles: 31
+      md5: 33c811b99f774779de8defd07c7b93e5.dir
+      size: 2950355
+      nfiles: 25
     outs:
     - path: reports/metrics-winter.json
       hash: md5
-      md5: c5e450809fc77d1200dff33e29b90d51
-      size: 2707
+      md5: 6c79a89779a40d7f1163a211b37f8e89
+      size: 2111
   evaluation@spring:
-    cmd: "python ../../scripts/report.py models/reports/spring-*.pkl --output-report
-      reports/metrics-spring.json\n"
+    cmd: "python ../../scripts/report.py models/reports/spring-*.pkl --output-report\
+      \ reports/metrics-spring.json\n"
     deps:
     - path: ../../scripts/report.py
       hash: md5
-      md5: 81c8fd3a554b55990b55a54a82423019
-      size: 1503
+      md5: fc8ffb4da9fc3d6287ed870e370153ff
+      size: 1642
     - path: models/reports
       hash: md5
-      md5: 580bc58a31c949ae8de790e98b226e04.dir
-      size: 4200359
-      nfiles: 31
+      md5: 33c811b99f774779de8defd07c7b93e5.dir
+      size: 2950355
+      nfiles: 25
     outs:
     - path: reports/metrics-spring.json
       hash: md5
-      md5: 5511519cd310e4526bae685936ed736e
-      size: 2681
+      md5: 9eb43d54bd931f4566ccf34d99f7220b
+      size: 2091

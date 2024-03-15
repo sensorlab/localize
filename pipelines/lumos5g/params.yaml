@@ -3,21 +3,11 @@ split:
   n_splits: 5
   test_size: 0.20
 
-train:
-  n_jobs: -1
-
 models:
   LinearRegression:
-    pipeline:
-      - step: scaler
-        module: sklearn.preprocessing
-        class: StandardScaler
-      - step: regressor
-        module: sklearn.multioutput
-        class: MultiOutputRegressor
-        estimator:
-          module: sklearn.linear_model
-          class: LinearRegression
+    module: sklearn.linear_model
+    class: LinearRegression
+
 
   RandomForestRegressor:
     module: sklearn.ensemble
@@ -28,15 +18,6 @@ models:
       n_estimators: [10, 50, 100, 250, 400]
       max_depth: [5, 10, 30, 50, 150, 200, null]
 
-  # RandomForestRegressor:
-  #   module: sklearn.ensemble
-  #   class: RandomForestRegressor
-  #   parameters:
-  #     random_state: 42
-  #     n_jobs: -1
-  #   hyperparmeters:
-  #     n_estimators: [10, 50, 100, 250, 400]
-  #     max_depth: [5, 10, 30, 50, 150, 200, null]
 
   KNeighborsRegressor:
     module: sklearn.neighbors
@@ -55,39 +36,3 @@ models:
     parameters:
       random_state: 42
       enable_categorical: true
-
-  # Cerar2024Simple:
-  #   module: src.models
-  #   class: Cerar2024Simple
-  #   parameters:
-  #     batch_size: 64
-  #     max_epochs: 100
-  #     lr: 0.0005
-  #     #random_state: 42
-  #     module__n_outputs: 2
-  #     module__in_features: 18
-  #     module__random_state: 42
-
-  # Arnold2018Deep:
-  #   module: src.models
-  #   class: Arnold2018DeepModel
-  #   params: # FIXME: Takole tudi drugod
-  #     batch_size: 64
-  #     max_epochs: 100
-  #     lr: 0.0005
-  #     #random_state: 42
-  #     module__n_outputs: 2
-  #     module__in_features: 18
-  #     module__random_state: 42
-  #   #hyperparams:
-
-
-
-  # Arnold2019Sounding:
-  #   module: src.models
-  #   class: Arnold2019SoundingModel
-  #   parameters:
-  #     batch_size: 64
-  #     max_epochs: 100
-  #     module__random_state: 42
-  #     module__n_outputs: 2

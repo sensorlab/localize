@@ -1,16 +1,62 @@
-# Localization-as-a-Service for NANCY project
+# NANCY SaaS Localization: Self-Evolving Model Repository
 
+This project automates the training of machine learning models using Data Version Control (DVC), focusing on a streamlined and efficient pipeline management system. It is designed to work with four distinct datasets: CTW2019, CTW2020, Log-a-Tec, and Lumos5G, each with its dedicated pipeline to cater to the specific requirements and structure of the dataset.
 
-## ML Pipelines
+## Features
 
-Project is designed in a way that allows user to define ML pipeline using through YAML configuration.
+- **Automated Training Pipelines**: Four specialized pipelines for CTW2019, CTW2020, Log-a-Tec, and Lumos5G datasets.
+- **Easy Setup**: Minimal setup required with Conda dependencies.
+- **DVC Integration**: Leveraging DVC for efficient data and model versioning, ensuring reproducibility and traceability.
 
-In most cases, localization is a multioutput problem, where we estimate x, y, and (sometimes) z coordiantes.
+## Prerequisites
 
-- List of scikit-learn algorithms that support multiouput [[list](https://scikit-learn.org/stable/modules/multiclass.html)]. Algorithms that do not support multioutput need to be adapted, through `MultiOutputRegressor` to train regressor for reach target column.
+Before you begin, ensure you have the following installed:
+- [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) for managing dependencies.
 
-### Log-a-Tec BLE dataset(s)
+## Installation
 
-### LUMOS 5G dataset
+1. Clone the repository to your local machine:
 
-### CTW 2019 dataset
+```bash
+git clone https://github.com/sensorlab/nancy-saas-localization
+```
+
+2. Navigate to the cloned directory and install the required Conda dependencies:
+
+```bash
+conda env create -f environment.yml
+conda activate nancy
+```
+
+## Usage
+
+To use this project for training models with your datasets, follow these steps:
+
+1. **Select a Pipeline**: Navigate to the `pipelines` directory and choose the pipeline corresponding to your dataset:
+
+```bash
+cd pipelines/<dataset-name>
+```
+
+Replace `<dataset-name>` with one of the following: `ctw2019`, `ctw2020`, `logatec`, or `lumos5g`.
+
+2. **Run DVC Reproduction**: Execute the following command to start the model training process:
+
+```bash
+# Dowload external dependencies (e.g., datasets)
+dvc pull
+
+# Run all stages for all models
+dvc repro
+```
+
+This command will automate the training process based on the predefined steps in the selected pipeline.
+
+## License
+
+This project is licensed under the [BSD-3 Clause License](LICENSE) - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Data sources: CTW2019, CTW2020, Log-a-Tec, Lumos5G datasets.
+- [DVC](https://dvc.org/) for their excellent data version control system.

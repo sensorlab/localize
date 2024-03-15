@@ -101,6 +101,8 @@ def cli(
         print("Change shape to channel-last")
         H = np.transpose(H, (0, 2, 3, 1))  # (None, 2, 16, 924) --> (None, 16, 924, 2)
 
+    assert H.shape[1:] == (16, 924, 2)
+
     # load split indices
     splits = joblib.load(split_indices_path, mmap_mode=None)
 

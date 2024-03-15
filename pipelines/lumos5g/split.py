@@ -42,12 +42,6 @@ class CombineCVs(model_selection.BaseCrossValidator):
     show_default=True,
     # help="Method to harmonize values",
 )
-# @click.option(
-#     "--params",
-#     "params_path",
-#     type=click.Path(exists=True, dir_okay=False, path_type=Path),
-#     help="Path to the YAML with parameters",
-# )
 def cli(input_path: Path, output_indices_path: Path, split: str):
     # Load parameters
     params = load_params("./params.yaml")

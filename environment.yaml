@@ -44,14 +44,6 @@ dependencies:
   - dask
   - dvc
 
-  #- cudatoolkit=12.2
-  #- cudnn=8.7
-
-  #- tensorflow
-  #- autokeras
-
-  #- snakemake
-
   - pip:
     #- dvc
     - lightning~=2.2

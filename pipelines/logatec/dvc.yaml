@@ -8,7 +8,7 @@
 vars:
   - logatec:
       subsets: [winter, spring]
-      models: [LinearRegression, RandomForestRegressor, XGBRegressor, XGBRFRegressor, KNeighborsRegressor]
+      models: [LinearRegression, RandomForestRegressor, XGBRegressor, KNeighborsRegressor]
       splits: [Random, KFold, LeaveOneGroupOut]
 
 stages:

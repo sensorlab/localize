@@ -2,7 +2,6 @@ from pathlib import Path
 
 import click
 import joblib
-from src import load_data
 
 import numpy as np
 
@@ -28,7 +27,7 @@ import numpy as np
 #     help="Adapt dataset for certain framework",
 # )
 def cli(input_path: Path, output_path: Path):
-    data: dict[str, np.ndarray] = load_data(input_path)
+    data: dict[str, np.ndarray] = joblib.load(input_path)
     h, snr, pos = data["h"], data["snr"], data["pos"]
 
     # Fix #1: We'll focus only on X and Y coordinates. Delete Z axis.

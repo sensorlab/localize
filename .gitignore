@@ -294,12 +294,12 @@ tmp/
 
 #*.json
 #*.h5
-#*.hdf5
 #*.pickle
 *.csv
 *.pkl
 *.zip
 *.h5
+*.hdf5
 *.joblib
 *.feather
 *.parquet
