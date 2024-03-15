@@ -1,0 +1,12 @@
+md5: ff5fc6fd40e97ffee4810ece650600a3
+frozen: true
+deps:
+- checksum: '"c17ef417-5a8d1beb0d329"'
+  size: 3246322711
+  hash: md5
+  path: https://data.ieeemlc.org/dist/CTW2020/CTW2020_labelled_data.zip
+outs:
+- md5: 173971ddd04d9f69af0aa88f90c2513d
+  size: 3246322711
+  hash: md5
+  path: CTW2020_labelled_data.zip

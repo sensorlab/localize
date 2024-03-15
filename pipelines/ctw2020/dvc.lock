@@ -1,0 +1,76 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd:
+    - unzip -d data/raw/ -j data/raw/CTW2020_labelled_data.zip "CTW2020_labelled_data/*.hdf5"
+    - python prepare.py data/raw/file_*.hdf5 --output data/interim/ctw2020.pkl
+    - rm data/raw/*.hdf5
+    deps:
+    - path: data/raw/CTW2020_labelled_data.zip
+      hash: md5
+      md5: 173971ddd04d9f69af0aa88f90c2513d
+      size: 3246322711
+    - path: prepare.py
+      hash: md5
+      md5: 46cfd518f19670c1f68cd65605c48cf1
+      size: 1228
+    outs:
+    - path: data/interim/ctw2020.pkl
+      hash: md5
+      md5: b6b5cafc5a0173afb1187a2b43291da7
+      size: 10310971718
+  featurize:
+    cmd: "python featurize.py --input data/interim/ctw2020.pkl --output data/prepared/ctw2020.pkl\n"
+    deps:
+    - path: data/interim/ctw2020.pkl
+      hash: md5
+      md5: b6b5cafc5a0173afb1187a2b43291da7
+      size: 10310971718
+    - path: featurize.py
+      hash: md5
+      md5: 16f80f0b0253bb2990b7252e26704a8c
+      size: 1571
+    outs:
+    - path: data/prepared/ctw2020.pkl
+      hash: md5
+      md5: bea9e053dabd5507008cd142d278559c
+      size: 10311111051
+  split@Random:
+    cmd: "python split.py --input data/prepared/ctw2020.pkl --split Random --output-indices\
+      \ data/splits/RandomSplit.pkl\n"
+    deps:
+    - path: data/prepared/ctw2020.pkl
+      hash: md5
+      md5: bea9e053dabd5507008cd142d278559c
+      size: 10311111051
+    - path: split.py
+      hash: md5
+      md5: 38d54882fce6b1fbc623056e93be09d7
+      size: 1795
+    params:
+      params.yaml:
+        seed: 42
+        split:
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 7042559c7e0dd6ff6535f053041287c0
+      size: 996571
+  flatten:
+    cmd: "python flatten.py --input data/prepared/ctw2020.pkl --output data/prepared/ctw2020.flatten.pkl\n"
+    deps:
+    - path: data/prepared/ctw2020.pkl
+      hash: md5
+      md5: bea9e053dabd5507008cd142d278559c
+      size: 10311111051
+    - path: flatten.py
+      hash: md5
+      md5: 171cfb0fb466f4e60b7372276384041a
+      size: 856
+    outs:
+    - path: data/prepared/ctw2020.flatten.pkl
+      hash: md5
+      md5: 88d6c6575b5c9bc6b43cae805debcf6b
+      size: 10311111019

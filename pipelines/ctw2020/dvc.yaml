@@ -1,0 +1,106 @@
+vars:
+  - ctw2020:
+      #models: [LinearRegression, RandomForestRegressor, XGBRegressor, KNeighborsRegressor]
+      models: [LinearRegression, RandomForestRegressor]
+      splits: [Random]
+
+stages:
+
+  prepare:
+    desc: Prepare CTW2020 dataset for the MLOps pipeline
+    cmd:
+      - unzip -d data/raw/ -j data/raw/CTW2020_labelled_data.zip "CTW2020_labelled_data/*.hdf5"
+      - python prepare.py data/raw/file_*.hdf5 --output data/interim/ctw2020.pkl
+      - rm data/raw/*.hdf5
+    deps:
+      - data/raw/CTW2020_labelled_data.zip
+      - prepare.py
+    outs:
+      - data/interim/ctw2020.pkl
+
+
+  featurize:
+    desc: Prepare CTW2020 dataset
+    cmd: >
+      python featurize.py
+      --input data/interim/ctw2020.pkl
+      --output data/prepared/ctw2020.pkl
+    deps:
+      - featurize.py
+      - data/interim/ctw2020.pkl
+    outs:
+      - data/prepared/ctw2020.pkl
+
+  flatten:
+    desc: Prepare CTW2020 dataset
+    cmd: >
+      python flatten.py
+      --input data/prepared/ctw2020.pkl
+      --output data/prepared/ctw2020.flatten.pkl
+    deps:
+      - flatten.py
+      - data/prepared/ctw2020.pkl
+    outs:
+      - data/prepared/ctw2020.flatten.pkl
+
+  split:
+    desc: Prepare CTW2020 data split
+    matrix:
+      split: ${ctw2020.splits}
+    cmd: >
+      python split.py
+      --input data/prepared/ctw2020.pkl
+      --split ${item.split}
+      --output-indices data/splits/${item.split}Split.pkl
+    params:
+      - seed
+      - split
+    deps:
+      - data/prepared/ctw2020.pkl
+      - split.py
+    outs:
+      - data/splits/${item.split}Split.pkl
+
+
+  benchmark:
+    matrix:
+      split: ${ctw2020.splits}
+      model:
+        - name: RandomForestRegressor
+          input: data/prepared/ctw2020.flatten.pkl
+        #- name: Arnold2018DeepModel
+        #  input: data/prepared/ctw2020.flatten.pkl
+        #- name: Arnold2019SoundingModel
+        #  input: data/prepared/ctw2020.pkl
+        #- name: Pirnat2022Pirnat1G
+        #  input: data/prepared/ctw2020.pkl
+        #- name: Cerar2021Localization
+        #  input: data/prepared/ctw2020.pkl
+    cmd: >
+      python ../../scripts/benchmark.py
+      --use ${item.model.name}
+      --data ${item.model.input}
+      --split-indices data/splits/${item.split}Split.pkl
+      --output-report models/reports/${item.model.name}-${item.split}Split.pkl
+    params:
+      - seed
+      - models.${item.model.name}
+    deps:
+      - ../../scripts/benchmark.py
+      - ${item.model.input}
+      - data/splits/${item.split}Split.pkl
+    outs:
+      - models/reports/${item.model.name}-${item.split}Split.pkl
+
+
+  evaluation:
+    cmd: >
+      python ../../scripts/report.py
+      models/reports/*.pkl
+      --output-report reports/metrics.json
+    deps:
+      - ../../scripts/report.py
+      - models/reports
+    metrics:
+      - reports/metrics.json:
+          cache: false
