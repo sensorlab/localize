@@ -58,5 +58,5 @@ This project is licensed under the [BSD-3 Clause License](LICENSE) - see the LIC
 
 ## Acknowledgments
 
-This project has received funding from the European Union's Horizon Europe Framework Programme under grant agreement No. 101096456 (NANCY).
+This project has received funding from the European Union's Horizon Europe Framework Programme under grant agreement No. 101096456 ([NANCY](https://nancy-project.eu/)).
 The project is supported by the Smart Networks and Services Joint Undertaking and its members.
