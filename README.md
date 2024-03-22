@@ -58,5 +58,5 @@ This project is licensed under the [BSD-3 Clause License](LICENSE) - see the LIC
 
 ## Acknowledgments
 
-- Data sources: CTW2019, CTW2020, Log-a-Tec, Lumos5G datasets.
-- [DVC](https://dvc.org/) for their excellent data version control system.
+This project has received funding from the European Union's Horizon Europe Framework Programme under grant agreement No. 101096456 (NANCY).
+The project is supported by the Smart Networks and Services Joint Undertaking and its members.
