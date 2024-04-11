@@ -12,8 +12,8 @@ stages:
       size: 3246322711
     - path: prepare.py
       hash: md5
-      md5: 46cfd518f19670c1f68cd65605c48cf1
-      size: 1228
+      md5: 6f86ecddc22d118ad9592c67d785e2f8
+      size: 1227
     outs:
     - path: data/interim/ctw2020.pkl
       hash: md5
@@ -28,8 +28,8 @@ stages:
       size: 10310971718
     - path: featurize.py
       hash: md5
-      md5: 16f80f0b0253bb2990b7252e26704a8c
-      size: 1571
+      md5: 94026e6fefe0166b700a1c89e9726107
+      size: 1577
     outs:
     - path: data/prepared/ctw2020.pkl
       hash: md5
@@ -45,8 +45,8 @@ stages:
       size: 10311111051
     - path: split.py
       hash: md5
-      md5: 38d54882fce6b1fbc623056e93be09d7
-      size: 1795
+      md5: 994d26e12e67b8251b459f748d9df9be
+      size: 1778
     params:
       params.yaml:
         seed: 42
@@ -74,3 +74,64 @@ stages:
       hash: md5
       md5: 88d6c6575b5c9bc6b43cae805debcf6b
       size: 10311111019
+  benchmark@Random-model0:
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/ctw2020.flatten.pkl\
+      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/RandomForestRegressor-RandomSplit.pkl\n"
+    deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: d0261cf08fe83e489c748b4fda8013c5
+      size: 8199
+    - path: data/prepared/ctw2020.flatten.pkl
+      hash: md5
+      md5: 88d6c6575b5c9bc6b43cae805debcf6b
+      size: 10311111019
+    - path: data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 7042559c7e0dd6ff6535f053041287c0
+      size: 996571
+    params:
+      params.yaml:
+        models.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+          hyperparmeters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+        seed: 42
+    outs:
+    - path: models/reports/RandomForestRegressor-RandomSplit.pkl
+      hash: md5
+      md5: 6072249f5fd43496a8e6e42faee774cb
+      size: 399338
+  evaluation:
+    cmd: "python ../../scripts/report.py models/reports/*.pkl --output-report reports/metrics.json\n"
+    deps:
+    - path: ../../scripts/report.py
+      hash: md5
+      md5: fc8ffb4da9fc3d6287ed870e370153ff
+      size: 1642
+    - path: models/reports
+      hash: md5
+      md5: 1f838cb61afb069a2975af2707ee162b.dir
+      size: 399338
+      nfiles: 2
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: e98620a9fad916116b2e8b565ed5f7df
+      size: 190

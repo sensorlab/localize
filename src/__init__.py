@@ -1,6 +1,7 @@
 """
 The `src` package is the root of this project.
 """
+
 from pathlib import Path
 from typing import Any
 

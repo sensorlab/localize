@@ -66,6 +66,8 @@ stages:
     matrix:
       split: ${ctw2020.splits}
       model:
+        - name: LinearRegression
+          input: data/prepared/ctw2020.flatten.pkl
         - name: RandomForestRegressor
           input: data/prepared/ctw2020.flatten.pkl
         #- name: Arnold2018DeepModel

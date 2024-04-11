@@ -43,11 +43,13 @@ Replace `<dataset-name>` with one of the following: `ctw2019`, `ctw2020`, `logat
 2. **Run DVC Reproduction**: Execute the following command to start the model training process:
 
 ```bash
-# Dowload external dependencies (e.g., datasets)
-dvc pull
+# On first run, you may need to run as
+dvc repro --pull --force
 
-# Run all stages for all models
+# On any subsequent run, it should be enough to run
 dvc repro
+
+
 ```
 
 This command will automate the training process based on the predefined steps in the selected pipeline.

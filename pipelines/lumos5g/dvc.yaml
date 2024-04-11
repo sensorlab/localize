@@ -36,7 +36,7 @@ stages:
     outs:
       - data/prepared/lumos5g.pkl
 
-  fit:
+  split:
     desc: Split dataset and store indices
     matrix:
       split: [KFold]
