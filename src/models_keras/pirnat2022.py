@@ -1,13 +1,13 @@
-from keras.callbacks import EarlyStopping
-from keras.layers import Conv2D, BatchNormalization, Add, LeakyReLU
-from keras.models import Model
-import tensorflow as tf
-from scikeras.wrappers import KerasRegressor
 from functools import partial
-import keras
-from keras import layers
 
+import keras
+import tensorflow as tf
 from keras import backend as K
+from keras import layers
+from keras.callbacks import EarlyStopping
+from keras.layers import Add, BatchNormalization, Conv2D, LeakyReLU
+from keras.models import Model
+from scikeras.wrappers import KerasRegressor
 
 
 # keras.mixed_precision.set_global_policy("mixed_bfloat16")

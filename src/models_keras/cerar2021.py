@@ -1,13 +1,15 @@
-from tensorflow import keras
-from keras import backend as K, layers, optimizers, callbacks
-from .pirnat2022 import mean_euclidean_distance_error
-
-from scikeras.wrappers import KerasRegressor
 from functools import partial
+
+from keras import backend as K
+from keras import callbacks, layers, optimizers
+from scikeras.wrappers import KerasRegressor
+from tensorflow import keras
+
+from .pirnat2022 import mean_euclidean_distance_error
 
 
 def _resnet_block(input, filters, kernel=3, strides=1, activation="relu"):
-    common = dict(use_bias=False, padding="same", kernel_initializer="he_normal")
+    common = {"use_bias": False, "padding": "same", "kernel_initializer": "he_normal"}
 
     if isinstance(strides, int):
         strides = (strides, strides)
@@ -41,8 +43,8 @@ def resnet_block(x, filters, kernel, stride1=1, blocks=3):
 
 def build_model():
     # conv_kwargs = dict(padding='same', kernel_initializer='he_normal', use_bias=False)
-    fc_kwargs = dict(kernel_initializer="he_normal", use_bias=True)
-    bn_kwargs = dict(axis=-1, epsilon=1.001e-5)
+    fc_kwargs = {"kernel_initializer": "he_normal", "use_bias": True}
+    bn_kwargs = {"axis": -1, "epsilon": 1.001e-5}
 
     x = inputs = layers.Input(shape=(2, 16, 924), name="h")
     x = layers.Permute((2, 3, 1))(x)

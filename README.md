@@ -42,6 +42,8 @@ Replace `<dataset-name>` with one of the following: `ctw2019`, `ctw2020`, `logat
 
 2. **Run DVC Reproduction**: Execute the following command to start the model training process:
 
+In the current version of service, we don't have DVC cache publicly available.
+
 ```bash
 # On first run, you may need to run as
 dvc repro --pull --force
@@ -53,6 +55,15 @@ dvc repro
 ```
 
 This command will automate the training process based on the predefined steps in the selected pipeline.
+
+## Contributions
+
+When submitting pull request, we suggest to run `pre-commit run --all-files` checks beforehand. If you don't `pre-commit` installed yet, do the following steps:
+
+1. Run `pip install pre-commit` to install *pre-commit-hooks* tool
+2. Run `pre-commit install`, and it will make the tool part of `git commit` step.
+
+Now you can run `pre-commit run --all-files` to whole project for consistency.
 
 ## License
 

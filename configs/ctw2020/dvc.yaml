@@ -1,0 +1,132 @@
+vars:
+  - path:
+      # Path are relative to location of dvc.yaml file
+      scripts: ../../src/ctw2020
+      common: ../../src
+      data: ../../artifacts/ctw2020/data
+      models: ../../artifacts/ctw2020/models
+      reports: ../../artifacts/ctw2020/reports
+
+  - splits:
+      - Random
+  # Models are defined in params.yaml
+
+
+
+stages:
+  prepare:
+    desc: Prepare CTW2020 dataset for the MLOps pipeline
+    cmd:
+      - unzip ${path.data}/raw/CTW2020_labelled_data.zip -d ${path.data}/raw/ -j "CTW2020_labelled_data/*.hdf5"
+      - >
+        python ${path.scripts}/prepare.py
+        ${path.data}/raw/file_*.hdf5
+        --output ${path.data}/interim/ctw2020.pkl
+      - rm ${path.data}/raw/*.hdf5
+    deps:
+      - ${path.scripts}/prepare.py
+      - ${path.data}/raw/CTW2020_labelled_data.zip
+    outs:
+      - ${path.data}/interim/ctw2020.pkl
+
+
+  featurize:
+    desc: Enrich dataset with additional features
+    cmd: >
+      python ${path.scripts}/featurize.py
+      --input ${path.data}/interim/ctw2020.pkl
+      --output ${path.data}/prepared/ctw2020.pkl
+    deps:
+      - ${path.scripts}/featurize.py
+      - ${path.data}/interim/ctw2020.pkl
+    outs:
+      - ${path.data}/prepared/ctw2020.pkl
+
+  flatten:
+    desc: Prepare flatten input data for cetain ML algorithms
+    cmd: >
+      python ${path.scripts}/flatten.py
+      --input ${path.data}/prepared/ctw2020.pkl
+      --output ${path.data}/prepared/ctw2020.flatten.pkl
+    deps:
+      - flatten.py
+      - ${path.data}/prepared/ctw2020.pkl
+    outs:
+      - ${path.data}/prepared/ctw2020.flatten.pkl
+
+  split:
+    desc: Split dataset and store indices
+    matrix:
+      split: ${splits}
+    cmd: >
+      python ${path.scripts}/split.py
+      --input ${path.data}/prepared/ctw2020.pkl
+      --split ${item.split}
+      --output-indices ${path.data}/splits/${item.split}Split.pkl
+    params:
+      - split
+    deps:
+      - ${path.scripts}/split.py
+      - ${path.data}/prepared/ctw2020.pkl
+    outs:
+      - ${path.data}/splits/${item.split}Split.pkl
+
+
+  benchmark:
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      split: ${splits}
+      model:
+        - name: RandomForestRegressor
+          input: ${path.data}/prepared/ctw2020.flatten.pkl
+        - name: Arnold2018DeepModel
+          input: ${path.data}/prepared/ctw2020.flatten.pkl
+        - name: Arnold2019SoundingModel
+          input: ${path.data}/prepared/ctw2020.pkl
+        - name: Pirnat2022Pirnat1G
+          input: ${path.data}/prepared/ctw2020.pkl
+        - name: Cerar2021Localization
+          input: ${path.data}/prepared/ctw2020.pkl
+    cmd: >
+      python ${path.common}/benchmark.py
+      --use ${item.model.name}
+      --data ${item.model.input}
+      --split-indices ${path.data}/splits/${item.split}Split.pkl
+      --output-results ${path.models}/${item.model.name}-${item.split}Split-results.pkl
+    params:
+      - models.${item.model.name}
+    deps:
+      - ${path.common}/benchmark.py
+      - ${item.model.input}
+      - ${path.data}/splits/${item.split}Split.pkl
+    outs:
+      - ${path.models}/${item.model.name}-${item.split}Split-results.pkl
+
+
+  # AutoML:
+  #   matrix:
+  #     split: ${splits}
+  #   cmd: >
+  #     python ${path.scripts}/automl.py
+  #     --data ${path.data}/prepared/ctw2020.pkl
+  #     --split-indices ${path.data}/splits/${item.split}Split.pkl
+  #     --output-results ${path.models}/autokeras-${item.split}Split-results.pkl
+  #   deps:
+  #     - ${path.scripts}/automl.py
+  #     - ${path.data}/prepared/ctw2020.pkl
+  #     - ${path.data}/splits/${item.split}Split.pkl
+  #   outs:
+  #     - ${path.models}/autokeras-${item.split}Split-results.pkl
+
+
+  evaluation:
+    cmd: >
+      python ${path.common}/report.py
+      ${path.models}/*-results.pkl
+      --output-report ${path.reports}/metrics.json
+    deps:
+      - ${path.common}/report.py
+      - ${path.models}
+    metrics:
+      - ${path.reports}/metrics.json:
+          cache: false

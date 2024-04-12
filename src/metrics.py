@@ -1,5 +1,6 @@
 import numpy as np
 
+
 # def mean_percentage_error(A: np.ndarray, F: np.ndarray) -> np.float64:
 #     A_abs, F_abs = np.abs(A), np.abs(F)
 #     mask = ~(np.maximum(A_abs, F_abs) == 0)
