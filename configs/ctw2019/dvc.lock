@@ -71,8 +71,8 @@ stages:
       size: 2069363555
     - path: ../../src/ctw2019/split.py
       hash: md5
-      md5: b9e80fd8e91d238d29b226e30642413b
-      size: 3449
+      md5: b8fd0fe36c3db2520ed330841f38e535
+      size: 3006
     params:
       params.yaml:
         split:
@@ -180,22 +180,23 @@ stages:
       md5: e419bff4ca7468950218f12013dd9c6c
       size: 47930
   evaluation:
-    cmd: "python ../../scripts/report.py models/reports/*.pkl --output-report reports/metrics.json\n"
+    cmd: "python ../../src/report.py ../../artifacts/ctw2019/models/*-results.pkl\
+      \ --output-report ../../artifacts/ctw2019/reports/metrics.json\n"
     deps:
-    - path: ../../scripts/report.py
+    - path: ../../artifacts/ctw2019/models
       hash: md5
-      md5: fc8ffb4da9fc3d6287ed870e370153ff
-      size: 1642
-    - path: models/reports
+      md5: e8c0e5113a397c47f891b05a983055e5.dir
+      size: 1495248
+      nfiles: 16
+    - path: ../../src/report.py
       hash: md5
-      md5: 8e2fa3486d2b2ed8a6321468e0264f14.dir
-      size: 1404872
-      nfiles: 6
+      md5: d315d71b09a199d1b584e640cf9afe0f
+      size: 1644
     outs:
-    - path: reports/metrics.json
+    - path: ../../artifacts/ctw2019/reports/metrics.json
       hash: md5
-      md5: c4087be7ad42a1bcc0f377b0c851fd5e
-      size: 964
+      md5: d3243a8cb9f83344389a1644a1f12813
+      size: 2749
   benchmark@LongEdge-LinearRegression:
     cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl\
       \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/LinearRegression-LongEdgeSplit.pkl\n"
@@ -1274,9 +1275,9 @@ stages:
       md5: 04e5b49f020735214bafb65bfe7fc69f
       size: 280978
   optimization@Random-model3:
-    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
       \ --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-RandomSplit-results.pkl\n"
+      \ ../../artifacts/ctw2019/models/Cerar2021Localization-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1288,11 +1289,11 @@ stages:
       size: 700227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: b2696b8569b104090da8e77c2a84e674
-      size: 8223
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
     params:
       params.yaml:
-        models.Pirnat2022Pirnat1G:
+        models.Cerar2021Localization:
           pipeline:
           - step: preparation
             module: src.data
@@ -1301,12 +1302,12 @@ stages:
               keyname: h
           - step: regressor
             module: src.models_keras
-            class: Pirnat1G
+            class: Cerar2021
     outs:
-    - path: ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-RandomSplit-results.pkl
+    - path: ../../artifacts/ctw2019/models/Cerar2021Localization-RandomSplit-results.pkl
       hash: md5
-      md5: 8874200a1699c5d97bce716f0283296b
-      size: 280975
+      md5: 21e989810fadc6589bfaa26dfdb5d9aa
+      size: 280978
   optimization@ShortEdge-model1:
     cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
       \ --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results\
@@ -1322,8 +1323,8 @@ stages:
       size: 140238
     - path: ../../src/benchmark.py
       hash: md5
-      md5: d8ff8dfdafd692c0ba75cc4c70b44b1a
-      size: 8223
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
     params:
       params.yaml:
         models.Arnold2019SoundingModel:
@@ -1353,7 +1354,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2019SoundingModel-ShortEdgeSplit-results.pkl
       hash: md5
-      md5: 5a4a29bda47038baaa0ea017dee77b6d
+      md5: 0f27b9290c783e0bac9246c14a59650d
       size: 29621
   optimization@ShortEdge-model0:
     cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
@@ -1370,8 +1371,8 @@ stages:
       size: 140238
     - path: ../../src/benchmark.py
       hash: md5
-      md5: d8ff8dfdafd692c0ba75cc4c70b44b1a
-      size: 8223
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
     params:
       params.yaml:
         models.Arnold2018DeepModel:
@@ -1402,7 +1403,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2018DeepModel-ShortEdgeSplit-results.pkl
       hash: md5
-      md5: cf734f10785db6dbaf2c425354f75693
+      md5: 79ebf7b462fa3ee38fdde55e20bef54f
       size: 29617
   optimization@Random-model0:
     cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
@@ -1419,8 +1420,8 @@ stages:
       size: 700227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 972f7366b0ee8155f5061e9972dde179
-      size: 8242
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
     params:
       params.yaml:
         models.Arnold2018DeepModel:
@@ -1451,5 +1452,485 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2018DeepModel-RandomSplit-results.pkl
       hash: md5
-      md5: 0a62461d72b5f90e49be0ee1efddb4f7
+      md5: 903224322430da3957ce4513172fde52
       size: 280976
+  optimization@Random-model1:
+    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Arnold2019SoundingModel-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 08d18bb17d58cd555431df2167ad3e25
+      size: 700227
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Arnold2019SoundingModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2019SoundingModel
+          parameters:
+            optimizer:
+              module: torch.optim
+              class: Adam
+            callbacks:
+            - module: skorch.callbacks
+              class: EarlyStopping
+              parameters:
+                patience: 10
+            module__random_state: 42
+            iterator_train__shuffle: true
+            iterator_train__num_workers: 8
+            optimizer__weight_decay: 0.01
+            optimizer__lr: 0.0005
+            max_epochs: 250
+            batch_size: 64
+            device: cuda
+            compile: false
+    outs:
+    - path: ../../artifacts/ctw2019/models/Arnold2019SoundingModel-RandomSplit-results.pkl
+      hash: md5
+      md5: bbea68893b9646f4cada8dc5c942ad9e
+      size: 280980
+  optimization@Random-model2:
+    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 08d18bb17d58cd555431df2167ad3e25
+      size: 700227
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Pirnat2022Pirnat1G:
+          pipeline:
+          - step: preparation
+            module: src.data
+            class: ExtractByKeyword
+            parameters:
+              keyname: h
+          - step: regressor
+            module: src.models_keras
+            class: Pirnat1G
+    outs:
+    - path: ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-RandomSplit-results.pkl
+      hash: md5
+      md5: 30530846cc08c898e3845be3a272593e
+      size: 280975
+  optimization@ShortEdge-model2:
+    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-ShortEdgeSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl
+      hash: md5
+      md5: 92d487a26dcfddfdc8e272a1c4560062
+      size: 140238
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Pirnat2022Pirnat1G:
+          pipeline:
+          - step: preparation
+            module: src.data
+            class: ExtractByKeyword
+            parameters:
+              keyname: h
+          - step: regressor
+            module: src.models_keras
+            class: Pirnat1G
+    outs:
+    - path: ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-ShortEdgeSplit-results.pkl
+      hash: md5
+      md5: 7370d67875a494a853cc0841b01683a8
+      size: 29616
+  optimization@ShortEdge-model3:
+    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Cerar2021Localization-ShortEdgeSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl
+      hash: md5
+      md5: 92d487a26dcfddfdc8e272a1c4560062
+      size: 140238
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Cerar2021Localization:
+          pipeline:
+          - step: preparation
+            module: src.data
+            class: ExtractByKeyword
+            parameters:
+              keyname: h
+          - step: regressor
+            module: src.models_keras
+            class: Cerar2021
+    outs:
+    - path: ../../artifacts/ctw2019/models/Cerar2021Localization-ShortEdgeSplit-results.pkl
+      hash: md5
+      md5: 97bf075294761f112ed76c2421a665f5
+      size: 29619
+  optimization@LongEdge-model0:
+    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Arnold2018DeepModel-LongEdgeSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 411b70954fa29aeb9ea4880de3440cef
+      size: 2069363523
+    - path: ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl
+      hash: md5
+      md5: 55bfb893a099dcf434ab79cae12cd2b1
+      size: 140229
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Arnold2018DeepModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2018DeepModel
+          parameters:
+            optimizer:
+              module: torch.optim
+              class: Adam
+            callbacks:
+            - module: skorch.callbacks
+              class: EarlyStopping
+              parameters:
+                patience: 10
+            module__in_features: 29584
+            module__random_state: 42
+            iterator_train__shuffle: true
+            iterator_train__num_workers: 8
+            optimizer__weight_decay: 0.01
+            optimizer__lr: 0.0005
+            max_epochs: 250
+            batch_size: 64
+            device: cuda
+            compile: false
+    outs:
+    - path: ../../artifacts/ctw2019/models/Arnold2018DeepModel-LongEdgeSplit-results.pkl
+      hash: md5
+      md5: 05a26a1a78eab8f01ff670fe1835c1a1
+      size: 32120
+  optimization@LongEdge-model1:
+    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Arnold2019SoundingModel-LongEdgeSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl
+      hash: md5
+      md5: 55bfb893a099dcf434ab79cae12cd2b1
+      size: 140229
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Arnold2019SoundingModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2019SoundingModel
+          parameters:
+            optimizer:
+              module: torch.optim
+              class: Adam
+            callbacks:
+            - module: skorch.callbacks
+              class: EarlyStopping
+              parameters:
+                patience: 10
+            module__random_state: 42
+            iterator_train__shuffle: true
+            iterator_train__num_workers: 8
+            optimizer__weight_decay: 0.01
+            optimizer__lr: 0.0005
+            max_epochs: 250
+            batch_size: 64
+            device: cuda
+            compile: false
+    outs:
+    - path: ../../artifacts/ctw2019/models/Arnold2019SoundingModel-LongEdgeSplit-results.pkl
+      hash: md5
+      md5: 7deacc2ed45e1bdaadbdb7d3fc2df917
+      size: 32124
+  optimization@LongEdge-model2:
+    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-LongEdgeSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl
+      hash: md5
+      md5: 55bfb893a099dcf434ab79cae12cd2b1
+      size: 140229
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Pirnat2022Pirnat1G:
+          pipeline:
+          - step: preparation
+            module: src.data
+            class: ExtractByKeyword
+            parameters:
+              keyname: h
+          - step: regressor
+            module: src.models_keras
+            class: Pirnat1G
+    outs:
+    - path: ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-LongEdgeSplit-results.pkl
+      hash: md5
+      md5: c2afc847ef929fa24ff881e83e7e15e2
+      size: 32119
+  optimization@LongEdge-model3:
+    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Cerar2021Localization-LongEdgeSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl
+      hash: md5
+      md5: 55bfb893a099dcf434ab79cae12cd2b1
+      size: 140229
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Cerar2021Localization:
+          pipeline:
+          - step: preparation
+            module: src.data
+            class: ExtractByKeyword
+            parameters:
+              keyname: h
+          - step: regressor
+            module: src.models_keras
+            class: Cerar2021
+    outs:
+    - path: ../../artifacts/ctw2019/models/Cerar2021Localization-LongEdgeSplit-results.pkl
+      hash: md5
+      md5: 22662a6ea207c533e1d1969a2a1d3c88
+      size: 32122
+  optimization@Cutout-model0:
+    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Arnold2018DeepModel-CutoutSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 411b70954fa29aeb9ea4880de3440cef
+      size: 2069363523
+    - path: ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl
+      hash: md5
+      md5: d482455520e5a6d583342d4096965fb8
+      size: 140227
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Arnold2018DeepModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2018DeepModel
+          parameters:
+            optimizer:
+              module: torch.optim
+              class: Adam
+            callbacks:
+            - module: skorch.callbacks
+              class: EarlyStopping
+              parameters:
+                patience: 10
+            module__in_features: 29584
+            module__random_state: 42
+            iterator_train__shuffle: true
+            iterator_train__num_workers: 8
+            optimizer__weight_decay: 0.01
+            optimizer__lr: 0.0005
+            max_epochs: 250
+            batch_size: 64
+            device: cuda
+            compile: false
+    outs:
+    - path: ../../artifacts/ctw2019/models/Arnold2018DeepModel-CutoutSplit-results.pkl
+      hash: md5
+      md5: f46c570c2aa5e3039ad28d3ea7974623
+      size: 31094
+  optimization@Cutout-model1:
+    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Arnold2019SoundingModel-CutoutSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl
+      hash: md5
+      md5: d482455520e5a6d583342d4096965fb8
+      size: 140227
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Arnold2019SoundingModel:
+          module: skorch
+          class: NeuralNetRegressor
+          estimator:
+            module: src.models
+            class: Arnold2019SoundingModel
+          parameters:
+            optimizer:
+              module: torch.optim
+              class: Adam
+            callbacks:
+            - module: skorch.callbacks
+              class: EarlyStopping
+              parameters:
+                patience: 10
+            module__random_state: 42
+            iterator_train__shuffle: true
+            iterator_train__num_workers: 8
+            optimizer__weight_decay: 0.01
+            optimizer__lr: 0.0005
+            max_epochs: 250
+            batch_size: 64
+            device: cuda
+            compile: false
+    outs:
+    - path: ../../artifacts/ctw2019/models/Arnold2019SoundingModel-CutoutSplit-results.pkl
+      hash: md5
+      md5: 170332717bed6ec96684145ce4ef06c6
+      size: 31098
+  optimization@Cutout-model2:
+    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-CutoutSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl
+      hash: md5
+      md5: d482455520e5a6d583342d4096965fb8
+      size: 140227
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Pirnat2022Pirnat1G:
+          pipeline:
+          - step: preparation
+            module: src.data
+            class: ExtractByKeyword
+            parameters:
+              keyname: h
+          - step: regressor
+            module: src.models_keras
+            class: Pirnat1G
+    outs:
+    - path: ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-CutoutSplit-results.pkl
+      hash: md5
+      md5: ae5036cc906093b5e59879ff3eb0edbc
+      size: 31093
+  optimization@Cutout-model3:
+    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
+      \ --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results\
+      \ ../../artifacts/ctw2019/models/Cerar2021Localization-CutoutSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: 3fe82724f38155d4a7a78f2b2855eff3
+      size: 2069363555
+    - path: ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl
+      hash: md5
+      md5: d482455520e5a6d583342d4096965fb8
+      size: 140227
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: adffd586a858365db49ec84a7d4a8897
+      size: 8243
+    params:
+      params.yaml:
+        models.Cerar2021Localization:
+          pipeline:
+          - step: preparation
+            module: src.data
+            class: ExtractByKeyword
+            parameters:
+              keyname: h
+          - step: regressor
+            module: src.models_keras
+            class: Cerar2021
+    outs:
+    - path: ../../artifacts/ctw2019/models/Cerar2021Localization-CutoutSplit-results.pkl
+      hash: md5
+      md5: db405fcbf494994b9781d99786a919a3
+      size: 31096

@@ -12,7 +12,7 @@ This project automates the training of machine learning models using Data Versio
 
 - `artifacts/<dataset>/data/{raw,interim,splits,prepared}` contains dataset at different stages of data preparation pipeline.
 - `configs/<dataset>/dvc.yaml` contains pipeline instructions for DVC tool
-- `configs/<dataset>/params.yaml` contains configurations
+- `configs/<dataset>/params.yaml` contains ML model configurations
 
 ## Prerequisites
 
@@ -36,7 +36,12 @@ conda activate nancy
 
 ## Usage
 
-To build all models for all datasets run the `./run_pipelines.sh` script. Grab a coffee, because it will take some time. If you wish to work on particular dataset, follow these steps:
+To build all models for all datasets run the `./run_pipelines.sh` script. Grab a :coffee: as it takes some time to build models from scratch.
+
+> [!WARNING]
+> In the current set up, we don't have artifact cache available. It will take some time to build all models from scratch.
+
+If you wish to work on one particular dataset, follow these steps:
 
 1. Activate conda environment using `conda activate nancy` command.
 2. Enter the subfolder `configs/<dataset>` with configurations for a dataset. Replace `<dataset>` with either of `ctw2019`, `ctw2020`, `logatec`, or `lumos5g`.
@@ -51,12 +56,10 @@ dvc repro --pull
 # On any subsequent run, it should be enough to run
 dvc repro
 ```
-> [!WARNING]
-> In the current set up, we don't have artifact cache available. It will take some time to build all models from scratch.
 
 ## Contributions
 
-When submitting pull request, we suggest to run `pre-commit run --all-files` checks beforehand. If you don't `pre-commit` installed yet, do the following steps:
+When submitting pull request, we suggest to run `pre-commit` checks. If you don't `pre-commit` installed yet, do the following steps:
 
 1. Run `pip install pre-commit` to install *pre-commit-hooks* tool
 2. Run `pre-commit install`, and it will make the tool part of `git commit` step.

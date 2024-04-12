@@ -17,7 +17,7 @@ stages:
   prepare:
     desc: Prepare CTW2020 dataset for the MLOps pipeline
     cmd:
-      - unzip ${path.data}/raw/CTW2020_labelled_data.zip -d ${path.data}/raw/ -j "CTW2020_labelled_data/*.hdf5"
+      - unzip -d ${path.data}/raw/ -j ${path.data}/raw/CTW2020_labelled_data.zip "CTW2020_labelled_data/*.hdf5"
       - >
         python ${path.scripts}/prepare.py
         ${path.data}/raw/file_*.hdf5
@@ -49,7 +49,7 @@ stages:
       --input ${path.data}/prepared/ctw2020.pkl
       --output ${path.data}/prepared/ctw2020.flatten.pkl
     deps:
-      - flatten.py
+      - ${path.scripts}/flatten.py
       - ${path.data}/prepared/ctw2020.pkl
     outs:
       - ${path.data}/prepared/ctw2020.flatten.pkl
@@ -77,16 +77,18 @@ stages:
     matrix:
       split: ${splits}
       model:
-        - name: RandomForestRegressor
+        - name: XGBRegressor
           input: ${path.data}/prepared/ctw2020.flatten.pkl
-        - name: Arnold2018DeepModel
-          input: ${path.data}/prepared/ctw2020.flatten.pkl
-        - name: Arnold2019SoundingModel
-          input: ${path.data}/prepared/ctw2020.pkl
-        - name: Pirnat2022Pirnat1G
-          input: ${path.data}/prepared/ctw2020.pkl
-        - name: Cerar2021Localization
-          input: ${path.data}/prepared/ctw2020.pkl
+        #- name: RandomForestRegressor
+        #  input: ${path.data}/prepared/ctw2020.flatten.pkl
+        #- name: Arnold2018DeepModel
+        #  input: ${path.data}/prepared/ctw2020.flatten.pkl
+        #-# name: Arnold2019SoundingModel
+         # input: ${path.data}/prepared/ctw2020.pkl
+        #- name: Pirnat2022Pirnat1G
+        #  input: ${path.data}/prepared/ctw2020.pkl
+        #- name: Cerar2021Localization
+        #  input: ${path.data}/prepared/ctw2020.pkl
     cmd: >
       python ${path.common}/benchmark.py
       --use ${item.model.name}

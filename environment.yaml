@@ -16,22 +16,15 @@ dependencies:
   - pytorch~=2.2.0
   - pytorch-cuda=12.1
   - torchvision
-  - torchaudio
   - skorch~=0.15.0
-
-  #- nomkl
 
   - numpy
   - scipy
   - matplotlib~=3.8.0
   - scikit-learn~=1.4.0
-  #- scikit-learn-intelex
   - pandas~=2.1.0
 
   - py-xgboost-cpu~=2.0
-
-  - pyarrow~=14.0
-  #- fastparquet
 
   - jupyterlab~=4.0
   - ipywidgets
@@ -45,7 +38,6 @@ dependencies:
   - dvc
 
   - pip:
-    #- dvc
     - lightning~=2.2
     - lightning-bolts
     - torch-metrics
