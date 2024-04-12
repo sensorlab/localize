@@ -8,6 +8,12 @@ This project automates the training of machine learning models using Data Versio
 - **Easy Setup**: Minimal setup required with Conda dependencies.
 - **DVC Integration**: Leveraging DVC for efficient data and model versioning, ensuring reproducibility and traceability.
 
+## Project Layout
+
+- `artifacts/<dataset>/data/{raw,interim,splits,prepared}` contains dataset at different stages of data preparation pipeline.
+- `configs/<dataset>/dvc.yaml` contains pipeline instructions for DVC tool
+- `configs/<dataset>/params.yaml` contains ML model configurations
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
@@ -30,29 +36,35 @@ conda activate nancy
 
 ## Usage
 
-To use this project for training models with your datasets, follow these steps:
+To build all models for all datasets run the `./run_pipelines.sh` script. Grab a :coffee: as it takes some time to build models from scratch.
 
-1. **Select a Pipeline**: Navigate to the `pipelines` directory and choose the pipeline corresponding to your dataset:
+> [!WARNING]
+> In the current set up, we don't have artifact cache available. It will take some time to build all models from scratch.
+
+If you wish to work on one particular dataset, follow these steps:
+
+1. Activate conda environment using `conda activate nancy` command.
+2. Enter the subfolder `configs/<dataset>` with configurations for a dataset. Replace `<dataset>` with either of `ctw2019`, `ctw2020`, `logatec`, or `lumos5g`.
+3. (optional) tune/change ML model parameters in `params.yaml` file.
+4. Run the following command to start the model training process:
 
 ```bash
-cd pipelines/<dataset-name>
-```
-
-Replace `<dataset-name>` with one of the following: `ctw2019`, `ctw2020`, `logatec`, or `lumos5g`.
-
-2. **Run DVC Reproduction**: Execute the following command to start the model training process:
-
-```bash
-# On first run, you may need to run as
-dvc repro --pull --force
+# On first run also pull dataset dependencies with `--pull`.
+# If complains something related to cache, add `--force` flag
+dvc repro --pull
 
 # On any subsequent run, it should be enough to run
 dvc repro
-
-
 ```
 
-This command will automate the training process based on the predefined steps in the selected pipeline.
+## Contributions
+
+When submitting pull request, we suggest to run `pre-commit` checks. If you don't `pre-commit` installed yet, do the following steps:
+
+1. Run `pip install pre-commit` to install *pre-commit-hooks* tool
+2. Run `pre-commit install`, and it will make the tool part of `git commit` step.
+
+Now run `pre-commit run --all-files` to see if your changes comply with code rules.
 
 ## License
 

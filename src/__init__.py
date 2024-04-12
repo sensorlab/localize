@@ -2,33 +2,22 @@
 The `src` package is the root of this project.
 """
 
+import json
 from pathlib import Path
 from typing import Any
 
 import joblib
+import numpy as np
 import pandas as pd
 import yaml
-import json
-
 from sklearn import model_selection
-import numpy as np
+
 
 # Project source code directory
 SRC_PATH = Path(__file__).resolve().parents[0]
 
 # Project root path
 PROJECT_PATH = Path(__file__).resolve().parents[1]
-
-# Model directory path
-MODEL_PATH = PROJECT_PATH / "models"
-
-# Reports directory path
-REPORTS_PATH = PROJECT_PATH / "reports"
-
-# Data paths
-RAW_DATA_PATH = PROJECT_PATH / "data" / "raw"
-INTERIM_DATA_PATH = PROJECT_PATH / "data" / "interim"
-PROCESSED_DATA_PATH = PROJECT_PATH / "data" / "processed"
 
 
 class NumpyEncoder(json.JSONEncoder):

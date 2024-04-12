@@ -1,0 +1,141 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd:
+    - unzip -d ../../artifacts/ctw2020/data/raw/ -j ../../artifacts/ctw2020/data/raw/CTW2020_labelled_data.zip
+      "CTW2020_labelled_data/*.hdf5"
+    - "python ../../src/ctw2020/prepare.py ../../artifacts/ctw2020/data/raw/file_*.hdf5\
+      \ --output ../../artifacts/ctw2020/data/interim/ctw2020.pkl\n"
+    - rm ../../artifacts/ctw2020/data/raw/*.hdf5
+    deps:
+    - path: ../../artifacts/ctw2020/data/raw/CTW2020_labelled_data.zip
+      hash: md5
+      md5: 173971ddd04d9f69af0aa88f90c2513d
+      size: 3246322711
+    - path: ../../src/ctw2020/prepare.py
+      hash: md5
+      md5: 6f86ecddc22d118ad9592c67d785e2f8
+      size: 1227
+    outs:
+    - path: ../../artifacts/ctw2020/data/interim/ctw2020.pkl
+      hash: md5
+      md5: b6b5cafc5a0173afb1187a2b43291da7
+      size: 10310971718
+  featurize:
+    cmd: "python ../../src/ctw2020/featurize.py --input ../../artifacts/ctw2020/data/interim/ctw2020.pkl\
+      \ --output ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2020/data/interim/ctw2020.pkl
+      hash: md5
+      md5: b6b5cafc5a0173afb1187a2b43291da7
+      size: 10310971718
+    - path: ../../src/ctw2020/featurize.py
+      hash: md5
+      md5: 9e43c3d5c0e2f82e4ca1d9a72cad31dc
+      size: 1576
+    outs:
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
+      hash: md5
+      md5: bea9e053dabd5507008cd142d278559c
+      size: 10311111051
+  split@Random:
+    cmd: "python ../../src/ctw2020/split.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\
+      \ --split Random --output-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
+      hash: md5
+      md5: bea9e053dabd5507008cd142d278559c
+      size: 10311111051
+    - path: ../../src/ctw2020/split.py
+      hash: md5
+      md5: 8bac1c6e719c42c8361900f8dc380a92
+      size: 1785
+    params:
+      params.yaml:
+        split:
+          seed: 42
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 7042559c7e0dd6ff6535f053041287c0
+      size: 996571
+  flatten:
+    cmd: "python ../../src/ctw2020/flatten.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\
+      \ --output ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
+      hash: md5
+      md5: bea9e053dabd5507008cd142d278559c
+      size: 10311111051
+    - path: ../../src/ctw2020/flatten.py
+      hash: md5
+      md5: a185fffb436cdff572a4b0a331ce1923
+      size: 855
+    outs:
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
+      hash: md5
+      md5: 88d6c6575b5c9bc6b43cae805debcf6b
+      size: 10311111019
+  benchmark@Random-model0:
+    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/ctw2020.flatten.pkl\
+      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/RandomForestRegressor-RandomSplit.pkl\n"
+    deps:
+    - path: ../../scripts/benchmark.py
+      hash: md5
+      md5: d0261cf08fe83e489c748b4fda8013c5
+      size: 8199
+    - path: data/prepared/ctw2020.flatten.pkl
+      hash: md5
+      md5: 88d6c6575b5c9bc6b43cae805debcf6b
+      size: 10311111019
+    - path: data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 7042559c7e0dd6ff6535f053041287c0
+      size: 996571
+    params:
+      params.yaml:
+        models.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+          hyperparmeters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+        seed: 42
+    outs:
+    - path: models/reports/RandomForestRegressor-RandomSplit.pkl
+      hash: md5
+      md5: 6072249f5fd43496a8e6e42faee774cb
+      size: 399338
+  evaluation:
+    cmd: "python ../../scripts/report.py models/reports/*.pkl --output-report reports/metrics.json\n"
+    deps:
+    - path: ../../scripts/report.py
+      hash: md5
+      md5: fc8ffb4da9fc3d6287ed870e370153ff
+      size: 1642
+    - path: models/reports
+      hash: md5
+      md5: 1f838cb61afb069a2975af2707ee162b.dir
+      size: 399338
+      nfiles: 2
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: e98620a9fad916116b2e8b565ed5f7df
+      size: 190

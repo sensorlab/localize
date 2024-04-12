@@ -1,0 +1,141 @@
+vars:
+  - path:
+      # Path are relative to location of dvc.yaml file
+      scripts: ../../src/ctw2019
+      common: ../../src
+      data: ../../artifacts/ctw2019/data
+      models: ../../artifacts/ctw2019/models
+      reports: ../../artifacts/ctw2019/reports
+
+  - splits:
+      - Random
+      - ShortEdge
+      - LongEdge
+      - Cutout
+
+  # Models are defined in params.yaml
+
+
+
+stages:
+  prepare:
+    desc: Prepare CTW2019 dataset for the MLOps pipeline
+    cmd:
+      - unzip ${path.data}/raw/CTW2019_Dataset_h5.zip -d ${path.data}/raw/
+      - >
+        python ${path.scripts}/prepare.py
+        --data-h ${path.data}/raw/h_Estimated_CTW_Train.h5
+        --data-snr ${path.data}/raw/SNR_CTW_Train.h5
+        --data-pos ${path.data}/raw/r_Position_CTW_Train.h5
+        --output ${path.data}/interim/ctw2019.pkl
+      - rm ${path.data}/raw/*.h5
+    deps:
+      - ${path.scripts}/prepare.py
+      - ${path.data}/raw/CTW2019_Dataset_h5.zip
+    outs:
+      - ${path.data}/interim/ctw2019.pkl
+
+
+  featurize:
+    desc: Enrich dataset with additional features
+    cmd: >
+      python ${path.scripts}/featurize.py
+      --input ${path.data}/interim/ctw2019.pkl
+      --output ${path.data}/prepared/ctw2019.pkl
+    deps:
+      - ${path.scripts}/featurize.py
+      - ${path.data}/interim/ctw2019.pkl
+    outs:
+      - ${path.data}/prepared/ctw2019.pkl
+
+
+  flatten:
+    desc: Prepare flatten input data for cetain ML algorithms
+    cmd: >
+      python ${path.scripts}/flatten.py
+      --input ${path.data}/prepared/ctw2019.pkl
+      --output ${path.data}/prepared/ctw2019.flatten.pkl
+    deps:
+      - ${path.scripts}/flatten.py
+      - ${path.data}/prepared/ctw2019.pkl
+    outs:
+      - ${path.data}/prepared/ctw2019.flatten.pkl
+
+
+  split:
+    desc: Split dataset and store indices
+    matrix:
+      split: ${splits}
+    cmd: >
+      python ${path.scripts}/split.py
+      --input ${path.data}/prepared/ctw2019.pkl
+      --split ${item.split}
+      --output-indices ${path.data}/splits/${item.split}Split.pkl
+    params:
+      - split
+    deps:
+      - ${path.scripts}/split.py
+      - ${path.data}/prepared/ctw2019.pkl
+    outs:
+      - ${path.data}/splits/${item.split}Split.pkl
+
+
+  optimization:
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      split: ${splits}
+      model:
+        # TODO: At some point, I need to remove this, to be more consistent with other pipelines
+        #- name: RandomForestRegressor
+        #  input: ${path.data}/prepared/ctw2019.flatten.pkl
+        - name: Arnold2018DeepModel
+          input: ${path.data}/prepared/ctw2019.flatten.pkl
+        - name: Arnold2019SoundingModel
+          input: ${path.data}/prepared/ctw2019.pkl
+        - name: Pirnat2022Pirnat1G
+          input: ${path.data}/prepared/ctw2019.pkl
+        - name: Cerar2021Localization
+          input: ${path.data}/prepared/ctw2019.pkl
+    cmd: >
+      python ${path.common}/benchmark.py
+      --use ${item.model.name}
+      --data ${item.model.input}
+      --split-indices ${path.data}/splits/${item.split}Split.pkl
+      --output-results ${path.models}/${item.model.name}-${item.split}Split-results.pkl
+    params:
+      - models.${item.model.name}
+    deps:
+      - ${path.common}/benchmark.py
+      - ${item.model.input}
+      - ${path.data}/splits/${item.split}Split.pkl
+    outs:
+      - ${path.models}/${item.model.name}-${item.split}Split-results.pkl
+
+
+  # AutoML:
+  #   matrix:
+  #     split: ${splits}
+  #   cmd: >
+  #     python ${path.scripts}/automl.py
+  #     --data ${path.data}/prepared/ctw2019.pkl
+  #     --split-indices ${path.data}/splits/${item.split}Split.pkl
+  #     --output-results ${path.models}/autokeras-${item.split}Split-results.pkl
+  #   deps:
+  #     - ${path.scripts}/automl.py
+  #     - ${path.data}/prepared/ctw2019.pkl
+  #     - ${path.data}/splits/${item.split}Split.pkl
+  #   outs:
+  #     - ${path.models}/autokeras-${item.split}Split-results.pkl
+
+
+  evaluation:
+    cmd: >
+      python ${path.common}/report.py
+      ${path.models}/*-results.pkl
+      --output-report ${path.reports}/metrics.json
+    deps:
+      - ${path.common}/report.py
+      - ${path.models}
+    metrics:
+      - ${path.reports}/metrics.json:
+          cache: false

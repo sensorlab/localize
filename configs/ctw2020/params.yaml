@@ -1,0 +1,114 @@
+split:
+  seed: 42
+  n_splits: 5
+  test_size: 0.20
+
+models:
+  LinearRegression:
+    module: sklearn.linear_model
+    class: LinearRegression
+
+  # RandomForestRegressor:
+  #   module: sklearn.ensemble
+  #   class: RandomForestRegressor
+  #   parameters:
+  #     random_state: 42
+  #   hyperparmeters:
+  #     n_estimators: [10, 50, 100, 250, 400]
+  #     max_depth: [5, 10, 30, 50, 150, 200, null]
+
+  XGBRegressor:
+    module: xgboost
+    class: XGBRegressor
+    parameters:
+      random_state: 42
+      enable_categorical: true
+
+  # KNeighborsRegressor:
+  #   module: sklearn.neighbors
+  #   class: KNeighborsRegressor
+  #   hyperparameters:
+  #     n_neighbors: [5, 10, 15]
+  #     weights: [uniform, distance]
+  #     p: [1, 2]
+  #     leaf_size: [5, 10, 15, 30, 45]
+  #     metric: [minkowski, euclidean]
+
+
+  # Pirnat2022Pirnat1G:
+  #   pipeline:
+  #     - step: preparation
+  #       module: src.data
+  #       class: ExtractByKeyword
+  #       parameters:
+  #         keyname: h
+  #     - step: regressor
+  #       module: src.models_keras
+  #       class: Pirnat1G
+
+
+  # Cerar2021Localization:
+  #   pipeline:
+  #     - step: preparation
+  #       module: src.data
+  #       class: ExtractByKeyword
+  #       parameters:
+  #         keyname: h
+  #     - step: regressor
+  #       module: src.models_keras
+  #       class: Cerar2021
+
+
+  # Arnold2018DeepModel:
+  #   module: skorch
+  #   class: NeuralNetRegressor
+  #   estimator:
+  #     module: src.models
+  #     class: Arnold2018DeepModel
+  #   parameters:
+  #     optimizer:
+  #       module: torch.optim
+  #       class: Adam
+  #     callbacks:
+  #       - module: skorch.callbacks
+  #         class: EarlyStopping
+  #         parameters:
+  #           patience: 10
+  #     module__in_features: 103544 # 56*924*2+56
+  #     module__random_state: 42
+  #     iterator_train__shuffle: true
+  #     iterator_train__num_workers: 8
+  #     optimizer__weight_decay: 0.01
+  #     optimizer__lr: 0.0005
+  #     max_epochs: 250
+  #     batch_size: 64
+  #     device: cuda
+  #     compile: false
+
+  # Arnold2019SoundingModel:
+  #   module: skorch
+  #   class: NeuralNetRegressor
+  #   estimator:
+  #     module: src.models
+  #     class: Arnold2019SoundingModel
+  #   parameters:
+  #     optimizer:
+  #       module: torch.optim
+  #       class: Adam
+  #     callbacks:
+  #       - module: skorch.callbacks
+  #         class: EarlyStopping
+  #         parameters:
+  #           patience: 10
+  #     module__random_state: 42
+  #     iterator_train__shuffle: true
+  #     iterator_train__num_workers: 8
+  #     optimizer__weight_decay: 0.01
+  #     optimizer__lr: 0.0005
+  #     #callbacks__EarlyStopping__patience: 10
+  #     #callbacks__LRScheduler__policy: ReduceLROnPlateau
+  #     #callbacks__LRScheduler__patience: 4
+  #     max_epochs: 250
+  #     batch_size: 64
+  #     device: cuda
+  #     compile: false

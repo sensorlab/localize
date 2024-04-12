@@ -1,0 +1,95 @@
+vars:
+  - path:
+      # Path are relative to location of dvc.yaml file
+      scripts: ../../src/lumos5g
+      common: ../../src
+      data: ../../artifacts/lumos5g/data
+      models: ../../artifacts/lumos5g/models
+      reports: ../../artifacts/lumos5g/reports
+
+  - splits: [KFold]
+
+  # Models are defined in params.yaml
+
+stages:
+
+  # download:
+  #   desc: Download dataset from authors website.
+  #   cmd: curl --insecure -o ${path.data}/raw/Lumos5G-v1.0.zip http://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip
+  #   deps:
+  #     - http://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip
+  #   outs:
+  #     - ${path.data}/raw/Lumos5G-v1.0.zip
+
+  prepare:
+    desc: Prepare Lumos5G dataset for MLOps pipeline
+    cmd: |
+      unzip -j ${path.data}/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d ${path.data}/raw/
+      python ${path.scripts}/prepare.py --input ${path.data}/raw/Lumos5G-v1.0.csv --output ${path.data}/interim/lumos5g.pkl
+      rm ${path.data}/raw/Lumos5G-v1.0.csv
+    deps:
+      - ${path.data}/raw/Lumos5G-v1.0.zip
+      - ${path.scripts}/prepare.py
+    outs:
+      - ${path.data}/interim/lumos5g.pkl
+
+  featurize:
+    desc: Featurize dataset
+    cmd: >
+      python ${path.scripts}/featurize.py
+      --input ${path.data}/interim/lumos5g.pkl
+      --output ${path.data}/prepared/lumos5g.pkl
+    deps:
+      - ${path.scripts}/featurize.py
+      - ${path.data}/interim/lumos5g.pkl
+    outs:
+      - ${path.data}/prepared/lumos5g.pkl
+
+  split:
+    desc: Split dataset and store indices
+    matrix:
+      split: ${splits}
+    cmd: >
+      python ${path.scripts}/split.py
+      --input ${path.data}/prepared/lumos5g.pkl
+      --split ${item.split}
+      --output-indices ${path.data}/splits/${item.split}Split.pkl
+    params:
+      - split
+    deps:
+      - ${path.scripts}/split.py
+      - ${path.data}/prepared/lumos5g.pkl
+    outs:
+      - ${path.data}/splits/${item.split}Split.pkl
+
+  optimization:
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      split: ${splits}
+      model: ${models}
+    cmd: >
+      python ${path.common}/benchmark.py
+      --use ${item.model}
+      --data ${path.data}/prepared/lumos5g.pkl
+      --split-indices ${path.data}/splits/${item.split}Split.pkl
+      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+    params:
+      - models.${item.model}
+    deps:
+      - ${path.common}/benchmark.py
+      - ${path.data}/prepared/lumos5g.pkl
+      - ${path.data}/splits/${item.split}Split.pkl
+    outs:
+      - ${path.models}/${item.model}-${item.split}Split-results.pkl
+
+  evaluation:
+    cmd: >
+      python ${path.common}/report.py
+      ${path.models}/*-results.pkl
+      --output-report ${path.reports}/metrics.json
+    deps:
+      - ${path.common}/report.py
+      - ${path.models}
+    metrics:
+      - ${path.reports}/metrics.json:
+          cache: false
