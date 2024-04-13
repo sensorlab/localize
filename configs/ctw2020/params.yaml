@@ -35,28 +35,28 @@ models:
   #     metric: [minkowski, euclidean]
 
 
-  # Pirnat2022Pirnat1G:
-  #   pipeline:
-  #     - step: preparation
-  #       module: src.data
-  #       class: ExtractByKeyword
-  #       parameters:
-  #         keyname: h
-  #     - step: regressor
-  #       module: src.models_keras
-  #       class: Pirnat1G
+  Pirnat2022Pirnat1G:
+    pipeline:
+      - step: preparation
+        module: src.data
+        class: ExtractByKeyword
+        parameters:
+          keyname: h
+      - step: regressor
+        module: src.models_keras
+        class: Pirnat1G
 
 
-  # Cerar2021Localization:
-  #   pipeline:
-  #     - step: preparation
-  #       module: src.data
-  #       class: ExtractByKeyword
-  #       parameters:
-  #         keyname: h
-  #     - step: regressor
-  #       module: src.models_keras
-  #       class: Cerar2021
+  Cerar2021Localization:
+    pipeline:
+      - step: preparation
+        module: src.data
+        class: ExtractByKeyword
+        parameters:
+          keyname: h
+      - step: regressor
+        module: src.models_keras
+        class: Cerar2021
 
 
   # Arnold2018DeepModel:

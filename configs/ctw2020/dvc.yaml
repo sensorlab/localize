@@ -85,10 +85,10 @@ stages:
         #  input: ${path.data}/prepared/ctw2020.flatten.pkl
         #-# name: Arnold2019SoundingModel
          # input: ${path.data}/prepared/ctw2020.pkl
-        #- name: Pirnat2022Pirnat1G
-        #  input: ${path.data}/prepared/ctw2020.pkl
-        #- name: Cerar2021Localization
-        #  input: ${path.data}/prepared/ctw2020.pkl
+        - name: Pirnat2022Pirnat1G
+          input: ${path.data}/prepared/ctw2020.pkl
+        - name: Cerar2021Localization
+          input: ${path.data}/prepared/ctw2020.pkl
     cmd: >
       python ${path.common}/benchmark.py
       --use ${item.model.name}

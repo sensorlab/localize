@@ -37,6 +37,8 @@ dependencies:
   - dask
   - dvc
 
+  - curl
+
   - pip:
     - lightning~=2.2
     - lightning-bolts
