@@ -185,7 +185,7 @@ stages:
     deps:
     - path: ../../artifacts/ctw2019/models
       hash: md5
-      md5: e8c0e5113a397c47f891b05a983055e5.dir
+      md5: a6663a54af0c450e8edc713492b4a791.dir
       size: 1495248
       nfiles: 16
     - path: ../../src/report.py
@@ -195,8 +195,8 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/reports/metrics.json
       hash: md5
-      md5: d3243a8cb9f83344389a1644a1f12813
-      size: 2749
+      md5: 6b30c9306d0896733e2e8253088d1980
+      size: 2752
   benchmark@LongEdge-LinearRegression:
     cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl\
       \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/LinearRegression-LongEdgeSplit.pkl\n"
@@ -1289,7 +1289,7 @@ stages:
       size: 700227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1306,7 +1306,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Cerar2021Localization-RandomSplit-results.pkl
       hash: md5
-      md5: 21e989810fadc6589bfaa26dfdb5d9aa
+      md5: 24f8002ad8d3d42a86caacff61c5e5c6
       size: 280978
   optimization@ShortEdge-model1:
     cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1323,7 +1323,7 @@ stages:
       size: 140238
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1354,7 +1354,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2019SoundingModel-ShortEdgeSplit-results.pkl
       hash: md5
-      md5: 0f27b9290c783e0bac9246c14a59650d
+      md5: dd263b8299c0ec235193f1202b65abe8
       size: 29621
   optimization@ShortEdge-model0:
     cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
@@ -1371,7 +1371,7 @@ stages:
       size: 140238
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1403,7 +1403,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2018DeepModel-ShortEdgeSplit-results.pkl
       hash: md5
-      md5: 79ebf7b462fa3ee38fdde55e20bef54f
+      md5: 87685852eacb5cec66b89e0578ef9bd4
       size: 29617
   optimization@Random-model0:
     cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
@@ -1420,7 +1420,7 @@ stages:
       size: 700227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1452,7 +1452,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2018DeepModel-RandomSplit-results.pkl
       hash: md5
-      md5: 903224322430da3957ce4513172fde52
+      md5: 9c2bf5ebc016eaabbe931aa7c318424b
       size: 280976
   optimization@Random-model1:
     cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1469,7 +1469,7 @@ stages:
       size: 700227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1500,7 +1500,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2019SoundingModel-RandomSplit-results.pkl
       hash: md5
-      md5: bbea68893b9646f4cada8dc5c942ad9e
+      md5: 32b4eb0c0f67ff8926153db02ab9de37
       size: 280980
   optimization@Random-model2:
     cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1517,7 +1517,7 @@ stages:
       size: 700227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1534,7 +1534,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-RandomSplit-results.pkl
       hash: md5
-      md5: 30530846cc08c898e3845be3a272593e
+      md5: f2f34c567f93c1788558d20775838493
       size: 280975
   optimization@ShortEdge-model2:
     cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1551,7 +1551,7 @@ stages:
       size: 140238
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1568,7 +1568,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-ShortEdgeSplit-results.pkl
       hash: md5
-      md5: 7370d67875a494a853cc0841b01683a8
+      md5: d3a488be4b811cac66d134df9e68acb2
       size: 29616
   optimization@ShortEdge-model3:
     cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1585,7 +1585,7 @@ stages:
       size: 140238
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1602,7 +1602,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Cerar2021Localization-ShortEdgeSplit-results.pkl
       hash: md5
-      md5: 97bf075294761f112ed76c2421a665f5
+      md5: 56503041ea042161bc63cb53af3ac0be
       size: 29619
   optimization@LongEdge-model0:
     cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
@@ -1619,7 +1619,7 @@ stages:
       size: 140229
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1651,7 +1651,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2018DeepModel-LongEdgeSplit-results.pkl
       hash: md5
-      md5: 05a26a1a78eab8f01ff670fe1835c1a1
+      md5: 2f02379f213adbf85324379411c9b916
       size: 32120
   optimization@LongEdge-model1:
     cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1668,7 +1668,7 @@ stages:
       size: 140229
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1699,7 +1699,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2019SoundingModel-LongEdgeSplit-results.pkl
       hash: md5
-      md5: 7deacc2ed45e1bdaadbdb7d3fc2df917
+      md5: fb3e2d749c5ffa4010f33247cdce5f99
       size: 32124
   optimization@LongEdge-model2:
     cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1716,7 +1716,7 @@ stages:
       size: 140229
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1733,7 +1733,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-LongEdgeSplit-results.pkl
       hash: md5
-      md5: c2afc847ef929fa24ff881e83e7e15e2
+      md5: 6e5f15c5669bf4dd7f1f4a1662d1b62d
       size: 32119
   optimization@LongEdge-model3:
     cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1750,7 +1750,7 @@ stages:
       size: 140229
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1767,7 +1767,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Cerar2021Localization-LongEdgeSplit-results.pkl
       hash: md5
-      md5: 22662a6ea207c533e1d1969a2a1d3c88
+      md5: 1e100a9cd9bd442b6a4718ce4cc4cdfc
       size: 32122
   optimization@Cutout-model0:
     cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
@@ -1784,7 +1784,7 @@ stages:
       size: 140227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1816,7 +1816,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2018DeepModel-CutoutSplit-results.pkl
       hash: md5
-      md5: f46c570c2aa5e3039ad28d3ea7974623
+      md5: d82e8ebf4c9c14c1ea3c4a2d23d03171
       size: 31094
   optimization@Cutout-model1:
     cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1833,7 +1833,7 @@ stages:
       size: 140227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1864,7 +1864,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Arnold2019SoundingModel-CutoutSplit-results.pkl
       hash: md5
-      md5: 170332717bed6ec96684145ce4ef06c6
+      md5: 3325f5a5bf344b42aabc16eb4d7c0678
       size: 31098
   optimization@Cutout-model2:
     cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1881,7 +1881,7 @@ stages:
       size: 140227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1898,7 +1898,7 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-CutoutSplit-results.pkl
       hash: md5
-      md5: ae5036cc906093b5e59879ff3eb0edbc
+      md5: 4b3001307151a0d68ed5ceb737d71079
       size: 31093
   optimization@Cutout-model3:
     cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
@@ -1915,7 +1915,7 @@ stages:
       size: 140227
     - path: ../../src/benchmark.py
       hash: md5
-      md5: adffd586a858365db49ec84a7d4a8897
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
       size: 8243
     params:
       params.yaml:
@@ -1932,5 +1932,5 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/models/Cerar2021Localization-CutoutSplit-results.pkl
       hash: md5
-      md5: db405fcbf494994b9781d99786a919a3
+      md5: b5cc7c2bf1bdb2f1d43e3151fd9881dd
       size: 31096

@@ -180,7 +180,7 @@ def cli(
 
     # general train parameters
     # n_jobs = joblib.cpu_count()
-    gridsearch_jobs = 2
+    gridsearch_jobs = 4
     # backend = "threading"
 
     if quirks["is_skorch_module"]:

@@ -79,63 +79,50 @@ stages:
       md5: 88d6c6575b5c9bc6b43cae805debcf6b
       size: 10311111019
   benchmark@Random-model0:
-    cmd: "python ../../scripts/benchmark.py --use RandomForestRegressor --data data/prepared/ctw2020.flatten.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/RandomForestRegressor-RandomSplit.pkl\n"
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\
+      \ --split-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results\
+      \ ../../artifacts/ctw2020/models/XGBRegressor-RandomSplit-results.pkl\n"
     deps:
-    - path: ../../scripts/benchmark.py
-      hash: md5
-      md5: d0261cf08fe83e489c748b4fda8013c5
-      size: 8199
-    - path: data/prepared/ctw2020.flatten.pkl
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
       hash: md5
       md5: 88d6c6575b5c9bc6b43cae805debcf6b
       size: 10311111019
-    - path: data/splits/RandomSplit.pkl
+    - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
       hash: md5
       md5: 7042559c7e0dd6ff6535f053041287c0
       size: 996571
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: f7257f6eda31513a56fd6fac7c22eeaa
+      size: 8243
     params:
       params.yaml:
-        models.RandomForestRegressor:
-          module: sklearn.ensemble
-          class: RandomForestRegressor
+        models.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
           parameters:
             random_state: 42
-          hyperparmeters:
-            n_estimators:
-            - 10
-            - 50
-            - 100
-            - 250
-            - 400
-            max_depth:
-            - 5
-            - 10
-            - 30
-            - 50
-            - 150
-            - 200
-            -
-        seed: 42
+            enable_categorical: true
     outs:
-    - path: models/reports/RandomForestRegressor-RandomSplit.pkl
+    - path: ../../artifacts/ctw2020/models/XGBRegressor-RandomSplit-results.pkl
       hash: md5
-      md5: 6072249f5fd43496a8e6e42faee774cb
-      size: 399338
+      md5: 7365890c805531d2b11d2e449630a669
+      size: 399329
   evaluation:
-    cmd: "python ../../scripts/report.py models/reports/*.pkl --output-report reports/metrics.json\n"
+    cmd: "python ../../src/report.py ../../artifacts/ctw2020/models/*-results.pkl\
+      \ --output-report ../../artifacts/ctw2020/reports/metrics.json\n"
     deps:
-    - path: ../../scripts/report.py
+    - path: ../../artifacts/ctw2020/models
       hash: md5
-      md5: fc8ffb4da9fc3d6287ed870e370153ff
-      size: 1642
-    - path: models/reports
-      hash: md5
-      md5: 1f838cb61afb069a2975af2707ee162b.dir
-      size: 399338
+      md5: b48a2d65530d36fae6ead077d7634a62.dir
+      size: 399329
       nfiles: 2
-    outs:
-    - path: reports/metrics.json
+    - path: ../../src/report.py
       hash: md5
-      md5: e98620a9fad916116b2e8b565ed5f7df
-      size: 190
+      md5: d315d71b09a199d1b584e640cf9afe0f
+      size: 1644
+    outs:
+    - path: ../../artifacts/ctw2020/reports/metrics.json
+      hash: md5
+      md5: 8e39195bbdb83ad6b0f33080123d2579
+      size: 184
