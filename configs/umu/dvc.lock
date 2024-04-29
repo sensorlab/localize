@@ -1,0 +1,38 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: "unzip ../../artifacts/umu/data/raw/UMU.zip -d ../../artifacts/umu/data/raw/\n
+      python ../../src/umu/prepare.py --method average --input ../../artifacts/umu/data/raw/tcp_nokia_20240325.xlsx
+      --output ../../artifacts/umu/data/interim/umu.pkl\nrm ../../artifacts/umu/data/raw/*.xlsx\n
+      rm ../../artifacts/umu/data/raw/__MACOSX/.*.xlsx\n"
+    deps:
+    - path: ../../artifacts/umu/data/raw/umu.zip
+      hash: md5
+      md5: 1345918b8746ab5f376b8787f408f32b
+      size: 2489104
+    - path: ../../src/umu/prepare.py
+      hash: md5
+      md5: a806475b6270f7994f3be602f9959584
+      size: 1262
+    outs:
+    - path: ../../artifacts/umu/data/interim/umu.pkl
+      hash: md5
+      md5: e87e707991333aa5f6a3dbb1a183d9a0
+      size: 36417
+  featurize:
+    cmd: "python ../../src/umu/featurize.py --input ../../artifacts/umu/data/interim/umu.pkl
+      --output ../../artifacts/umu/data/prepared/umu.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/interim/umu.pkl
+      hash: md5
+      md5: e87e707991333aa5f6a3dbb1a183d9a0
+      size: 36417
+    - path: ../../src/umu/featurize.py
+      hash: md5
+      md5: 3299259f9b378945ca5ef0549875fad8
+      size: 2234
+    outs:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: f9dd64449dfcedb1c1ca549f3b8ee046
+      size: 39434
