@@ -7,11 +7,7 @@ vars:
       models: ../../artifacts/umu/models
       reports: ../../artifacts/umu/reports
 
-  - splits:
-      - Random
-      - ShortEdge
-      - LongEdge
-      - Cutout
+  - splits: [Random, KFold, LeaveOneGroupOut]
 
   # Models are defined in params.yaml
 
