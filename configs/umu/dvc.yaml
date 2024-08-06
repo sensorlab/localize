@@ -26,6 +26,17 @@ stages:
     outs:
       - ${path.data}/interim/umu.pkl
 
+  eda_raw:
+    desc: Exploratory data analysis
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/interim/umu.pkl
+      --output ${path.reports}/interim/umu.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/interim/umu.pkl
+    outs:
+      - ${path.reports}/interim/umu.tex
 
   featurize:
     desc: Enrich dataset with additional features
@@ -38,6 +49,18 @@ stages:
       - ${path.data}/interim/umu.pkl
     outs:
       - ${path.data}/prepared/umu.pkl
+
+  eda_features:
+    desc: Exploratory data analysis
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/prepared/umu.pkl
+      --output ${path.reports}/prepared/umu.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/interim/umu.pkl
+    outs:
+      - ${path.reports}/prepared/umu.tex
 
   split:
     desc: Split dataset and store indices

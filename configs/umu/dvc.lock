@@ -12,8 +12,8 @@ stages:
       size: 2489104
     - path: ../../src/umu/prepare.py
       hash: md5
-      md5: 0dda223716a47bfd45a800f93c7f05c0
-      size: 1299
+      md5: 38f3dae8ac96e8fc50c36c8f1e379ea5
+      size: 1298
     outs:
     - path: ../../artifacts/umu/data/interim/umu.pkl
       hash: md5
@@ -561,3 +561,54 @@ stages:
       hash: md5
       md5: 2a1ec74baa1c09b4e00d23fb9418819e
       size: 2081
+  eda:
+    cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/interim/umu.pkl\
+      \ --output ../../artifacts/umu/reports/interim/umu.tex\n"
+    deps:
+    - path: ../../artifacts/umu/data/interim/umu.pkl
+      hash: md5
+      md5: c6e81e2d30f7b20a4a5ab7ca834dcb0e
+      size: 40240
+    - path: ../../src/eda.py
+      hash: md5
+      md5: 5c7c479f69bebeb5246b594bb8901733
+      size: 5957
+    outs:
+    - path: ../../artifacts/umu/reports/interim/umu.tex
+      hash: md5
+      md5: e937b5997077487f98f7781b3e76e0ad
+      size: 6096
+  eda_raw:
+    cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/interim/umu.pkl\
+      \ --output ../../artifacts/umu/reports/interim/umu.tex\n"
+    deps:
+    - path: ../../artifacts/umu/data/interim/umu.pkl
+      hash: md5
+      md5: c6e81e2d30f7b20a4a5ab7ca834dcb0e
+      size: 40240
+    - path: ../../src/eda.py
+      hash: md5
+      md5: b9bb3128857397da1db7a2f346fd31cd
+      size: 6240
+    outs:
+    - path: ../../artifacts/umu/reports/interim/umu.tex
+      hash: md5
+      md5: e937b5997077487f98f7781b3e76e0ad
+      size: 6096
+  eda_features:
+    cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/prepared/umu.pkl\
+      \ --output ../../artifacts/umu/reports/prepared/umu.tex\n"
+    deps:
+    - path: ../../artifacts/umu/data/interim/umu.pkl
+      hash: md5
+      md5: c6e81e2d30f7b20a4a5ab7ca834dcb0e
+      size: 40240
+    - path: ../../src/eda.py
+      hash: md5
+      md5: b9bb3128857397da1db7a2f346fd31cd
+      size: 6240
+    outs:
+    - path: ../../artifacts/umu/reports/prepared/umu.tex
+      hash: md5
+      md5: 3d45a22b509fab5b6609400ba10e392b
+      size: 6346
