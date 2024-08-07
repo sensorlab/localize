@@ -1,19 +1,17 @@
 schema: '2.0'
 stages:
   prepare:
-    cmd: "unzip ../../artifacts/umu/data/raw/UMU.zip -d ../../artifacts/umu/data/raw/\n\
-      python ../../src/umu/prepare.py --method average --input ../../artifacts/umu/data/raw/tcp_nokia_20240325.xlsx\
-      \ --output ../../artifacts/umu/data/interim/umu.pkl\nrm ../../artifacts/umu/data/raw/*.xlsx\n\
-      rm ../../artifacts/umu/data/raw/__MACOSX/.*.xlsx\n"
+    cmd: "python ../../src/umu/prepare.py --method average --input ../../artifacts/umu/data/raw/tcp_nokia_20240325.xlsx\
+      \ --output ../../artifacts/umu/data/interim/umu.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/raw/umu.zip
       hash: md5
-      md5: 1345918b8746ab5f376b8787f408f32b
-      size: 2489104
+      md5: e50d6be220ff2123b41c8d069c7798d1
+      size: 2484882
     - path: ../../src/umu/prepare.py
       hash: md5
-      md5: 38f3dae8ac96e8fc50c36c8f1e379ea5
-      size: 1298
+      md5: 0dda223716a47bfd45a800f93c7f05c0
+      size: 1299
     outs:
     - path: ../../artifacts/umu/data/interim/umu.pkl
       hash: md5
@@ -588,13 +586,13 @@ stages:
       size: 40240
     - path: ../../src/eda.py
       hash: md5
-      md5: b9bb3128857397da1db7a2f346fd31cd
-      size: 6240
+      md5: 5378a7160efc3f921a640ec878645c2f
+      size: 7689
     outs:
     - path: ../../artifacts/umu/reports/interim/umu.tex
       hash: md5
-      md5: e937b5997077487f98f7781b3e76e0ad
-      size: 6096
+      md5: 9af213af92bbb778f6e3f10ac3224da7
+      size: 10388
   eda_features:
     cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/prepared/umu.pkl\
       \ --output ../../artifacts/umu/reports/prepared/umu.tex\n"
@@ -605,10 +603,10 @@ stages:
       size: 40240
     - path: ../../src/eda.py
       hash: md5
-      md5: b9bb3128857397da1db7a2f346fd31cd
-      size: 6240
+      md5: 5378a7160efc3f921a640ec878645c2f
+      size: 7689
     outs:
     - path: ../../artifacts/umu/reports/prepared/umu.tex
       hash: md5
-      md5: 3d45a22b509fab5b6609400ba10e392b
-      size: 6346
+      md5: b95f21a023a44b57a66bef4a11ee0946
+      size: 10642
