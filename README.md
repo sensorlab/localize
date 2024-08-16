@@ -30,7 +30,7 @@ git clone https://github.com/sensorlab/nancy-saas-localization
 2. Navigate to the cloned directory and install the required Conda dependencies:
 
 ```bash
-conda env create -f environment.yml
+conda env create -f environment.yaml
 conda activate nancy
 ```
 
