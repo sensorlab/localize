@@ -47,7 +47,9 @@ dependencies:
     - pre-commit
     - ruff
     - SciencePlots~=2.1
-
+    - seaborn
+    - openpyxl
+    - ydata_profiling
     - tensorflow[and-cuda]~=2.15.0
     - autokeras
 
