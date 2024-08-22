@@ -63,3 +63,35 @@ class ReshapeTransformer(BaseEstimator, TransformerMixin):
 
         else:
             raise NotImplementedError
+
+def replace_extreme_outliers(series: pd.Series, multiplier: float = 3.0) -> pd.Series:
+    """
+    Replaces extreme outliers in a pandas Series with interpolated values.
+    
+    Parameters:
+    series (pd.Series): The input data series.
+    multiplier (float): The multiplier for the IQR to define extreme outliers (default is 3.0).
+    
+    Returns:
+    pd.Series: A series with extreme outliers replaced by interpolated values.
+    """
+    
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+    IQR = Q3 - Q1
+    
+    lower_bound = Q1 - multiplier * IQR
+    upper_bound = Q3 + multiplier * IQR
+    
+    outliers = (series < lower_bound) | (series > upper_bound)
+    
+    series_cleaned = series.copy()
+    
+    # Replace outliers with NaN for interpolation
+    series_cleaned[outliers] = np.nan
+    series_cleaned = series_cleaned.interpolate(method='linear')
+    
+    # In case of any remaining NaNs at the beginning or end, forward/backward fill them
+    series_cleaned = series_cleaned.bfill().ffill()
+    
+    return series_cleaned

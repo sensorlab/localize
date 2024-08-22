@@ -63,20 +63,21 @@ class ExploratoryDataAnalysis:
     
     def column_histogram(self):
         # make sure the figures path exists
-        figures_path = str(self.output_path).replace('/umu.tex', '/figures/')
+        figures_path = str(self.output_path).replace('/lumos5g.tex', '/figures/')
         Path(figures_path).mkdir(parents=True, exist_ok=True)
-
         figures = []
 
         # Identify numerical columns
         numerical_columns = self.df.select_dtypes(include=[np.number]).columns
 
+        print(self.df.dtypes)
         # Perform univariate analysis on numerical columns
         for column in numerical_columns:
             # For continuous variables
-            if len(self.df[column].unique()) > 10:  # Assuming if unique values > 10, consider it continuous
+            num_unique = len(self.df[column].unique())
+            if  num_unique> 10:  # Assuming if unique values > 10, consider it continuous
                 plt.figure(figsize=(8, 6))
-                sns.histplot(self.df[column], kde=True)
+                ax = sns.histplot(self.df[column], kde=True) # without bins = min(num_unique, 20) it get's stuck if extreme outliers are present, 20 is just an arbitrary value
                 plt.title(f'Histogram of {column}')
                 plt.xlabel(column)
                 plt.ylabel('Frequency')
@@ -105,10 +106,12 @@ class ExploratoryDataAnalysis:
 
     def heatmap(self):
         # provide the path to save to
-        figure_path = Path(str(self.output_path).replace('/umu.tex', '/figures/heatmap.png'))
-
+        figure_path = Path(str(self.output_path).replace('/lumos5g.tex', '/figures/heatmap.png'))
+        
+        print(self.df)
+        
         # Create a correlation matrix
-        corr_matrix = self.df.corr()
+        corr_matrix = self.df.select_dtypes(include='number').corr()
 
         # Plot the heatmap
         plt.figure(figsize=(10, 8))
@@ -175,10 +178,11 @@ class ExploratoryDataAnalysis:
         cols_stats = self.column_stats()
         hist_figs = self.column_histogram()
         self.heatmap()
+        
 
         # prepare the dataframe with heatnao details to add to thee histogram df
         mapdf = pd.DataFrame([{ "ColName": "heatmap", "Path": Path('./figures/heatmap.png') }])
-
+        
         # generate the .tex report
         self.generate_latex_document(
             [[cols_summary, "Col summary", "Col summary"],
@@ -202,22 +206,21 @@ class ExploratoryDataAnalysis:
 )
 
 def cli(input_path: Path, output_path: Path):
-
     if str(output_path).find("interim") >= 0:
         df = joblib.load(input_path)
     elif str(output_path).find("prepared") >=0:
         features, targets = load_data(input_path)
-        df = pd.concat([features, targets])
+        df = pd.concat([features, targets], axis=1)
     else:
         print("!! eda not available for this input data")
-
+    
     # generate .tex eda report
     edai = ExploratoryDataAnalysis(df, output_path)
     edai.gen_tex_report()
-
+    
     # generate html eda report
     profile = ProfileReport(df, title="Profiling Report")
-    htmlpath = str(output_path).replace('/umu.tex', '/umu.html/')
+    htmlpath = str(output_path).replace('/lumos5g.tex', '/lumos5g.html')
     profile.to_file(htmlpath)
         
 if __name__ == "__main__":
