@@ -29,6 +29,17 @@ stages:
     outs:
       - ${path.data}/interim/ctw2020.pkl
 
+  eda_raw:
+    desc: Exploratory data analysis
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/interim/ctw2020.pkl
+      --output ${path.reports}/interim/ctw2020.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/interim/ctw2020.pkl
+    outs:
+      - ${path.reports}/interim/ctw2020.tex
 
   featurize:
     desc: Enrich dataset with additional features
@@ -41,6 +52,7 @@ stages:
       - ${path.data}/interim/ctw2020.pkl
     outs:
       - ${path.data}/prepared/ctw2020.pkl
+      
 
   flatten:
     desc: Prepare flatten input data for cetain ML algorithms
@@ -53,6 +65,18 @@ stages:
       - ${path.data}/prepared/ctw2020.pkl
     outs:
       - ${path.data}/prepared/ctw2020.flatten.pkl
+
+  eda_features:
+    desc: Exploratory data analysis
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/prepared/ctw2020.flatten.pkl
+      --output ${path.reports}/prepared/ctw2020.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/prepared/ctw2020.flatten.pkl
+    outs:
+      - ${path.reports}/prepared/ctw2020.tex
 
   split:
     desc: Split dataset and store indices

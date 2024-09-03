@@ -34,7 +34,20 @@ stages:
       - ${path.data}/raw/CTW2019_Dataset_h5.zip
     outs:
       - ${path.data}/interim/ctw2019.pkl
+      
 
+  eda_raw:
+    desc: Exploratory data analysis
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/interim/ctw2019.pkl
+      --output ${path.reports}/interim/ctw2019.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/interim/ctw2019.pkl
+    outs:
+      - ${path.reports}/interim/ctw2019.tex
+      
 
   featurize:
     desc: Enrich dataset with additional features
@@ -60,6 +73,19 @@ stages:
       - ${path.data}/prepared/ctw2019.pkl
     outs:
       - ${path.data}/prepared/ctw2019.flatten.pkl
+ 
+ 
+  eda_features:
+    desc: Exploratory data analysis
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/prepared/ctw2019.flatten.pkl
+      --output ${path.reports}/prepared/ctw2019.flatten.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/prepared/ctw2019.flatten.pkl
+    outs:
+      - ${path.reports}/prepared/ctw2019.flatten.tex
 
 
   split:

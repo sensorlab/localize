@@ -33,6 +33,18 @@ stages:
     outs:
       - ${path.data}/interim/lumos5g.pkl
 
+  eda_raw:
+    desc: Exploratory data analysis
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/interim/lumos5g.pkl
+      --output ${path.reports}/interim/lumos5g.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/interim/lumos5g.pkl
+    outs:
+      - ${path.reports}/interim/lumos5g.tex
+
   featurize:
     desc: Featurize dataset
     cmd: >
@@ -44,6 +56,18 @@ stages:
       - ${path.data}/interim/lumos5g.pkl
     outs:
       - ${path.data}/prepared/lumos5g.pkl
+      
+  eda_features:
+    desc: Exploratory data analysis
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/prepared/lumos5g.pkl
+      --output ${path.reports}/prepared/lumos5g.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/prepared/lumos5g.pkl
+    outs:
+      - ${path.reports}/prepared/lumos5g.tex
 
   split:
     desc: Split dataset and store indices

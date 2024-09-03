@@ -25,7 +25,7 @@ def cli(input_path: Path, output_path: Path):
     # Modifications to dataset for machine learning
     h_flat = h.reshape(h.shape[0], -1)
     features = np.concatenate((h_flat, snr), axis=1, dtype=np.float32)
-    assert features.shape == (h.shape[0], 16 * 924 * 2 + 16)
+    assert features.shape == (h.shape[0], 16 * (924 * 2 + 1))
 
     # Save newly transformed dataset
     joblib.dump((features, targets), output_path)

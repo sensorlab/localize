@@ -8,7 +8,7 @@ vars:
       reports: ../../artifacts/logatec/reports
 
   - subsets: [winter, spring]
-  - splits: [Random, KFold, LeaveOneGroupOut]
+  - splits: [Random] #, KFold, LeaveOneGroupOut]
 
   # Models are defined in params.yaml
 
@@ -28,6 +28,19 @@ stages:
     outs:
       - ${path.data}/interim/${item.subset}.pkl
 
+  eda_raw:
+    desc: Exploratory data analysis
+    matrix:
+      subset: ${subsets}
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/interim/${item.subset}.pkl
+      --output ${path.reports}/interim/${item.subset}.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/interim/${item.subset}.pkl
+    outs:
+      - ${path.reports}/interim/${item.subset}.tex
 
   featurize:
     desc: Enrich dataset with additional features
@@ -43,6 +56,20 @@ stages:
     outs:
       - ${path.data}/prepared/${item.subset}.pkl
 
+  eda_features:
+    desc: Exploratory data analysis
+    matrix:
+      subset: ${subsets}
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/prepared/${item.subset}.pkl
+      --output ${path.reports}/prepared/${item.subset}.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/prepared/${item.subset}.pkl
+    outs:
+      - ${path.reports}/prepared/${item.subset}.tex
+      
   split:
     desc: Prepare train-test split indices for model training and evaluation
     matrix:
