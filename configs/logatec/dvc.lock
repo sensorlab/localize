@@ -1327,8 +1327,8 @@ stages:
       size: 10172
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.LinearRegression:
@@ -1338,8 +1338,8 @@ stages:
     outs:
     - path: ../../artifacts/logatec/models/winter-LinearRegression-RandomSplit-results.pkl
       hash: md5
-      md5: 1e25886de14fcffb0da47f70054764b2
-      size: 18165
+      md5: 59b220a0df269395798409ed8c4f6277
+      size: 5503
   optimization@winter-Random-RandomForestRegressor:
     cmd: "python ../../src/benchmark.py --use RandomForestRegressor --data ../../artifacts/logatec/data/prepared/winter.pkl\
       \ --split-indices ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl\
@@ -1355,8 +1355,8 @@ stages:
       size: 10172
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.RandomForestRegressor:
@@ -1383,8 +1383,8 @@ stages:
     outs:
     - path: ../../artifacts/logatec/models/winter-RandomForestRegressor-RandomSplit-results.pkl
       hash: md5
-      md5: 94efd32e4052e858c8fc62370025eb7b
-      size: 18204
+      md5: 6997cbd239e57a45debb11437524544c
+      size: 6975
   optimization@winter-Random-XGBRegressor:
     cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/logatec/data/prepared/winter.pkl\
       \ --split-indices ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl\
@@ -1400,8 +1400,8 @@ stages:
       size: 10172
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.XGBRegressor:
@@ -1414,8 +1414,8 @@ stages:
     outs:
     - path: ../../artifacts/logatec/models/winter-XGBRegressor-RandomSplit-results.pkl
       hash: md5
-      md5: e13be67ada9742ca32b8bee9a89f3e66
-      size: 18161
+      md5: 6afcfd8c63d39b0ff9dd2680de8d32a3
+      size: 5487
   optimization@winter-Random-KNeighborsRegressor:
     cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --data ../../artifacts/logatec/data/prepared/winter.pkl\
       \ --split-indices ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl\
@@ -1431,8 +1431,8 @@ stages:
       size: 10172
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.KNeighborsRegressor:
@@ -1461,8 +1461,8 @@ stages:
     outs:
     - path: ../../artifacts/logatec/models/winter-KNeighborsRegressor-RandomSplit-results.pkl
       hash: md5
-      md5: 0e8902078057c1834634761ce07ac375
-      size: 18248
+      md5: 449a007cc661c6b9b0bf18b1bbff35fc
+      size: 11263
   optimization@winter-KFold-LinearRegression:
     cmd: "python ../../src/benchmark.py --use LinearRegression --data ../../artifacts/logatec/data/prepared/winter.pkl\
       \ --split-indices ../../artifacts/logatec/data/splits/winter-KFoldSplit.pkl\
@@ -1780,8 +1780,8 @@ stages:
       size: 94615
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.LinearRegression:
@@ -1791,8 +1791,8 @@ stages:
     outs:
     - path: ../../artifacts/logatec/models/spring-LinearRegression-RandomSplit-results.pkl
       hash: md5
-      md5: 59a9ab35b6396b39551db11e7ad2165b
-      size: 123677
+      md5: 6567b91afec2b13090d4e9297f16bd56
+      size: 31895
   optimization@spring-Random-RandomForestRegressor:
     cmd: "python ../../src/benchmark.py --use RandomForestRegressor --data ../../artifacts/logatec/data/prepared/spring.pkl\
       \ --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl\
@@ -1808,8 +1808,8 @@ stages:
       size: 94615
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.RandomForestRegressor:
@@ -1836,8 +1836,8 @@ stages:
     outs:
     - path: ../../artifacts/logatec/models/spring-RandomForestRegressor-RandomSplit-results.pkl
       hash: md5
-      md5: 73fb0b41511808a807ae7a7d75496dc4
-      size: 123716
+      md5: ca4e522097f6429fae7714ba2dbb8ecd
+      size: 33367
   optimization@spring-Random-XGBRegressor:
     cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/logatec/data/prepared/spring.pkl\
       \ --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl\
@@ -1853,8 +1853,8 @@ stages:
       size: 94615
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.XGBRegressor:
@@ -1867,8 +1867,8 @@ stages:
     outs:
     - path: ../../artifacts/logatec/models/spring-XGBRegressor-RandomSplit-results.pkl
       hash: md5
-      md5: 11f75d801d56242f4fe1fd6cfd9ac793
-      size: 123673
+      md5: 0b032bbe1ec66f93fbce7ffc6d0f10a8
+      size: 31879
   optimization@spring-Random-KNeighborsRegressor:
     cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --data ../../artifacts/logatec/data/prepared/spring.pkl\
       \ --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl\
@@ -1884,8 +1884,8 @@ stages:
       size: 94615
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.KNeighborsRegressor:
@@ -1914,8 +1914,8 @@ stages:
     outs:
     - path: ../../artifacts/logatec/models/spring-KNeighborsRegressor-RandomSplit-results.pkl
       hash: md5
-      md5: 317c1c412d4633aefe79319f02cbdbcb
-      size: 123760
+      md5: ce1a05927850f84a1583ebcf33eb18a6
+      size: 37655
   optimization@spring-KFold-LinearRegression:
     cmd: "python ../../src/benchmark.py --use LinearRegression --data ../../artifacts/logatec/data/prepared/spring.pkl\
       \ --split-indices ../../artifacts/logatec/data/splits/spring-KFoldSplit.pkl\
@@ -2228,8 +2228,8 @@ stages:
       size: 33637
     - path: ../../src/eda.py
       hash: md5
-      md5: d848cc84fb27d242041e907280f8b80f
-      size: 7999
+      md5: e6c9a4d447ccb8c1bda8160e694c241b
+      size: 9439
     outs:
     - path: ../../artifacts/logatec/reports/prepared/winter.tex
       hash: md5
@@ -2262,8 +2262,8 @@ stages:
       size: 33514
     - path: ../../src/eda.py
       hash: md5
-      md5: d848cc84fb27d242041e907280f8b80f
-      size: 7999
+      md5: e6c9a4d447ccb8c1bda8160e694c241b
+      size: 9439
     outs:
     - path: ../../artifacts/logatec/reports/interim/winter.tex
       hash: md5
@@ -2279,8 +2279,8 @@ stages:
       size: 262439
     - path: ../../src/eda.py
       hash: md5
-      md5: d848cc84fb27d242041e907280f8b80f
-      size: 7999
+      md5: e6c9a4d447ccb8c1bda8160e694c241b
+      size: 9439
     outs:
     - path: ../../artifacts/logatec/reports/interim/spring.tex
       hash: md5

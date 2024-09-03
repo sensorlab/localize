@@ -39,7 +39,7 @@ stages:
       md5: bea9e053dabd5507008cd142d278559c
       size: 10311111051
   split@Random:
-    cmd: "python ../../src/ctw2020/split.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\
+    cmd: "python ../../src/ctw2020/split.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\
       \ --split Random --output-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl\n"
     deps:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
@@ -59,8 +59,8 @@ stages:
     outs:
     - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
       hash: md5
-      md5: 7042559c7e0dd6ff6535f053041287c0
-      size: 996571
+      md5: b55173f38f229f98201eb9404ccb2033
+      size: 4723
   flatten:
     cmd: "python ../../src/ctw2020/flatten.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\
       \ --output ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\n"
@@ -71,13 +71,13 @@ stages:
       size: 10311111051
     - path: ../../src/ctw2020/flatten.py
       hash: md5
-      md5: a185fffb436cdff572a4b0a331ce1923
-      size: 855
+      md5: a6124ba93fcf6670aef29772b788fbc2
+      size: 867
     outs:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
       hash: md5
-      md5: 88d6c6575b5c9bc6b43cae805debcf6b
-      size: 10311111019
+      md5: 1f536bcc904e19e12f6a426242c372ea
+      size: 41418739
   benchmark@Random-model0:
     cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\
       \ --split-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results\
@@ -85,16 +85,16 @@ stages:
     deps:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
       hash: md5
-      md5: 88d6c6575b5c9bc6b43cae805debcf6b
-      size: 10311111019
+      md5: 1f536bcc904e19e12f6a426242c372ea
+      size: 41418739
     - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
       hash: md5
-      md5: 7042559c7e0dd6ff6535f053041287c0
-      size: 996571
+      md5: b55173f38f229f98201eb9404ccb2033
+      size: 4723
     - path: ../../src/benchmark.py
       hash: md5
-      md5: f7257f6eda31513a56fd6fac7c22eeaa
-      size: 8243
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.XGBRegressor:
@@ -106,8 +106,8 @@ stages:
     outs:
     - path: ../../artifacts/ctw2020/models/XGBRegressor-RandomSplit-results.pkl
       hash: md5
-      md5: 7365890c805531d2b11d2e449630a669
-      size: 399329
+      md5: ee3ebbe2116ac82ab38e9de5ce9742e2
+      size: 2263
   evaluation:
     cmd: "python ../../src/report.py ../../artifacts/ctw2020/models/*-results.pkl\
       \ --output-report ../../artifacts/ctw2020/reports/metrics.json\n"

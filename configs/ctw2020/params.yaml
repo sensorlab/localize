@@ -7,7 +7,8 @@ models:
   LinearRegression:
     module: sklearn.linear_model
     class: LinearRegression
-
+    hyperparameters:
+      fit_intercept: [true, false]
   # RandomForestRegressor:
   #   module: sklearn.ensemble
   #   class: RandomForestRegressor
@@ -23,6 +24,11 @@ models:
     parameters:
       random_state: 42
       enable_categorical: true
+    hyperparameters:
+      n_estimators: [10, 50, 100, 250]
+      max_depth: [3, 5, 10, 30, 50] 
+      learning_rate: [0.01, 0.1, 0.2]
+      
 
   # KNeighborsRegressor:
   #   module: sklearn.neighbors

@@ -247,8 +247,8 @@ stages:
       size: 10901145
     - path: ../../src/lumos5g/split.py
       hash: md5
-      md5: ea301e7f3dbf638046c9ff8ab6a60c39
-      size: 1664
+      md5: 6d4d97c2426e345cad7d8e5033b1c809
+      size: 1903
     params:
       params.yaml:
         split:
@@ -275,8 +275,8 @@ stages:
       size: 2725514
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.KNeighborsRegressor:
@@ -303,8 +303,8 @@ stages:
     outs:
     - path: ../../artifacts/lumos5g/models/KNeighborsRegressor-KFoldSplit-results.pkl
       hash: md5
-      md5: 2cd906291ea0ab12c264b858d17b00c3
-      size: 2182551
+      md5: 2e4108c20d8a10dc6cfa68ac5c88379e
+      size: 550558
   optimization@KFold-LinearRegression:
     cmd: "python ../../src/benchmark.py --use LinearRegression --data ../../artifacts/lumos5g/data/prepared/lumos5g.pkl\
       \ --split-indices ../../artifacts/lumos5g/data/splits/KFoldSplit.pkl --output-results\
@@ -320,18 +320,22 @@ stages:
       size: 2725514
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.LinearRegression:
           module: sklearn.linear_model
           class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
     outs:
     - path: ../../artifacts/lumos5g/models/LinearRegression-KFoldSplit-results.pkl
       hash: md5
-      md5: 9f1b1d390c47fa0f573e379237a200ad
-      size: 2182468
+      md5: d8d52ff73849c0934f11fb5407191525
+      size: 546478
   optimization@KFold-RandomForestRegressor:
     cmd: "python ../../src/benchmark.py --use RandomForestRegressor --data ../../artifacts/lumos5g/data/prepared/lumos5g.pkl\
       \ --split-indices ../../artifacts/lumos5g/data/splits/KFoldSplit.pkl --output-results\
@@ -347,8 +351,8 @@ stages:
       size: 2725514
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.RandomForestRegressor:
@@ -374,8 +378,8 @@ stages:
     outs:
     - path: ../../artifacts/lumos5g/models/RandomForestRegressor-KFoldSplit-results.pkl
       hash: md5
-      md5: e79d374908f607afd77a177eaabfebb7
-      size: 2182506
+      md5: acd70f2720b3a941d7fd72c6ff752a84
+      size: 547870
   optimization@KFold-XGBRegressor:
     cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/lumos5g/data/prepared/lumos5g.pkl\
       \ --split-indices ../../artifacts/lumos5g/data/splits/KFoldSplit.pkl --output-results\
@@ -391,8 +395,8 @@ stages:
       size: 2725514
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 36954e5dbd3d1da8547e63a6d2f37ddf
-      size: 8473
+      md5: 09883bbe25905a59e21e7ab82ff4e59c
+      size: 11189
     params:
       params.yaml:
         models.XGBRegressor:
@@ -401,11 +405,27 @@ stages:
           parameters:
             random_state: 42
             enable_categorical: true
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 3
+            - 5
+            - 10
+            - 30
+            - 50
+            learning_rate:
+            - 0.01
+            - 0.1
+            - 0.2
     outs:
     - path: ../../artifacts/lumos5g/models/XGBRegressor-KFoldSplit-results.pkl
       hash: md5
-      md5: a875bf957a572f648d72c1d7386f745f
-      size: 2182464
+      md5: ced5953056ab04d55d534c2c7273d766
+      size: 551582
   eda_raw:
     cmd: "python ../../src/eda.py --input ../../artifacts/lumos5g/data/interim/lumos5g.pkl\
       \ --output ../../artifacts/lumos5g/reports/interim/lumos5g.tex\n"
@@ -416,13 +436,13 @@ stages:
       size: 8382327
     - path: ../../src/eda.py
       hash: md5
-      md5: f905d544c1df5740e4312310f93d3abf
-      size: 7940
+      md5: e6c9a4d447ccb8c1bda8160e694c241b
+      size: 9439
     outs:
     - path: ../../artifacts/lumos5g/reports/interim/lumos5g.tex
       hash: md5
-      md5: 7009c85fab8f7cdc713910203e8d7d66
-      size: 11556
+      md5: e79a5529c2967eaafab2288bdb459ee5
+      size: 11676
   eda_features:
     cmd: "python ../../src/eda.py --input ../../artifacts/lumos5g/data/prepared/lumos5g.pkl\
       \ --output ../../artifacts/lumos5g/reports/prepared/lumos5g.tex\n"
@@ -433,10 +453,10 @@ stages:
       size: 10901145
     - path: ../../src/eda.py
       hash: md5
-      md5: 8cb0f081d4b81e47ce1e13d3faaa57ad
-      size: 7970
+      md5: e6c9a4d447ccb8c1bda8160e694c241b
+      size: 9439
     outs:
     - path: ../../artifacts/lumos5g/reports/prepared/lumos5g.tex
       hash: md5
-      md5: 1a53912b7d3211aa134cec81824e4b74
-      size: 13140
+      md5: c81915c42537a81ae5275ad563160012
+      size: 13300
