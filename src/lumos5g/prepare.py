@@ -5,6 +5,16 @@ import click
 import joblib
 import pandas as pd
 
+import os
+import sys
+# Add the project root directory to sys.path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    print(project_root)
+    sys.path.insert(0, project_root)
+    
+from data import replace_extreme_outliers
+
 
 def load_raw_data(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
@@ -90,6 +100,9 @@ def cli(input_path: Path, output_path: Path, task: str):
     # NaN values will be below lowest recognized value
     for key in ("lte_rssi", "lte_rsrp", "lte_rsrq", "nr_ssRsrp", "nr_ssRsrq", "nr_ssSinr"):
         df[key].fillna(df[key].min() - 10, inplace=True)
+
+    for col in df.select_dtypes(include='number').columns:
+        df[col] = replace_extreme_outliers(df[col])
 
     # Convert string columns into "category" type
     df = df.astype({"nrStatus": "category", "mobility_mode": "category", "trajectory_direction": "category"})

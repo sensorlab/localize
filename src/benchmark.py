@@ -32,20 +32,25 @@ if platform.system() == 'Darwin':
 
 import yaml
 from sklearn.base import BaseEstimator
-from sklearn.model_selection import GridSearchCV
+from src.gridsearch.gridsearch_manager import GridSearchManager
 from sklearn.pipeline import Pipeline
 from skorch import NeuralNetClassifier, NeuralNetRegressor
 from skorch.helper import SliceDict
 
 from src import PredefinedSplit, safe_indexing, save_params
 
+from data import root_mean_squared_error, euclidean_distance, median_euclidean_distance, mean_percentage_error
+from sklearn import metrics
 
 torch.set_float32_matmul_precision("high")
+
 
 # List of workarounds
 quirks = {
     # Fix #1: Skorch and GridSearch don't play well with parallel CVs
-    "is_skorch_module": False
+    "is_skorch_module": False,
+    # Fix #2: GridSearchCV doesn't save trained models
+    "store_models": False # CONSTANT
 }
 
 
@@ -99,7 +104,7 @@ def construct_model_or_pipeline(model_config: dict) -> BaseEstimator:
 
 
 def get_hyperparameters(model_name, models_config):
-    return models_config[model_name].get("hyperparameters", {})
+    return models_config[model_name].get("hyperparameters", {'n_jobs': [4]})
 
 
 @click.command()
@@ -191,80 +196,126 @@ def cli(
     # construct pipeline from YAML file and obtain hyperparameters
     model_or_pipeline = construct_model_or_pipeline(model_config)
     hyperparameters = get_hyperparameters(model_name, config["models"])
+    
+    grid_search_parameters = {"estimator": model_or_pipeline,
+                              "param_grid":hyperparameters,
+                              "cv":cv}
 
-    # general train parameters
-    # n_jobs = joblib.cpu_count()
-    gridsearch_jobs = 4
-    # backend = "threading"
+    scorers= {'rmse': {'scorer': root_mean_squared_error, 'greater_is_better': False},
+              'euclidean': {'scorer': euclidean_distance, 'greater_is_better': False},
+              'r_squared': {'scorer': metrics.r2_score, 'greater_is_better': True},
+              'mae': {'scorer': metrics.mean_absolute_error, 'greater_is_better': False},
+              'mede': {'scorer': median_euclidean_distance, 'greater_is_better': False},
+              'mpe': {'scorer': mean_percentage_error, 'greater_is_better': False},
+             }
+    if True:
+        grid_search = GridSearchManager(tmp_dir_path = "../../tmp/",
+                                        model_save_dir_path = Path(str(results_path).replace(".pkl", "")),
+                                        single_thread=quirks["is_skorch_module"], 
+                                        scorers = scorers)
+        grid_search.search(features, targets, search_parameters = grid_search_parameters)
 
-    if quirks["is_skorch_module"]:
-        gridsearch_jobs = 1
+        reports = grid_search.generate_report(store_top_num_models = 0.1)
 
-    print(model_or_pipeline)
-    print(f"{hyperparameters=}")
-
-    if hyperparameters:
-        grid_search = GridSearchCV(
-            estimator=model_or_pipeline,
-            param_grid=hyperparameters,
-            scoring="neg_mean_squared_error",
-            n_jobs=gridsearch_jobs,
-            cv=cv,
-            verbose=2,
-            error_score="raise",
-        )
-
-        # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
-        grid_search.fit(features, targets)
-
-        model_or_pipeline = grid_search.best_estimator_
-        best_hparams = grid_search.best_params_
-
+        reports["model_data"]["model_metadata"] = {"algorithm": model_name}
+        reports["split_data"]["split_metadata"] = splits["metadata"]
+        
+        grid_search.cleanup_tmp()
+        
     else:
         best_hparams = hyperparameters
+        results = {}
+        for key in scorers:
+            results[key] = []
+        
+        for train_indices, test_indices in cv.split(features, targets):
+            X_train = safe_indexing(features, train_indices)
+            y_train = safe_indexing(targets, train_indices)
 
-    print(f"{best_hparams=}")
+            X_test = safe_indexing(features, test_indices)
+            y_test = safe_indexing(targets, test_indices)
+
+            time_start = time.perf_counter()
+            # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
+            model_or_pipeline.fit(X_train, y_train)
+            time_end = time.perf_counter()
+
+            time_start = time.perf_counter()
+            # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
+            y_pred = model_or_pipeline.predict(X_test)
+            time_end = time.perf_counter()
+            
+            for key, scorer in scorers.items():
+                results[key].append(scorer["scorer"](y_test, y_pred))
+            
+            y_pred = y_pred.astype(np.float32)
+        for key in scorers:
+            results[f"mean_test_{key}"] = np.mean(results[key])
+            results[f"std_test_{key}"] = np.std(results[key])
+        
+#=======================================
+#     # general train parameters
+#     # n_jobs = joblib.cpu_count()
+#     gridsearch_jobs = 4
+#     # backend = "threading"
+
+#     if quirks["is_skorch_module"]:
+#         gridsearch_jobs = 1
+
+#     print(model_or_pipeline)
+#     print(f"{hyperparameters=}")
+
+#     if hyperparameters:
+#         grid_search = GridSearchCV(
+#             estimator=model_or_pipeline,
+#             param_grid=hyperparameters,
+#             scoring="neg_mean_squared_error",
+#             n_jobs=gridsearch_jobs,
+#             cv=cv,
+#             verbose=2,
+#             error_score="raise",
+#         )
+
+#         # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
+#         grid_search.fit(features, targets)
+
+#         model_or_pipeline = grid_search.best_estimator_
+#         best_hparams = grid_search.best_params_
+
+#     else:
+#         best_hparams = hyperparameters
+
+#     print(f"{best_hparams=}")
 
     # Prepare template for the final report
-    reports = {
-        "predictions": {
-            "y_true": [],
-            "y_pred": [],
-        },
-        "model_metadata": {
-            "algorithm": model_name,
-            "hyperparameters": best_hparams,
-            "train_time": [],
-            "predict_time": [],
-        },
-        "split_metadata": splits["metadata"],
-    }
+    
+#     for train_indices, test_indices in cv.split(features, targets):
+#         X_train = safe_indexing(features, train_indices)
+#         y_train = safe_indexing(targets, train_indices)
 
-    for train_indices, test_indices in cv.split(features, targets):
-        X_train = safe_indexing(features, train_indices)
-        y_train = safe_indexing(targets, train_indices)
+#         X_test = safe_indexing(features, test_indices)
+#         y_test = safe_indexing(targets, test_indices)
 
-        X_test = safe_indexing(features, test_indices)
-        y_test = safe_indexing(targets, test_indices)
+#         time_start = time.perf_counter()
+#         # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
+#         model_or_pipeline.fit(X_train, y_train)
+#         time_end = time.perf_counter()
 
-        time_start = time.perf_counter()
-        # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
-        model_or_pipeline.fit(X_train, y_train)
-        time_end = time.perf_counter()
+#         reports["model_metadata"]["train_time"].append(time_end - time_start)
 
-        reports["model_metadata"]["train_time"].append(time_end - time_start)
+#         time_start = time.perf_counter()
+#         # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
+#         y_pred = model_or_pipeline.predict(X_test)
+#         time_end = time.perf_counter()
 
-        time_start = time.perf_counter()
-        # with joblib.parallel_config(backend=backend, n_jobs=n_jobs, verbose=11):
-        y_pred = model_or_pipeline.predict(X_test)
-        time_end = time.perf_counter()
+#         reports["model_metadata"]["predict_time"].append(time_end - time_start)
 
-        reports["model_metadata"]["predict_time"].append(time_end - time_start)
+#         reports["predictions"]["y_true"].append(y_test)
 
-        reports["predictions"]["y_true"].append(y_test)
+#         y_pred = y_pred.astype(np.float32)
+#         reports["predictions"]["y_pred"].append(y_pred)
 
-        y_pred = y_pred.astype(np.float32)
-        reports["predictions"]["y_pred"].append(y_pred)
+    
 
     if results_path:
         joblib.dump(reports, results_path)
