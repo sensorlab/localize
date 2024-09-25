@@ -20,7 +20,7 @@ stages:
   #     - http://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip
   #   outs:
   #     - ${path.data}/raw/Lumos5G-v1.0.zip
-
+####################
   prepare:
     desc: Prepare Lumos5G dataset for MLOps pipeline
     cmd: |
@@ -56,7 +56,7 @@ stages:
       - ${path.data}/interim/lumos5g.pkl
     outs:
       - ${path.data}/prepared/lumos5g.pkl
-      
+
   eda_features:
     desc: Exploratory data analysis
     cmd: >
@@ -86,19 +86,41 @@ stages:
     outs:
       - ${path.data}/splits/${item.split}Split.pkl
 
-  optimization:
+  gridsearch:
+     desc: Determine best hyper-parameters for algorithm on several CVs
+     matrix:
+       split: ${splits}
+       model: ${gridsearch}
+     cmd: >
+       python ${path.common}/benchmark.py
+       --use ${item.model}
+       --optimizer gridsearch
+       --data ${path.data}/prepared/lumos5g.pkl
+       --split-indices ${path.data}/splits/${item.split}Split.pkl
+       --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+     params:
+       - gridsearch.${item.model}
+     deps:
+       - ${path.common}/benchmark.py
+       - ${path.data}/prepared/lumos5g.pkl
+       - ${path.data}/splits/${item.split}Split.pkl
+     outs:
+       - ${path.models}/${item.model}-${item.split}Split-results.pkl
+
+  automl:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
       split: ${splits}
-      model: ${models}
+      model: ${automl}
     cmd: >
       python ${path.common}/benchmark.py
       --use ${item.model}
+      --optimizer automl
       --data ${path.data}/prepared/lumos5g.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
       --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
     params:
-      - models.${item.model}
+      - automl.${item.model}
     deps:
       - ${path.common}/benchmark.py
       - ${path.data}/prepared/lumos5g.pkl

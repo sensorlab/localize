@@ -47,8 +47,8 @@ stages:
       size: 8382327
     - path: ../../src/lumos5g/featurize.py
       hash: md5
-      md5: 3996bd670bda435a5f2d9881a6d92056
-      size: 1877
+      md5: 8d518a4c4adc6f99fa458734190d5104
+      size: 1873
     outs:
     - path: ../../artifacts/lumos5g/data/prepared/lumos5g.pkl
       hash: md5
@@ -436,8 +436,8 @@ stages:
       size: 8382327
     - path: ../../src/eda.py
       hash: md5
-      md5: e6c9a4d447ccb8c1bda8160e694c241b
-      size: 9439
+      md5: dd1b5c9343c85e5f00c74eb78c53a61f
+      size: 9440
     outs:
     - path: ../../artifacts/lumos5g/reports/interim/lumos5g.tex
       hash: md5
@@ -460,3 +460,115 @@ stages:
       hash: md5
       md5: c81915c42537a81ae5275ad563160012
       size: 13300
+  gridsearch@KFold-LinearRegression:
+    cmd: "python ../../src/benchmark.py --use LinearRegression --optimizer gridsearch\
+      \ --data ../../artifacts/lumos5g/data/prepared/lumos5g.pkl --split-indices ../../artifacts/lumos5g/data/splits/KFoldSplit.pkl\
+      \ --output-results ../../artifacts/lumos5g/models/LinearRegression-KFoldSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/lumos5g/data/prepared/lumos5g.pkl
+      hash: md5
+      md5: 408c1fb23b80e9424d6185782ee5bf8e
+      size: 10901145
+    - path: ../../artifacts/lumos5g/data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8e0253c0cf2d49630b20c8facdbd95f1
+      size: 2725514
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: eded54c29c962738380efdea30354188
+      size: 11874
+    params:
+      params.yaml:
+        gridsearch.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
+    outs:
+    - path: ../../artifacts/lumos5g/models/LinearRegression-KFoldSplit-results.pkl
+      hash: md5
+      md5: cd02cfe0988d0a4905c07ef285a1df77
+      size: 3275198
+  gridsearch@KFold-XGBRegressor:
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/lumos5g/data/prepared/lumos5g.pkl\
+      \ --split-indices ../../artifacts/lumos5g/data/splits/KFoldSplit.pkl --output-results\
+      \ ../../artifacts/lumos5g/models/XGBRegressor-KFoldSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/lumos5g/data/prepared/lumos5g.pkl
+      hash: md5
+      md5: 408c1fb23b80e9424d6185782ee5bf8e
+      size: 10901145
+    - path: ../../artifacts/lumos5g/data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8e0253c0cf2d49630b20c8facdbd95f1
+      size: 2725514
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 3f79c600d52d4c285dbc387bbd7c0a1b
+      size: 11475
+    params:
+      params.yaml:
+        gridsearch.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            enable_categorical: true
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 3
+            - 5
+            - 10
+            - 30
+            - 50
+            learning_rate:
+            - 0.01
+            - 0.1
+            - 0.2
+    outs:
+    - path: ../../artifacts/lumos5g/models/XGBRegressor-KFoldSplit-results.pkl
+      hash: md5
+      md5: 1ae19dd1aa184045b8a12919113135ef
+      size: 549662
+  automl@KFold-example:
+    cmd: "python ../../src/benchmark.py --use example --optimizer automl --data ../../artifacts/lumos5g/data/prepared/lumos5g.pkl\
+      \ --split-indices ../../artifacts/lumos5g/data/splits/KFoldSplit.pkl --output-results\
+      \ ../../artifacts/lumos5g/models/example-KFoldSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/lumos5g/data/prepared/lumos5g.pkl
+      hash: md5
+      md5: 408c1fb23b80e9424d6185782ee5bf8e
+      size: 10901145
+    - path: ../../artifacts/lumos5g/data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8e0253c0cf2d49630b20c8facdbd95f1
+      size: 2725514
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: ff3d131a5e33350d58c2fa64ddfec8be
+      size: 6137
+    params:
+      params.yaml:
+        automl.example:
+          inputs:
+          - name: data_input
+          outputs:
+          - name: x_out
+          - name: y_out
+          fit_settings:
+            epochs: 2
+          settings:
+            max_trials: 2
+            overwrite: true
+    outs:
+    - path: ../../artifacts/lumos5g/models/example-KFoldSplit-results.pkl
+      hash: md5
+      md5: 791773dc3a9de69e73a2e827f54fc225
+      size: 2182862

@@ -1,9 +1,13 @@
+evaluation:
+  metrics: {'rmse': False, 'r_squared': True, 'mae': False, 'mede': False, 'mape': False}
+  save_top_models: 0.1
+
 split:
   seed: 42
   n_splits: 5
   test_size: 0.20
 
-models:
+gridsearch:
   LinearRegression:
     module: sklearn.linear_model
     class: LinearRegression
@@ -40,6 +44,22 @@ models:
       enable_categorical: true
     hyperparameters:
       n_estimators: [10, 50, 100, 250]
-      max_depth: [3, 5, 10, 30, 50] 
+      max_depth: [3, 5, 10, 30, 50]
       learning_rate: [0.01, 0.1, 0.2]
+
+automl:
+  example:
+    inputs:
+      - name: data_input
+
+    outputs:
+      - name: x_out
+      - name: y_out
+
+    settings:
+      overwrite: true
+
+
+
+
 

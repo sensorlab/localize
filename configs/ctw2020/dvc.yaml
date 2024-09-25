@@ -12,22 +12,21 @@ vars:
   # Models are defined in params.yaml
 
 
-
 stages:
   prepare:
     desc: Prepare CTW2020 dataset for the MLOps pipeline
     cmd:
-      - unzip -d ${path.data}/raw/ -j ${path.data}/raw/CTW2020_labelled_data.zip "CTW2020_labelled_data/*.hdf5"
-      - >
-        python ${path.scripts}/prepare.py
-        ${path.data}/raw/file_*.hdf5
-        --output ${path.data}/interim/ctw2020.pkl
-      - rm ${path.data}/raw/*.hdf5
+    - unzip -d ${path.data}/raw/ -j ${path.data}/raw/CTW2020_labelled_data.zip "CTW2020_labelled_data/*.hdf5"
+    - >
+      python ${path.scripts}/prepare.py
+      ${path.data}/raw/file_*.hdf5
+      --output ${path.data}/interim/ctw2020.pkl
+    - rm ${path.data}/raw/*.hdf5
     deps:
-      - ${path.scripts}/prepare.py
-      - ${path.data}/raw/CTW2020_labelled_data.zip
+    - ${path.scripts}/prepare.py
+    - ${path.data}/raw/CTW2020_labelled_data.zip
     outs:
-      - ${path.data}/interim/ctw2020.pkl
+    - ${path.data}/interim/ctw2020.pkl
 
   eda_raw:
     desc: Exploratory data analysis
@@ -52,7 +51,7 @@ stages:
       - ${path.data}/interim/ctw2020.pkl
     outs:
       - ${path.data}/prepared/ctw2020.pkl
-      
+
 
   flatten:
     desc: Prepare flatten input data for cetain ML algorithms
@@ -96,7 +95,7 @@ stages:
       - ${path.data}/splits/${item.split}Split.pkl
 
 
-  benchmark:
+  gridsearch:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
       split: ${splits}
@@ -116,6 +115,7 @@ stages:
     cmd: >
       python ${path.common}/benchmark.py
       --use ${item.model.name}
+      --optimizer gridsearch
       --data ${item.model.input}
       --split-indices ${path.data}/splits/${item.split}Split.pkl
       --output-results ${path.models}/${item.model.name}-${item.split}Split-results.pkl
@@ -128,21 +128,26 @@ stages:
     outs:
       - ${path.models}/${item.model.name}-${item.split}Split-results.pkl
 
-
-  # AutoML:
-  #   matrix:
-  #     split: ${splits}
-  #   cmd: >
-  #     python ${path.scripts}/automl.py
-  #     --data ${path.data}/prepared/ctw2020.pkl
-  #     --split-indices ${path.data}/splits/${item.split}Split.pkl
-  #     --output-results ${path.models}/autokeras-${item.split}Split-results.pkl
-  #   deps:
-  #     - ${path.scripts}/automl.py
-  #     - ${path.data}/prepared/ctw2020.pkl
-  #     - ${path.data}/splits/${item.split}Split.pkl
-  #   outs:
-  #     - ${path.models}/autokeras-${item.split}Split-results.pkl
+  automl:
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      split: ${splits}
+      model: ${automl}
+    cmd: >
+      python ${path.common}/benchmark.py
+      --use ${item.model}
+      --optimizer automl
+      --data ${path.data}/prepared/ctw2020.pkl
+      --split-indices ${path.data}/splits/${item.split}Split.pkl
+      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+    params:
+      - models.${item.model}
+    deps:
+      - ${path.common}/benchmark.py
+      - ${path.data}/prepared/ctw2020.pkl
+      - ${path.data}/splits/${item.split}Split.pkl
+    outs:
+      - ${path.models}/${item.model}-${item.split}Split-results.pkl
 
 
   evaluation:

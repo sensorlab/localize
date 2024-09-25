@@ -34,7 +34,7 @@ stages:
       - ${path.data}/raw/CTW2019_Dataset_h5.zip
     outs:
       - ${path.data}/interim/ctw2019.pkl
-      
+
 
   eda_raw:
     desc: Exploratory data analysis
@@ -47,7 +47,7 @@ stages:
       - ${path.data}/interim/ctw2019.pkl
     outs:
       - ${path.reports}/interim/ctw2019.tex
-      
+
 
   featurize:
     desc: Enrich dataset with additional features
@@ -73,8 +73,8 @@ stages:
       - ${path.data}/prepared/ctw2019.pkl
     outs:
       - ${path.data}/prepared/ctw2019.flatten.pkl
- 
- 
+
+
   eda_features:
     desc: Exploratory data analysis
     cmd: >
@@ -106,52 +106,59 @@ stages:
       - ${path.data}/splits/${item.split}Split.pkl
 
 
-  optimization:
+  gridsearch:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
       split: ${splits}
-      model:
+      model: ${gridsearch}
         # TODO: At some point, I need to remove this, to be more consistent with other pipelines
         #- name: RandomForestRegressor
         #  input: ${path.data}/prepared/ctw2019.flatten.pkl
-        - name: Arnold2018DeepModel
-          input: ${path.data}/prepared/ctw2019.flatten.pkl
-        - name: Arnold2019SoundingModel
-          input: ${path.data}/prepared/ctw2019.pkl
-        - name: Pirnat2022Pirnat1G
-          input: ${path.data}/prepared/ctw2019.pkl
-        - name: Cerar2021Localization
-          input: ${path.data}/prepared/ctw2019.pkl
+ #       - name: Arnold2018DeepModel
+ #         input: ${path.data}/prepared/ctw2019.flatten.pkl
+ #       - name: Arnold2019SoundingModel
+ #         input: ${path.data}/prepared/ctw2019.pkl
+ #       - name: Pirnat2022Pirnat1G
+ #         input: ${path.data}/prepared/ctw2019.pkl
+ #       - name: Cerar2021Localization
+ #         input: ${path.data}/prepared/ctw2019.pkl
     cmd: >
       python ${path.common}/benchmark.py
-      --use ${item.model.name}
-      --data ${item.model.input}
+      --use ${item.model}
+      --optimizer gridsearch
+      --data ${path.data}/prepared/ctw2019.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
-      --output-results ${path.models}/${item.model.name}-${item.split}Split-results.pkl
+      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
     params:
-      - models.${item.model.name}
+      - models.${item.model}
     deps:
       - ${path.common}/benchmark.py
-      - ${item.model.input}
+      - ${path.data}/prepared/ctw2019.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.model.name}-${item.split}Split-results.pkl
+      - ${path.models}/${item.model}-${item.split}Split-results.pkl
 
 
-  # AutoML:
-  #   matrix:
-  #     split: ${splits}
-  #   cmd: >
-  #     python ${path.scripts}/automl.py
-  #     --data ${path.data}/prepared/ctw2019.pkl
-  #     --split-indices ${path.data}/splits/${item.split}Split.pkl
-  #     --output-results ${path.models}/autokeras-${item.split}Split-results.pkl
-  #   deps:
-  #     - ${path.scripts}/automl.py
-  #     - ${path.data}/prepared/ctw2019.pkl
-  #     - ${path.data}/splits/${item.split}Split.pkl
-  #   outs:
-  #     - ${path.models}/autokeras-${item.split}Split-results.pkl
+  automl:
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      split: ${splits}
+      model: ${automl}
+    cmd: >
+      python ${path.common}/benchmark.py
+      --use ${item.model}
+      --optimizer automl
+      --data ${path.data}/prepared/ctw2019.pkl
+      --split-indices ${path.data}/splits/${item.split}Split.pkl
+      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+    params:
+      - models.${item.model}
+    deps:
+      - ${path.common}/benchmark.py
+      - ${path.data}/prepared/ctw2019.pkl
+      - ${path.data}/splits/${item.split}Split.pkl
+    outs:
+      - ${path.models}/${item.model}-${item.split}Split-results.pkl
 
 
   evaluation:

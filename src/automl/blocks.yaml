@@ -1,0 +1,195 @@
+
+
+blocks:
+  basic:
+  - DenseBlock
+  - RNNBlock
+  - ConvBlock
+  - KerasApplicationBlock: # for pretrained?
+    - ResNetBlock #v1, v2
+    - XceptionBlock
+    - EfficientNetBlock #b0, b1, ..., b7
+  - BertBlock
+    
+  heads:
+  - ClassificationHead
+  - RegressionHead
+      
+  preprocessing:
+  - Normalization
+  - ImageAugmentation
+  
+  reduction:
+  - Merge
+  - Flatten
+  - Reduction:
+    - SpatialReduction
+    - TemporalReduction
+  
+  wrapper:
+  - ImageBlock #resnet, xception, vanilla, efficient
+  - TextBlock #BertBlock?
+  - GeneralBlock # Flatten + DenseBlock?
+
+
+Preprocessor:
+  common:
+  - LambdaPreprocessor:
+    - AddOneDimension
+  - CastToInt32
+  - CastToString
+  
+  encoders:
+  - Encoder: #template
+    - OneHotEncoder
+    - LabelEncoder
+  postprocessors:
+  - SigmoidPostprocessor
+  - SoftmaxPostprocessor
+  
+Nodes:
+- Input
+- ImageInput
+- TextInput
+
+    custom_model:
+    inputs:
+      - name: "input"
+
+    blocks:
+      - name: "reshape_block"
+        input: "input"
+        module: "src.automl.custom_blocks"
+        class: "SlidingWindowBlock"
+        
+      - name: "pre_block"
+        class: "DenseBlock"
+        input: "reshape_block"
+        args:
+          num_units: 
+            values: [32, 64, 128, 256, 512]
+          num_layers:  
+            values: [1, 2, 3, 4, 5]
+      
+      - name: "Fancy_block"
+        input: "reshape_block"
+        layers:
+          - class: "LSTM"
+            args:
+              units:  
+                values: [32, 64, 128, 512]
+              return_sequences: [false, true]
+          - class: "Dense"
+            args:
+              units:  
+                values: [32, 64, 128, 256, 512, 1024]
+              activation:  
+                values: ["relu", "tanh"]
+    
+    outputs:
+      - name: "x-out"
+        input: "Fancy_block"
+        args:
+          metrics:
+            - class: "root_mean_squared_error"
+              
+      - name: "y-out"
+        input: "Fancy_block"
+        args:
+          metrics:
+            - class: "root_mean_squared_error"
+        
+
+    search_space:
+      epochs: 5
+      
+    settings:
+      max_trials: 2
+      overwrite: true
+      seed: 42
+      tuner: "bayesian" 
+  
+  
+  
+  
+  autokeras_config:
+
+  # Input specifications
+  inputs:
+    - name: numerical_input
+      class: Input
+      args:
+        shape: [None]
+
+    - name: image_input
+      class: ImageInput
+      args:
+        shape: [256, 256, 3]
+
+  # Model architecture blocks
+  architecture:
+    blocks:
+      # AutoKeras DenseBlock for numerical input
+      - name: dense_block
+        class: DenseBlock
+        args:
+          num_layers: 2
+          dropout: 0.5
+        input: numerical_input
+
+      # AutoKeras ImageBlock for image input
+      - name: image_block
+        class: ImageBlock
+        args:
+          normalize: True
+          augment: True
+        input: image_input
+
+      # Flatten block directly
+      - name: flatten_block
+        class: Flatten
+        input: image_block  # Input is from the image block
+
+      # AutoKeras DenseBlock after Flatten
+      - name: dense_after_flatten
+        class: DenseBlock
+        args:
+          num_layers: 1
+        input: flatten_block  # Input is from the flatten block
+
+      # Merged block that concatenates dense and dense_after_flatten blocks
+      - name: merged_block
+        class: Merge  # Merge operation as a block
+        args:
+          method: concatenate  # The method of merging (concatenate or add)
+        input: [dense_block, dense_after_flatten]
+
+  # Output specifications
+  outputs:
+    - name: regression_output
+      type: RegressionHead
+      args:
+        loss: 'mean_squared_error'
+        metrics: ['mae']
+
+  # Search space configuration
+  search_space:
+    max_trials: 10
+    epochs: 50
+
+  # Miscellaneous settings
+  settings:
+    overwrite: true
+    project_name: my_autokeras_project
+    
+     - name: time_series_block
+        input: time_series_input
+        layers:
+          - type: LSTM  # Use an LSTM for time series data
+            units:
+              min: 32
+              max: 128
+              step: 32
+            activation:
+              values: ['relu', 'tanh']
+            return_sequences: false  # Since we flatten it before merging

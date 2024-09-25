@@ -36,8 +36,6 @@ dependencies:
   - dask
   - dvc
 
-  - curl
-
   - pip:
     - ydata_profiling
     - openpyxl
@@ -49,7 +47,8 @@ dependencies:
     - ruff
     - SciencePlots~=2.1
     - humanize
-    - autokeras
+    - tensorflow[and-cuda]~=2.16.1
+    - autokeras~=2.0.0
 
     - scikeras
     - -e .

@@ -43,7 +43,6 @@ def cli(input_path: Path, output_path: Path):
 
     h = np.stack([h_re, h_im], axis=-1)
 
-    print(f"{h.shape=} {snr.shape=} {pos.shape=}")
 
     # Fix #1: We'll focus only on X and Y coordinates. Delete Z axis.
     targets = np.delete(pos, -1, axis=-1)
@@ -53,7 +52,6 @@ def cli(input_path: Path, output_path: Path):
 
     # TODO: Do some additional feature engineering.
 
-    print(f"{h.shape=} {snr.shape=} {pos.shape=}")
 
     features = {"h": h, "snr": snr}
 

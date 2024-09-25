@@ -181,6 +181,7 @@ stages:
         seed: 42
         split:
           n_splits: 5
+          seed: 42
           test_size: 0.1
     outs:
     - path: ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl
@@ -804,6 +805,7 @@ stages:
         seed: 42
         split:
           n_splits: 5
+          seed: 42
           test_size: 0.1
     outs:
     - path: ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl
@@ -2228,8 +2230,8 @@ stages:
       size: 33637
     - path: ../../src/eda.py
       hash: md5
-      md5: e6c9a4d447ccb8c1bda8160e694c241b
-      size: 9439
+      md5: 22c8db3c9b758c100a42643da23e9b47
+      size: 9224
     outs:
     - path: ../../artifacts/logatec/reports/prepared/winter.tex
       hash: md5
@@ -2245,8 +2247,8 @@ stages:
       size: 263252
     - path: ../../src/eda.py
       hash: md5
-      md5: d848cc84fb27d242041e907280f8b80f
-      size: 7999
+      md5: 22c8db3c9b758c100a42643da23e9b47
+      size: 9224
     outs:
     - path: ../../artifacts/logatec/reports/prepared/spring.tex
       hash: md5
@@ -2262,8 +2264,8 @@ stages:
       size: 33514
     - path: ../../src/eda.py
       hash: md5
-      md5: e6c9a4d447ccb8c1bda8160e694c241b
-      size: 9439
+      md5: 22c8db3c9b758c100a42643da23e9b47
+      size: 9224
     outs:
     - path: ../../artifacts/logatec/reports/interim/winter.tex
       hash: md5
@@ -2279,10 +2281,418 @@ stages:
       size: 262439
     - path: ../../src/eda.py
       hash: md5
-      md5: e6c9a4d447ccb8c1bda8160e694c241b
-      size: 9439
+      md5: 22c8db3c9b758c100a42643da23e9b47
+      size: 9224
     outs:
     - path: ../../artifacts/logatec/reports/interim/spring.tex
       hash: md5
       md5: 53963530bd7a85d909638f68509984be
       size: 16840
+  gridsearch@winter-Random-LinearRegression:
+    cmd: "python ../../src/benchmark.py --use LinearRegression --optimizer gridsearch\
+      \ --data ../../artifacts/logatec/data/prepared/winter.pkl --split-indices ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/winter-LinearRegression-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/winter.pkl
+      hash: md5
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
+    - path: ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl
+      hash: md5
+      md5: 9e9f0704e55d3c07ee20cf9736397111
+      size: 10172
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        gridsearch.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
+        seed: 42
+    outs:
+    - path: ../../artifacts/logatec/models/winter-LinearRegression-RandomSplit-results.pkl
+      hash: md5
+      md5: 316896f6f03eb506b9a2cf5571da34e6
+      size: 28783
+  gridsearch@spring-Random-XGBRegressor:
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --optimizer gridsearch\
+      \ --data ../../artifacts/logatec/data/prepared/spring.pkl --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/spring-XGBRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/spring.pkl
+      hash: md5
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
+    - path: ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl
+      hash: md5
+      md5: 4e9ceaa65527ebbf053881b4a4bcac35
+      size: 94615
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        gridsearch.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            enable_categorical: true
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 3
+            - 5
+            - 10
+            - 30
+            - 50
+            learning_rate:
+            - 0.01
+            - 0.1
+            - 0.2
+        seed: 42
+    outs:
+    - path: ../../artifacts/logatec/models/spring-XGBRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 7df1084214734900cf3cfcca424fe6d8
+      size: 783687
+  gridsearch@spring-Random-LinearRegression:
+    cmd: "python ../../src/benchmark.py --use LinearRegression --optimizer gridsearch\
+      \ --data ../../artifacts/logatec/data/prepared/spring.pkl --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/spring-LinearRegression-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/spring.pkl
+      hash: md5
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
+    - path: ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl
+      hash: md5
+      md5: 4e9ceaa65527ebbf053881b4a4bcac35
+      size: 94615
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        gridsearch.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
+        seed: 42
+    outs:
+    - path: ../../artifacts/logatec/models/spring-LinearRegression-RandomSplit-results.pkl
+      hash: md5
+      md5: 9ad0cac8bc925294da465feacba5ce7c
+      size: 186951
+  gridsearch@winter-Random-KNeighborsRegressor:
+    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --optimizer gridsearch\
+      \ --data ../../artifacts/logatec/data/prepared/winter.pkl --split-indices ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/winter-KNeighborsRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/winter.pkl
+      hash: md5
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
+    - path: ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl
+      hash: md5
+      md5: 9e9f0704e55d3c07ee20cf9736397111
+      size: 10172
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        gridsearch.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          hyperparameters:
+            n_neighbors:
+            - 3
+            - 5
+            - 10
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            metric:
+            - minkowski
+            - euclidean
+        seed: 42
+    outs:
+    - path: ../../artifacts/logatec/models/winter-KNeighborsRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 6dac5794c4c612fb43e261ea3405f0f9
+      size: 219039
+  gridsearch@spring-Random-KNeighborsRegressor:
+    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --optimizer gridsearch\
+      \ --data ../../artifacts/logatec/data/prepared/spring.pkl --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/spring-KNeighborsRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/spring.pkl
+      hash: md5
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
+    - path: ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl
+      hash: md5
+      md5: 4e9ceaa65527ebbf053881b4a4bcac35
+      size: 94615
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        gridsearch.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          hyperparameters:
+            n_neighbors:
+            - 3
+            - 5
+            - 10
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            leaf_size:
+            - 5
+            - 10
+            - 15
+            - 30
+            metric:
+            - minkowski
+            - euclidean
+        seed: 42
+    outs:
+    - path: ../../artifacts/logatec/models/spring-KNeighborsRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: ce88f7f59b7b71b0a9c8ebfa914bed99
+      size: 1432087
+  gridsearch@spring-Random-RandomForestRegressor:
+    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --optimizer gridsearch\
+      \ --data ../../artifacts/logatec/data/prepared/spring.pkl --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/spring-RandomForestRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/spring.pkl
+      hash: md5
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
+    - path: ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl
+      hash: md5
+      md5: 4e9ceaa65527ebbf053881b4a4bcac35
+      size: 94615
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        gridsearch.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+        seed: 42
+    outs:
+    - path: ../../artifacts/logatec/models/spring-RandomForestRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: a34f25031e11f9237b72eaff4f074fff
+      size: 498535
+  gridsearch@winter-Random-RandomForestRegressor:
+    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --optimizer gridsearch\
+      \ --data ../../artifacts/logatec/data/prepared/winter.pkl --split-indices ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/winter-RandomForestRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/winter.pkl
+      hash: md5
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
+    - path: ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl
+      hash: md5
+      md5: 9e9f0704e55d3c07ee20cf9736397111
+      size: 10172
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        gridsearch.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            - 
+        seed: 42
+    outs:
+    - path: ../../artifacts/logatec/models/winter-RandomForestRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 12aa2d5cda29592c66f3d2b752420737
+      size: 76623
+  gridsearch@winter-Random-XGBRegressor:
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --optimizer gridsearch\
+      \ --data ../../artifacts/logatec/data/prepared/winter.pkl --split-indices ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/winter-XGBRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/winter.pkl
+      hash: md5
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
+    - path: ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl
+      hash: md5
+      md5: 9e9f0704e55d3c07ee20cf9736397111
+      size: 10172
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        gridsearch.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            enable_categorical: true
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 3
+            - 5
+            - 10
+            - 30
+            - 50
+            learning_rate:
+            - 0.01
+            - 0.1
+            - 0.2
+        seed: 42
+    outs:
+    - path: ../../artifacts/logatec/models/winter-XGBRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 6c5fa362fc22ed7e3cec35e7deb97056
+      size: 124159
+  automl@spring-Random-example:
+    cmd: "python ../../src/benchmark.py --use example --optimizer automl --data ../../artifacts/logatec/data/prepared/spring.pkl\
+      \ --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/spring-example-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/spring.pkl
+      hash: md5
+      md5: da33de3c4a20cba83a662ffbc17fdc6e
+      size: 263252
+    - path: ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl
+      hash: md5
+      md5: 4e9ceaa65527ebbf053881b4a4bcac35
+      size: 94615
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        automl.example:
+          inputs:
+          - name: data_input
+          outputs:
+          - name: x_out
+          - name: y_out
+          settings:
+            max_trials: 1
+            overwrite: true
+    outs:
+    - path: ../../artifacts/logatec/models/spring-example-RandomSplit-results.pkl
+      hash: md5
+      md5: 2d49ace48e2d227f7a41ba11fbeb7017
+      size: 124423
+  automl@winter-Random-example:
+    cmd: "python ../../src/benchmark.py --use example --optimizer automl --data ../../artifacts/logatec/data/prepared/winter.pkl\
+      \ --split-indices ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl\
+      \ --output-results ../../artifacts/logatec/models/winter-example-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/logatec/data/prepared/winter.pkl
+      hash: md5
+      md5: 0ee674076b940ad1b1fa7f6553a3ec7d
+      size: 33637
+    - path: ../../artifacts/logatec/data/splits/winter-RandomSplit.pkl
+      hash: md5
+      md5: 9e9f0704e55d3c07ee20cf9736397111
+      size: 10172
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: de7b7bb1ec4c64226187f06e808b289f
+      size: 6221
+    params:
+      params.yaml:
+        automl.example:
+          inputs:
+          - name: data_input
+          outputs:
+          - name: x_out
+          - name: y_out
+          settings:
+            max_trials: 1
+            overwrite: true
+    outs:
+    - path: ../../artifacts/logatec/models/winter-example-RandomSplit-results.pkl
+      hash: md5
+      md5: 04186f7f8a189f70adb8b4d6f5a6cac2
+      size: 18943

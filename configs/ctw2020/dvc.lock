@@ -31,15 +31,15 @@ stages:
       size: 10310971718
     - path: ../../src/ctw2020/featurize.py
       hash: md5
-      md5: 9e43c3d5c0e2f82e4ca1d9a72cad31dc
-      size: 1576
+      md5: 21754d12c970bf6d23560f403c8cb283
+      size: 1474
     outs:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
       hash: md5
       md5: bea9e053dabd5507008cd142d278559c
       size: 10311111051
   split@Random:
-    cmd: "python ../../src/ctw2020/split.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\
+    cmd: "python ../../src/ctw2020/split.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\
       \ --split Random --output-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl\n"
     deps:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
@@ -59,25 +59,25 @@ stages:
     outs:
     - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
       hash: md5
-      md5: b55173f38f229f98201eb9404ccb2033
-      size: 4723
+      md5: 7042559c7e0dd6ff6535f053041287c0
+      size: 996571
   flatten:
     cmd: "python ../../src/ctw2020/flatten.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\
       \ --output ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\n"
     deps:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
       hash: md5
-      md5: bea9e053dabd5507008cd142d278559c
-      size: 10311111051
+      md5: 2637c2f1392e6ea36808c15ea84f0d07
+      size: 414184371
     - path: ../../src/ctw2020/flatten.py
       hash: md5
-      md5: a6124ba93fcf6670aef29772b788fbc2
-      size: 867
+      md5: a185fffb436cdff572a4b0a331ce1923
+      size: 855
     outs:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
       hash: md5
-      md5: 1f536bcc904e19e12f6a426242c372ea
-      size: 41418739
+      md5: 7ced9642db6a826e38d00e26d674941d
+      size: 414184339
   benchmark@Random-model0:
     cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\
       \ --split-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results\

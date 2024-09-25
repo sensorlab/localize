@@ -62,7 +62,7 @@ def cli(input_path: Path, output_path: Path):
 
     assert not X.isna().values.any()
     assert not np.isinf(X).any().any()
-    
+
 
     joblib.dump((X, y), output_path)
 

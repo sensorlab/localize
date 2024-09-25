@@ -1,22 +1,27 @@
+evaluation:
+  metrics: {'rmse': False, 'r_squared': True, 'mae': False, 'mede': False, 'mape': False}
+  save_top_models: 0.1
+
 split:
   seed: 42
   n_splits: 5
   test_size: 0.20
 
-models:
+gridsearch:
   LinearRegression:
     module: sklearn.linear_model
     class: LinearRegression
     hyperparameters:
       fit_intercept: [true, false]
-  # RandomForestRegressor:
-  #   module: sklearn.ensemble
-  #   class: RandomForestRegressor
-  #   parameters:
-  #     random_state: 42
-  #   hyperparmeters:
-  #     n_estimators: [10, 50, 100, 250, 400]
-  #     max_depth: [5, 10, 30, 50, 150, 200, null]
+
+  RandomForestRegressor:
+    module: sklearn.ensemble
+    class: RandomForestRegressor
+    parameters:
+      random_state: 42
+    hyperparmeters:
+      n_estimators: [10, 50, 100, 250, 400]
+      max_depth: [5, 10, 30, 50, 150, 200, null]
 
   XGBRegressor:
     module: xgboost
@@ -26,19 +31,19 @@ models:
       enable_categorical: true
     hyperparameters:
       n_estimators: [10, 50, 100, 250]
-      max_depth: [3, 5, 10, 30, 50] 
+      max_depth: [3, 5, 10, 30, 50]
       learning_rate: [0.01, 0.1, 0.2]
-      
 
-  # KNeighborsRegressor:
-  #   module: sklearn.neighbors
-  #   class: KNeighborsRegressor
-  #   hyperparameters:
-  #     n_neighbors: [5, 10, 15]
-  #     weights: [uniform, distance]
-  #     p: [1, 2]
-  #     leaf_size: [5, 10, 15, 30, 45]
-  #     metric: [minkowski, euclidean]
+
+  KNeighborsRegressor:
+    module: sklearn.neighbors
+    class: KNeighborsRegressor
+    hyperparameters:
+      n_neighbors: [5, 10, 15]
+      weights: [uniform, distance]
+      p: [1, 2]
+      leaf_size: [5, 10, 15, 30, 45]
+      metric: [minkowski, euclidean]
 
 
   Pirnat2022Pirnat1G:
@@ -118,3 +123,230 @@ models:
   #     batch_size: 64
   #     device: cuda
   #     compile: false
+
+_automl:
+  custom:
+    inputs:
+      - name: "image"
+        class: "ImageInput"
+        input:
+          key: "h"
+
+      - name: "tabular"
+        input:
+          key: "snr"
+
+    blocks:
+      - name: "dense_block"
+        class: "DenseBlock"
+        input: "tabular"
+
+      - name: "image_block"
+        class: "ImageBlock"
+        input: "image"
+
+      - name: "merge_block"
+        class: "Merge"
+        input: ["dense_block", "image_block"]
+
+      - name: "final_block"
+        class: "DenseBlock"
+        input: "merge_block"
+
+    outputs:
+      - name: "first_out"
+        input: "final_block"
+
+      - name: "second_out"
+        input: "final_block"
+
+    fit_settings:
+      epochs: 50
+
+    settings:
+      max_trials: 10
+      overwrite: True
+      seed: 42
+      tuner: "bayesian"
+
+    additional_hyperparameters:
+      learning_rate:
+        min: !!float 1e-06
+        max: !!float 1e-03
+        sampling: "log"
+      optimizer:
+        values: ["adam", "adam_weight_decay"]
+
+automl:
+  Arnold2019SoundingModel:
+    inputs:
+      - name: "input_h"
+        class: "Input"
+        module: "autokeras"
+        args:
+          shape: [16, 924, 2]  # [height, width, channels]
+        input:
+          key: "h"
+
+    blocks:
+      - name: "arnold_block"
+        input: "input_h"
+        layers:
+          - class: "Conv2D"
+            module: "keras.layers"
+            args:
+              filters: 32
+              kernel_size: 3
+              strides: 1
+              padding: "same"
+              use_bias: True
+              kernel_initializer:
+                class: "HeUniform"
+                module: "keras.initializers"
+              kernel_regularizer:
+                class: "l2"
+                module: "keras.regularizers"
+                args:
+                  l2: 0.01  # To match optimizer's weight_decay
+          - class: "ReLU"
+            module: "keras.layers"
+          - class: "AveragePooling2D"
+            module: "keras.layers"
+            args:
+              pool_size: [1, 4]
+              padding: "valid"
+          - class: "ZeroPadding2D"
+            module: "keras.layers"
+            args:
+              padding:
+                - [0, 0]  # Top and bottom padding (height)
+                - [0, 1]  # Left and right padding (width)
+          - class: "Conv2D"
+            module: "keras.layers"
+            args:
+              filters: 32
+              kernel_size: 3
+              strides: 1
+              padding: "same"
+              use_bias: True
+              kernel_initializer:
+                class: "HeUniform"
+                module: "keras.initializers"
+              kernel_regularizer:
+                class: "l2"
+                module: "keras.regularizers"
+                args:
+                  l2: 0.01
+          - class: "ReLU"
+            module: "keras.layers"
+          - class: "AveragePooling2D"
+            module: "keras.layers"
+            args:
+              pool_size: [1, 4]
+              padding: "valid"
+          - class: "Flatten"
+            module: "keras.layers"
+          - class: "Dense"
+            module: "keras.layers"
+            args:
+              units: 256
+              kernel_initializer:
+                class: "HeUniform"
+                module: "keras.initializers"
+              kernel_regularizer:
+                class: "l2"
+                module: "keras.regularizers"
+                args:
+                  l2: 0.01
+          - class: "LeakyReLU"
+            module: "keras.layers"
+            args:
+              alpha: 0.01
+          - class: "Dense"
+            module: "keras.layers"
+            args:
+              units: 256
+              kernel_initializer:
+                class: "HeUniform"
+                module: "keras.initializers"
+              kernel_regularizer:
+                class: "l2"
+                module: "keras.regularizers"
+                args:
+                  l2: 0.01
+          - class: "LeakyReLU"
+            module: "keras.layers"
+            args:
+              alpha: 0.01
+          - class: "Dropout"
+            module: "keras.layers"
+            args:
+              rate: 0.2
+          - class: "Dense"
+            module: "keras.layers"
+            args:
+              units: 256
+              kernel_initializer:
+                class: "HeUniform"
+                module: "keras.initializers"
+              kernel_regularizer:
+                class: "l2"
+                module: "keras.regularizers"
+                args:
+                  l2: 0.01
+          - class: "LeakyReLU"
+            module: "keras.layers"
+            args:
+              alpha: 0.01
+          - class: "Dropout"
+            module: "keras.layers"
+            args:
+              rate: 0.2
+
+    outputs:
+      - name: "output_x"
+        class: "RegressionHead"
+        module: "autokeras"
+        input: "arnold_block"
+        args:
+          metrics: []
+
+      - name: "output_y"
+        class: "RegressionHead"
+        module: "autokeras"
+        input: "arnold_block"
+        args:
+          metrics: []
+
+    settings:
+      seed: 42
+      max_trials: 1  # Architecture is fixed
+      overwrite: True
+      tuner: "greedy"
+
+    fit_settings:
+      batch_size: 64
+      epochs: 250
+      callbacks:
+        - class: "EarlyStopping"
+          module: "keras.callbacks"
+          args:
+            patience: 20
+        - class: "ReduceLROnPlateau"
+          module: "keras.callbacks"
+          args:
+            monitor: "val_loss"
+            factor: 0.1
+            patience: 4
+            min_lr: !!float 1e-8
+        - class: "TensorBoard"
+          module: "keras.callbacks"
+          args:
+            log_dir: "../../tmp/tensorboard_logs"
+            write_graph: True
+            write_images: True
+
+    additional_hyperparameters:
+      learning_rate: 0.0005
+
+
