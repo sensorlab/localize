@@ -99,6 +99,12 @@ class utils:
 
         return parsed_args
 
+    @staticmethod
+    def contains_instance(instance_list, instance_type):
+        """Checks the list if an instance of a specified type is present."""
+        return any(
+            [isinstance(instance, instance_type) for instance in instance_list]
+        )
 
     @staticmethod
     def select_columns(columns: list[str], func: Callable[[str, str], bool], search_str: Union[list[str], str]) -> list[str]:

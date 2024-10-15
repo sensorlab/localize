@@ -7,11 +7,6 @@ try:
 except ImportError:
     pass
 
-import importlib
-import inspect
-import time
-from pathlib import Path
-
 import click
 import joblib
 import numpy as np
@@ -31,10 +26,8 @@ if platform.system() == 'Darwin':
 
 
 import yaml
-from sklearn.base import BaseEstimator
 from src.gridsearch.gridsearch_manager import GridSearchManager
-from sklearn.pipeline import Pipeline
-from skorch import NeuralNetClassifier, NeuralNetRegressor
+from src.automl.automl_manager import AutoMLManager
 from skorch.helper import SliceDict
 
 from src import PredefinedSplit, safe_indexing, save_params
@@ -165,15 +158,13 @@ def cli(
     cv_indices: list[tuple[np.ndarray, np.ndarray]] = splits["indices"]
     cv = PredefinedSplit(cv_indices)
 
-    store_top_num_models = 0.1
-
     # Path to your YAML configuration file
     config_path = "./params.yaml"
     # Load the configuration
     config = load_yaml_config(config_path)
 
     metrics_handler = MetricsHandler(config["evaluation"]["metrics"])
-    store_top_num_models = config["evaluation"]["save_top_models"]
+    store_top_num_models = config["evaluation"].get("save_top_models", 0.1)
 
     if optimizer_name == "gridsearch":
         gridsearch_config = config["gridsearch"][model_name]
@@ -196,21 +187,20 @@ def cli(
         grid_search.cleanup_tmp()
 
     else:
-        from src.automl.automl_manager import AutoMLManager
-        aml = AutoMLManager(
+        auto_ml = AutoMLManager(
             config = config["automl"][model_name],
             tmp_dir_path = tmp_dir_path,
             model_save_dir_path = Path(str(results_path).replace(".pkl", "")),
             project_name = model_name
         )
 
-        aml.search(features, targets, test_size = config["split"].get("test_size", 0.2))
-        reports = aml.generate_report(store_top_num_models = store_top_num_models, cv = cv, metrics = metrics_handler)
+        auto_ml.search(features, targets, test_size = config["split"].get("test_size", 0.2))
+        reports = auto_ml.generate_report(store_top_num_models = store_top_num_models, cv = cv, metrics = metrics_handler)
 
-        aml.cleanup_tmp()
+        auto_ml.cleanup_tmp()
 
-    reports["model_data"]["model_metadata"] = {"algorithm": model_name}
-    reports["split_data"]["split_metadata"] = splits["metadata"]
+    reports["model_data"]["metadata"] = {"algorithm": model_name}
+    reports["split_data"]["metadata"] = splits["metadata"]
 
     if results_path:
         joblib.dump(reports, results_path)

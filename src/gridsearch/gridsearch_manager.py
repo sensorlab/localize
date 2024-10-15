@@ -11,7 +11,11 @@ import humanize
 import shutil
 import glob
 from tqdm import tqdm
+
+
 from sklearn.base import BaseEstimator
+from sklearn.pipeline import Pipeline
+from skorch import NeuralNetClassifier, NeuralNetRegressor
 
 import importlib
 import inspect
@@ -146,6 +150,31 @@ class GridSearchManager:
         return sorted_df
 
 
+    def _correct_scores(self, df:pd.DataFrame, scores: dict) -> pd.DataFrame:
+        """
+        Scores returned by GridSearchCV are negated if a lower score is better; this function
+        corrects that by checking if greater is better for each scoring metric and applying corrections.
+
+        Args:
+        - df (pd.DataFrame): DataFrame containing the results of GridSearchCV.
+        - scores (dict) dict of scorer_name: greater_is_better
+
+        Returns:
+        - pd.DataFrame: DataFrame with corrected scores. If a higher score is better, the score is
+            returned as is; otherwise, it is negated.
+        """
+        for scorer_name, greater_is_better in scores.items():
+            # Identify all columns that contain the scorer name (e.g., split0_test_rmse, mean_test_rmse, etc.)
+            relevant_columns = [col for col in df.columns if (scorer_name in col and 'std_' not in col)]
+
+            for col in relevant_columns:
+                # If a higher score is better, no need to change anything; otherwise, negate the values
+                if not greater_is_better:
+                    df[col] = -df[col]
+
+        return df
+
+
     def search(self, features: Union[pd.DataFrame, np.ndarray],
                targets: Union[pd.DataFrame, np.ndarray],
                search_parameters: dict[str, Any]) -> None:
@@ -185,6 +214,7 @@ class GridSearchManager:
         # Store the results and sort them by mean rank
         self.results = pd.DataFrame(self.grid_search.cv_results_)
         self.results = self._order_by_mean_rank(self.results)
+        self.results = self._correct_scores(self.results, self._scorers)
 
 
     def predict(self, X: Union[np.ndarray, pd.Series], index: Union[None, int] = None) -> np.ndarray: #DEPRECATED
@@ -217,29 +247,6 @@ class GridSearchManager:
         return y_pred
 
 
-    def _correct_score(self, score:float, greater_is_better: Union[bool, dict]) -> float:
-        """
-        Scores returned by GridSearchCV are negated if a lower score is better, this function
-        therefore corrects that.
-
-        Args:
-        - score (float): The score that needs correction.
-        - greater_is_better (bool | dict): Indicates whether a higher score is better.
-          - If a boolean is provided, it directly indicates the preference.
-          - If a dictionary is provided, it should contain the key "greater_is_better"
-              with a boolean value.
-
-        Returns:
-        - float: The corrected score. If a higher score is better, the score is returned as is;
-          otherwise, it is negated.
-        """
-        if isinstance(greater_is_better, bool):
-            return score if greater_is_better else -score
-
-        # Handle the case where greater_is_better is a dictionary, defaulting to true
-        return score if greater_is_better.get("greater_is_better", True) else -score
-
-
     def generate_report(self, store_top_num_models: Union[int, float] = 0.1) -> dict:
         """
         Generates a report of the top models based on the evaluation results.
@@ -260,12 +267,20 @@ class GridSearchManager:
         # Defining report template
         self.report = {
             "model_data": {
-                "model_reports": [],
-                "model_metadata": None
+                "reports": [],
+                "metadata": None
             },
             "split_data" : {
                 "splits": [],
-                "split_metadata": None
+                "metadata": None
+            },
+            "optimizer_data": {
+                "metadata": {
+                    "algorithm": "gridsearch"
+                },
+                "additional_data":  {
+                    "results": self.results
+                }
             }
         }
 
@@ -299,7 +314,6 @@ class GridSearchManager:
             candidate_idx = row['candidate_idx']
 
             # Load and move top models for each split
-            total_model_size = 0
             model_data_per_split = []
             for split_idx in range(n_splits):
                 model_file = os.path.join(self.tmp_dir_path, f"est-{candidate_idx}-{split_idx}.pkl")
@@ -332,24 +346,26 @@ class GridSearchManager:
                 "model_data_per_split": model_data_per_split,
                 "scores": {
                     key: {
-                        "mean": self._correct_score(row[f'mean_test_{key}'], value),
+                        "mean": row[f'mean_test_{key}'],
                         "std": row[f'std_test_{key}']
                     }
-                    for key, value in self._scorers.items()
+                    for key in self._scorers
                 },
                 "params": row['params'],
                 "fit_time": {"mean": row['mean_fit_time'], "std": row['std_fit_time']},
                 "score_time": {"mean": row['mean_score_time'], "std": row['std_score_time']}
             }
-            self.report["model_data"]["model_reports"].append(model_report)
+            self.report["model_data"]["reports"].append(model_report)
 
+
+            total_model_size = sum([dat["model_size"] for dat in model_report["model_data_per_split"]])
             # Prepare the row for the logged report table
             table_row = [
                 idx + 1,
-                #*[f"{model_report['mean_scores'][key]:.4f} ± {model_report['std_scores'][key]:.2f}" for key in self._scorers],
+                *[f"{model_report['scores'][key]['mean']:.4f} ± {model_report['scores'][key]['std']:.2f}" for key in self._scorers],
                 f"{model_report['fit_time']['mean']:.1f} ± {model_report['fit_time']['std']:.0f} sec",
                 f"{model_report['score_time']['mean']:.1f} ± {model_report['score_time']['std']:.0f} sec",
-                #f"{humanize.naturalsize(total_model_size, binary=True)} ({n_splits}x{humanize.naturalsize(model_size, binary=True)})",
+                f"{humanize.naturalsize(total_model_size, binary=True)} ({n_splits}x{humanize.naturalsize(model_size, binary=True)})",
                 f"{model_report['params']}"
             ]
             table_data.append(table_row)

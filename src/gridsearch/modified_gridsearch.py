@@ -3,6 +3,9 @@ import warnings
 import os
 import gc
 
+import pandas as pd
+import numpy as np
+
 from unittest.mock import patch
 import joblib
 
@@ -14,6 +17,11 @@ from sklearn.metrics import make_scorer
 def make_prediction_saver_scorer(candidate_idx, split_idx, tmp_dir_path):
     # Adds context to the scorer
     def prediction_saver_metric(y_true, y_pred):
+        y_true = np.hsplit(y_true.to_numpy(), 2)
+        y_true = np.squeeze(np.stack(y_true, axis=0), axis=-1)
+
+        y_pred = np.hsplit(y_pred, 2)
+        y_pred = np.squeeze(np.stack(y_pred, axis=0), axis=-1)
         filename = os.path.join(tmp_dir_path, f"pred-{candidate_idx}-{split_idx}.pkl")
         joblib.dump({'y_true': y_true, 'y_pred': y_pred}, filename)
         # Return 0 to not affect the scoring
@@ -85,10 +93,8 @@ class GridSearchCVWithStoredModels(GridSearchCV):
             # Delete the setimator so that it's not retained in memory
             del results["estimator"]
 
-            # Remove the custom scorer results from the output to avoid confusion
-            keys_to_remove = [key for key in results if 'prediction_saver' in key]
-            for key in keys_to_remove:
-                del results[key]
+            # Remove the custom scorer results from the output
+            del results["test_scores"]["prediction_saver"]
 
             if candidate_idx == 0:
                 joblib.dump(kwargs["test"], os.path.join(tmp_dir_path, f"split-{split_idx}"))

@@ -3,7 +3,10 @@ from pathlib import Path
 import gc
 import time
 import shutil
+from copy import copy, deepcopy
 from typing import Union, Generator
+
+import joblib
 
 import numpy as np
 import pandas as pd
@@ -40,9 +43,11 @@ class AutoMLManager:
         """
         self.config = config.copy()
         self.model_save_dir_path = model_save_dir_path
-        self.tmp_dir_path = Path(os.path.join(tmp_dir_path, project_name))
+        self.tmp_dir_path = Path(tmp_dir_path)
         self.setup_config(project_name)
         self.setup_auto_model()
+
+        self.project_name = project_name
 
 
     def setup_config(self, project_name: str):
@@ -61,8 +66,6 @@ class AutoMLManager:
 
         # Fit config is used during fitting, but must still be preprocessed.
         self.fit_config = utils.parse_args(self.config.get("fit_settings", {}), self.config_parser.hp)
-        self.history = keras.callbacks.History()
-        self.fit_config.setdefault("callbacks", []).append(self.history)
 
 
     def setup_auto_model(self):
@@ -242,7 +245,7 @@ class AutoMLManager:
         self._prepare_model_save_directory()
 
         for idx, (model, hyperparameters) in enumerate(self._get_best_models(save_top_n)):
-            print(f"\nProcessing model {idx + 1}")
+            print(f"\nProcessing model {idx + 1} out of {save_top_n}")
 
             optimizer = model.optimizer
             del model
@@ -256,8 +259,14 @@ class AutoMLManager:
         Initializes the report structure.
         """
         return {
-            "model_data": {"model_reports": [], "model_metadata": None},
-            "split_data": {"splits": [], "split_metadata": None}
+            "model_data": {"reports": [], "metadata": None},
+            "split_data": {"splits": [], "metadata": None},
+            "optimizer_data": {
+                "metadata": {
+                    "algorithm": "atuoml"
+                },
+                "additional_data": {}
+            }
         }
 
 
@@ -324,7 +333,14 @@ class AutoMLManager:
         scores = {name: [] for name in metrics.metrics_names}
         model_data_per_split, train_times, predict_times, splits = [], [], [], []
 
+        history_callbacks = []
+
         for split_idx, (train_indices, test_indices) in enumerate(cv.split(self.preped_features[0], self.preped_targets[0])):
+            history = keras.callbacks.History()
+            fit_config = deepcopy(self.fit_config)
+
+            fit_config.setdefault("callbacks", []).append(history)
+
             print(f"\tProcessing split {split_idx + 1} out of {cv.get_n_splits()}")
 
             # Ensure the starting point is the same
@@ -336,7 +352,7 @@ class AutoMLManager:
 
             X_train, X_test, y_train, y_test = self._prepare_split_data(train_indices, test_indices)
 
-            train_time = self._train_model(model, X_train, y_train, X_test, y_test)
+            train_time = self._train_model(model, fit_config, X_train, y_train, X_test, y_test)
             train_times.append(train_time)
 
             y_pred, predict_time = self._predict(model, X_test)
@@ -352,11 +368,13 @@ class AutoMLManager:
             self._update_scores(scores, metrics, y_test, y_pred)
             splits.append(test_indices)
 
+            history_callbacks.append(deepcopy(history))
+
             del model
             keras.backend.clear_session()
             gc.collect()
 
-        ###
+        self.report["optimizer_data"]["additional_data"]["history"] = history_callbacks
         self._add_model_report(model_data_per_split, scores, hyperparameters, train_times, predict_times)
         self.report["split_data"]["splits"] = splits
 
@@ -399,7 +417,7 @@ class AutoMLManager:
         return X_train, X_test, y_train, y_test
 
 
-    def _train_model(self, model, X_train, y_train, X_test, y_test):
+    def _train_model(self, model, fit_settings, X_train, y_train, X_test, y_test):
         """
         Trains the model and measures the time it took.
 
@@ -412,7 +430,15 @@ class AutoMLManager:
         - The time it took to train the model-
         """
         start_time = time.perf_counter()
-        model.fit(X_train, y_train, validation_data=(X_test, y_test), **{**self.fit_config, "verbose": 2}) # Verbosity 2 is less than 1 (0<2<1)
+
+        fit_settings.setdefault("epochs", 1000) # AutoKeras default
+
+        # AutoKeras inserts early-stopping to accelerate the search process
+        # We have to do the same to get similar results
+        if not utils.contains_instance(fit_settings["callbacks"], keras.callbacks.EarlyStopping):
+            fit_settings["callbacks"].append(keras.callbacks.EarlyStopping(patience=10, min_delta=1e-4))
+
+        model.fit(X_train, y_train, validation_data=(X_test, y_test), **fit_settings)
         return time.perf_counter() - start_time
 
 
@@ -428,7 +454,6 @@ class AutoMLManager:
         - tuple[np.ndarray, float]
         """
         start_time = time.perf_counter()
-        print(X_test[0].shape)
         y_pred = model.predict(X_test, batch_size=self.fit_config.get("batch_size", 32))
         predict_time = time.perf_counter() - start_time
         return np.squeeze(np.stack(y_pred, axis=0), axis=-1), predict_time
@@ -467,7 +492,7 @@ class AutoMLManager:
             "fit_time": {"mean": np.mean(train_times), "std": np.std(train_times)},
             "score_time": {"mean": np.mean(predict_times), "std": np.std(predict_times)},
         }
-        self.report["model_data"]["model_reports"].append(model_report)
+        self.report["model_data"]["reports"].append(model_report)
 
 
     def cleanup_tmp(self):
