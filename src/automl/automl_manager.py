@@ -499,14 +499,14 @@ class AutoMLManager:
         """
         Cleans up the temporary directory (preserves '.gitignore').
         """
-        self.tmp_dir_path = os.path.join(self.tmp_dir_path, "..")
-        for item in os.listdir(self.tmp_dir_path):
-            if item == ".gitignore":
-                continue
+        project_folder = os.path.join(self.tmp_dir_path, self.project_name)
+        if os.path.basename(tmp_dir_path) == "tmp" and os.path.isdir(project_folder):
+            if os.path.commonpath([project_folder, tmp_dir_path]) == tmp_dir_path:
+                print(f"Deleting folder: {project_folder}")
+                shutil.rmtree(project_folder)
+            else:
+                print(f"{project_folder} is not a direct subdirectory of {tmp_dir_path}")
+        else:
+            print(f"{tmp_dir_path} is not a 'tmp' directory or {project_folder} does not exist.")
 
-            item_path = os.path.join(self.tmp_dir_path, item)
-            if os.path.isdir(item_path):
-                shutil.rmtree(item_path)
-            elif os.path.isfile(item_path):
-                os.remove(item_path)
 
