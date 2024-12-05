@@ -56,7 +56,7 @@ class GridSearchManager:
         self._show_progress_bar = show_progress_bar
 
 
-    def log(self, text: str, level: int = 1) -> None:
+    def _log(self, text: str, level: int = 1) -> None:
         """
         Logs messages based on the verbosity level.
 
@@ -86,7 +86,6 @@ class GridSearchManager:
             if "n_jobs" in inspect.signature(ModelClass).parameters:
                 parameters["n_jobs"] = joblib.cpu_count(only_physical_cores=True)
 
-            # TODO: should `optimizer` be part of parameter or on same model as declaration
             if "optimizer" in parameters:
                 optimizer_module = importlib.import_module(parameters["optimizer"]["module"])
                 OptimizerClass = getattr(optimizer_module, parameters["optimizer"]["class"])
@@ -193,9 +192,9 @@ class GridSearchManager:
 
         assert "param_grid" in parameters and parameters["param_grid"], "'param_grid' must exist and not be empty"
 
-        self.log("\n")
-        self.log(f"Estimator: {parameters['estimator']}")
-        self.log(f"Hyperparameters: {parameters['param_grid']}\n")
+        self._log("\n")
+        self._log(f"Estimator: {parameters['estimator']}")
+        self._log(f"Hyperparameters: {parameters['param_grid']}\n")
 
         # # Choose the appropriate GridSearchCV class based on whether models should be stored
         if self._store_models:
@@ -236,11 +235,11 @@ class GridSearchManager:
                 raise ValueError(f"Invalid index {index}. It should be between 0 and {len(self.models) - 1}.")
 
             model = self.models[index]
-            self.log(f"Using model at index {index} for prediction.", level=3)
+            self._log(f"Using model at index {index} for prediction.", level=3)
         else:
             # Default to using the best model
             model = self.best_estimator_
-            self.log("Using the best model for prediction.", level=3)
+            self._log("Using the best model for prediction.", level=3)
 
         y_pred = model.predict(X)
 
@@ -263,125 +262,171 @@ class GridSearchManager:
         Returns:
         - dict: A dictionary with all the report data
         """
+        self.report = self._initialize_report()
+        self._prepare_model_save_directory()
 
-        # Defining report template
-        self.report = {
-            "model_data": {
-                "reports": [],
-                "metadata": None
-            },
-            "split_data" : {
-                "splits": [],
-                "metadata": None
-            },
+        n_splits, n_candidates = self._load_general_info()
+        top_candidates = self._get_top_candidates(store_top_num_models, n_candidates)
+
+        # Process top models
+        for idx, row in top_candidates.iterrows():
+            self._process_candidate(row, n_splits)
+
+        self._process_splits(n_splits)
+
+        self._log_report()
+
+        return self.report
+
+
+    def _initialize_report(self):
+        """
+        Initializes the report structure.
+        """
+         # Prepare to log the report
+        self._log("\n")
+        self.table_data = []
+
+        return {
+            "model_data": {"reports": [], "metadata": None},
+            "split_data": {"splits": [], "metadata": None},
             "optimizer_data": {
                 "metadata": {
                     "algorithm": "gridsearch"
                 },
-                "additional_data":  {
-                    "results": self.results
+                "additional_data": {
+                     "results": self.results
                 }
             }
         }
 
-        # Load general information
-        general_info = joblib.load(os.path.join(self.tmp_dir_path, f"general.pkl"))
-        n_splits = general_info["n_splits"]
-        n_candidates = general_info["n_candidates"]
 
-        # Determine the number of top models to save
+    def _prepare_model_save_directory(self):
+        """
+        Makes sure that the directory exsists and that it's empty.
+        """
+        self.model_save_dir_path.mkdir(parents=True, exist_ok=True)
+        empty_directory(self.model_save_dir_path)
+
+
+    def _load_general_info(self):
+        """
+        Loads the general info about the number of splits and candidates from a file.
+        """
+        general_info = joblib.load(os.path.join(self.tmp_dir_path, f"general.pkl"))
+        return general_info["n_splits"], general_info["n_candidates"]
+
+
+    def _get_top_candidates(self, store_top_num_models: Union[int, float], n_candidates: int) -> pd.DataFrame:
+        """
+        Calculates the number of models to save, while making sure the value is in the range [1, n_models].
+        When int saves that number of models, when float saves that fraction of the models.
+        Reused for eval_top_n_to_save.
+
+        Args:
+        - store_top_num_models (int | float): number or fratcion of models to store.
+        - n_candidates (int): total number of candidates
+
+        Returns:
+        - pd.DataFrame: the top candidates.
+        """
+
         if isinstance(store_top_num_models, int) or (isinstance(store_top_num_models, float) and store_top_num_models.is_integer()):
-            save_top_n = min(store_top_num_models, n_candidates)
-        elif isinstance(store_top_num_models, float) and 0 < store_top_num_models < 1:
+            save_top_n = min(int(store_top_num_models), n_candidates)
+        elif isinstance(store_top_num_models, float) and 0.0 < store_top_num_models <= 1.:
             save_top_n = int(n_candidates * store_top_num_models)
         else:
             save_top_n = 1
 
         save_top_n = max(1, min(save_top_n, n_candidates))
-
-        # Get the top models from the results
-        top_n_df = self.results.head(save_top_n).copy()
-
-        # Prepare to log the report
-        self.log("\n")
-        table_data = []
-
-        self.model_save_dir_path.mkdir(parents=True, exist_ok=True)
-        empty_directory(self.model_save_dir_path)
-
-        # Iterate through the top models and prepare the report data
-        for idx, row in top_n_df.iterrows():
-            candidate_idx = row['candidate_idx']
-
-            # Load and move top models for each split
-            model_data_per_split = []
-            for split_idx in range(n_splits):
-                model_file = os.path.join(self.tmp_dir_path, f"est-{candidate_idx}-{split_idx}.pkl")
-
-                if os.path.exists(model_file):
-                    model_size = os.path.getsize(model_file)
-
-                    # Move the model file to the save directory
-                    destination_file = os.path.join(self.model_save_dir_path, f"est-{candidate_idx}-{split_idx}.pkl")
-                    shutil.move(model_file, destination_file)
-
-                    predictions_file = os.path.join(self.tmp_dir_path, f"pred-{candidate_idx}-{split_idx}.pkl")
-                    if os.path.exists(predictions_file):
-                        predictions_data = joblib.load(predictions_file)
-                        y_true = predictions_data["y_true"]
-                        y_pred = predictions_data["y_pred"]
-                    else:
-                        y_true = None
-                        y_pred = None
-
-                        self.log(f"Warning: File '{predictions_file}' does not exist.", level = 0)
-
-                    model_data_per_split.append({"model_path": destination_file, "y_true": y_true, "y_pred": y_pred, "model_size":model_size})
-                else:
-                    self.log(f"Warning: File '{model_file}' does not exist.", level = 0)
-                    models.append(None)  # Handle missing files
-
-            # Prepare the model report
-            model_report = {
-                "model_data_per_split": model_data_per_split,
-                "scores": {
-                    key: {
-                        "mean": row[f'mean_test_{key}'],
-                        "std": row[f'std_test_{key}']
-                    }
-                    for key in self._scorers
-                },
-                "params": row['params'],
-                "fit_time": {"mean": row['mean_fit_time'], "std": row['std_fit_time']},
-                "score_time": {"mean": row['mean_score_time'], "std": row['std_score_time']}
-            }
-            self.report["model_data"]["reports"].append(model_report)
+        return self.results.head(save_top_n).copy()
 
 
-            total_model_size = sum([dat["model_size"] for dat in model_report["model_data_per_split"]])
-            # Prepare the row for the logged report table
-            table_row = [
-                idx + 1,
-                *[f"{model_report['scores'][key]['mean']:.4f} ± {model_report['scores'][key]['std']:.2f}" for key in self._scorers],
-                f"{model_report['fit_time']['mean']:.1f} ± {model_report['fit_time']['std']:.0f} sec",
-                f"{model_report['score_time']['mean']:.1f} ± {model_report['score_time']['std']:.0f} sec",
-                f"{humanize.naturalsize(total_model_size, binary=True)} ({n_splits}x{humanize.naturalsize(model_size, binary=True)})",
-                f"{model_report['params']}"
-            ]
-            table_data.append(table_row)
+    def _process_candidate(self, model_results, n_splits: int):
+        """
+        Gets all the data for a candidate for each split, and add it to the report.
+        """
+        candidate_idx = model_results['candidate_idx']
 
-        # Define the headers for the report table
-        headers = [
-            "Rank",
-            *[key for key in self._scorers],
-            "Fit Time",
-            "Score Time",
-            "Model Size",
-            "Params"
+        # Load and move top models for each split
+        model_data_per_split = []
+
+        for split_idx in range(n_splits):
+            model_data_per_split.append(self._process_model_split(candidate_idx, split_idx))
+
+        self._prepare_model_report(model_data_per_split, model_results)
+
+
+    def _process_model_split(self, candidate_idx: int, split_idx: int):
+        """
+        Gets the data for a split and moves the model file from the tmp directory to the model save directory.
+        """
+        model_file = os.path.join(self.tmp_dir_path, f"est-{candidate_idx}-{split_idx}.pkl")
+
+        if os.path.exists(model_file):
+            model_size = os.path.getsize(model_file)
+
+            # Move the model file to the save directory
+            destination_file = os.path.join(self.model_save_dir_path, f"est-{candidate_idx}-{split_idx}.pkl")
+            shutil.move(model_file, destination_file)
+            model_file = destination_file
+        else:
+            model_size = None
+            model_file = None
+            self._log(f"Warning: File '{model_file}' does not exist.", level = 0)
+
+        predictions_file = os.path.join(self.tmp_dir_path, f"pred-{candidate_idx}-{split_idx}.pkl")
+        if os.path.exists(predictions_file):
+            predictions_data = joblib.load(predictions_file)
+            y_true = predictions_data["y_true"]
+            y_pred = predictions_data["y_pred"]
+        else:
+            y_true = None
+            y_pred = None
+            self._log(f"Warning: File '{predictions_file}' does not exist.", level = 0)
+
+        return {"model_path": model_file, "y_true": y_true, "y_pred": y_pred, "model_size":model_size}
+
+
+    def _prepare_model_report(self, model_data_per_split, model_results):
+        """
+        Prepares the model report and the log.
+        """
+         # Prepare the model report
+        model_report = {
+            "model_data_per_split": model_data_per_split,
+            "scores": {
+                key: {
+                    "mean": model_results[f'mean_test_{key}'],
+                    "std": model_results[f'std_test_{key}']
+                }
+                for key in self._scorers
+            },
+            "params": model_results['params'],
+            "fit_time": {"mean": model_results['mean_fit_time'], "std": model_results['std_fit_time']},
+            "score_time": {"mean": model_results['mean_score_time'], "std": model_results['std_score_time']}
+        }
+        self.report["model_data"]["reports"].append(model_report)
+
+        # Prepares the logged report table.
+        total_model_size = sum([dat["model_size"] for dat in model_report["model_data_per_split"]])
+        model_size = model_report["model_data_per_split"][0]["model_size"]
+        # Prepare the row for the logged report table
+        table_row = [
+            len(self.report["model_data"]["reports"]), # Rank of the candidate
+            *[f"{model_report['scores'][key]['mean']:.4f} ± {model_report['scores'][key]['std']:.2f}" for key in self._scorers],
+            f"{model_report['fit_time']['mean']:.1f} ± {model_report['fit_time']['std']:.0f} sec",
+            f"{model_report['score_time']['mean']:.1f} ± {model_report['score_time']['std']:.0f} sec",
+            f"{humanize.naturalsize(model_size , binary=True)} ({humanize.naturalsize(total_model_size, binary=True)})",
+            f"{model_report['params']}"
         ]
+        self.table_data.append(table_row)
 
-        self.log(tabulate(table_data, headers=headers, tablefmt="grid"))
 
+    def _process_splits(self, n_splits):
+        """
+        Gets the data for each split and add it to the report.
+        """
         # Load and append split data to the report
         for split_idx in range(n_splits):
             split_file = f"{self.tmp_dir_path}split-{split_idx}"
@@ -389,9 +434,27 @@ class GridSearchManager:
                 split = joblib.load(split_file)
                 self.report["split_data"]["splits"].append(split)
             else:
-                self.log(f"Warning: File '{split_file}' does not exist.", level = 0)
+                self._log(f"Warning: File '{split_file}' does not exist.", level = 0)
                 self.report["split_data"]["splits"].append(None)
-        return self.report
+
+
+    def _log_report(self):
+        """
+        Creates and loggs the report table.
+        """
+        # Define the headers for the report table
+        headers = [
+            "Rank",
+            *[key for key in self._scorers],
+            "Fit Time",
+            "Score Time",
+            "Model Size (Total size)",
+            "Params"
+        ]
+
+        self._log(tabulate(self.table_data, headers=headers, tablefmt="grid"))
+
+
 
     def cleanup_tmp(self):
         """
@@ -403,7 +466,7 @@ class GridSearchManager:
         files = glob.glob(os.path.join(self.tmp_dir_path, '*'))
 
         # Log the start of the cleanup process
-        self.log("\nCleaning up temporary model storage directory")
+        self._log("\nCleaning up temporary model storage directory")
 
         num_erased = 0
         is_gitignore = False  # Flag to track if .gitignore is present
@@ -429,7 +492,7 @@ class GridSearchManager:
         progress_bar.close()
 
         # Log the number of files erased, excluding .gitignore if present
-        self.log (f"Erased {num_erased} out of {len(files) - int(is_gitignore)} files") #don't count git ignore
+        self._log (f"Erased {num_erased} out of {len(files) - int(is_gitignore)} files") #don't count git ignore
 
 
 

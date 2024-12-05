@@ -218,8 +218,7 @@ class AutoMLManager:
     def generate_report(
         self, cv: PredefinedSplit,
         metrics: MetricsHandler,
-        store_top_num_models: Union[int, float] = 0.1,
-        eval_top_num_models: Union[int, float] = 1.0
+        store_top_num_models: Union[int, float] = 0.1
     ) -> dict:
         """
         Collect the data for the report by retraining the models for each cv split, and
@@ -241,7 +240,6 @@ class AutoMLManager:
 
         self.report = self._initialize_report()
         save_top_n = self._get_n_to_save(store_top_num_models)
-        eval_top_n = self._get_n_to_save(eval_top_num_models) #works the same
         self._prepare_model_save_directory()
 
         for idx, (model, hyperparameters) in enumerate(self._get_best_models(save_top_n)):
@@ -263,9 +261,11 @@ class AutoMLManager:
             "split_data": {"splits": [], "metadata": None},
             "optimizer_data": {
                 "metadata": {
-                    "algorithm": "atuoml"
+                    "algorithm": "automl"
                 },
-                "additional_data": {}
+                "additional_data": {
+                    "history":[]
+                }
             }
         }
 
@@ -283,12 +283,13 @@ class AutoMLManager:
         - int: the number of models to store
         """
         n_candidates = len(self.auto_model.tuner.oracle.trials)
-        if isinstance(store_top_num_models, int) or (isinstance(store_top_num_models, float) and store_top_num_models.is_integer()):
+        if type(store_top_num_models) == int or (isinstance(store_top_num_models, float) and store_top_num_models.is_integer() and store_top_num_models>1):
             save_top_n = min(int(store_top_num_models), n_candidates)
-        elif isinstance(store_top_num_models, float) and 0.0 < store_top_num_models <= 1.:
+        elif isinstance(store_top_num_models, float) and 0.0 < store_top_num_models <= 1.0:
             save_top_n = int(n_candidates * store_top_num_models)
         else:
             save_top_n = 1
+
         return max(1, min(save_top_n, n_candidates))
 
 
@@ -361,7 +362,7 @@ class AutoMLManager:
             model_data_per_split.append({
                 "model_path": save_path,
                 "y_pred": y_pred,
-                "y_true": y_test,
+                "y_true": np.stack(np.squeeze(y_test, axis=-1)), # correct the format into a single nd.array
                 "model_size": 0
             })
 
@@ -374,7 +375,7 @@ class AutoMLManager:
             keras.backend.clear_session()
             gc.collect()
 
-        self.report["optimizer_data"]["additional_data"]["history"] = history_callbacks
+        self.report["optimizer_data"]["additional_data"]["history"].append(history_callbacks)
         self._add_model_report(model_data_per_split, scores, hyperparameters, train_times, predict_times)
         self.report["split_data"]["splits"] = splits
 
