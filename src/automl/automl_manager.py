@@ -1,37 +1,33 @@
-import os
-from pathlib import Path
 import gc
-import time
+import os
 import shutil
-from copy import copy, deepcopy
-from typing import Union, Generator
+import time
+from copy import deepcopy
+from pathlib import Path
+from typing import Generator, Union
 
-import joblib
-
+import keras
 import numpy as np
 import pandas as pd
-import keras
-from keras_tuner import Tuner, HyperParameters
 from keras.models import Model
 from keras.optimizers import Optimizer
+from keras_tuner import HyperParameters
 from sklearn.model_selection import train_test_split
 
+from src import PredefinedSplit, empty_directory, safe_indexing
+from src.metrics import MetricsHandler
 
 from .automl_configparser import AutoKerasConfigParser
 from .utils import utils
-from src import PredefinedSplit, safe_indexing, empty_directory
-from src.metrics import MetricsHandler
 
-##
-import matplotlib.pyplot as plt
-##
 
 class AutoMLManager:
     """
     A class to manage all interactions with autokeras. Responsible for configuration,
     training, evaluation, and generating the report dict.
     """
-    def __init__(self, config: dict, tmp_dir_path: Path, model_save_dir_path : Path, project_name: str):
+
+    def __init__(self, config: dict, tmp_dir_path: Path, model_save_dir_path: Path, project_name: str):
         """
         Initializes the AutoMLManager instance.
 
@@ -48,7 +44,6 @@ class AutoMLManager:
         self.setup_auto_model()
 
         self.project_name = project_name
-
 
     def setup_config(self, project_name: str):
         """
@@ -67,7 +62,6 @@ class AutoMLManager:
         # Fit config is used during fitting, but must still be preprocessed.
         self.fit_config = utils.parse_args(self.config.get("fit_settings", {}), self.config_parser.hp)
 
-
     def setup_auto_model(self):
         """
         Sets up the automodel using, and retrieves data needed later on.
@@ -81,7 +75,6 @@ class AutoMLManager:
         self.output_names = self.config_parser.output_names
 
         self.auto_model = self.config_parser.build_model()
-
 
     def prepare_data(self, features: Union[pd.DataFrame, dict], targets: pd.DataFrame, test_size: float):
         """
@@ -100,7 +93,6 @@ class AutoMLManager:
 
         self._split_data(test_size)
 
-
     def _prepare_features(self, features: Union[pd.DataFrame, dict]) -> list[np.ndarray]:
         """
         Prepares the input data for each model input based on the configs.
@@ -109,11 +101,10 @@ class AutoMLManager:
         - features (pd.DataFrame | dict): input data to be processed.
         """
         if isinstance(features, dict):
-            #If features is a dict, then 'key' must be provided for each input, features[key] are then processed as normal
-            return [self._process_features(features[cnf['key']], cnf) for cnf in self.input_configs]
+            # If features is a dict, then 'key' must be provided for each input, features[key] are then processed as normal
+            return [self._process_features(features[cnf["key"]], cnf) for cnf in self.input_configs]
         # processes each features for each input.
         return [self._process_features(features, cnf) for cnf in self.input_configs]
-
 
     def _process_features(self, features: Union[np.ndarray, pd.DataFrame], config: Union[dict, list]):
         """
@@ -128,10 +119,9 @@ class AutoMLManager:
             # When config is a list, return the columns with the given index/name.
             return utils.to_numpy(features[config] if config else features)
         if isinstance(features, pd.DataFrame):
-            config.pop("key", None) # If it was a dict that has already been dealt with.
+            config.pop("key", None)  # If it was a dict that has already been dealt with.
             return self._process_dataframe(features, config)
         return features
-
 
     def _process_dataframe(self, df: pd.DataFrame, config: dict):
         """
@@ -150,7 +140,7 @@ class AutoMLManager:
         funcs = {
             "startswith": lambda name, search_str: name.startswith(search_str),
             "endswith": lambda name, search_str: name.endswith(search_str),
-            "contains": lambda name, search_str: search_str in name
+            "contains": lambda name, search_str: search_str in name,
         }
 
         """
@@ -164,7 +154,6 @@ class AutoMLManager:
                 raise KeyError(f"Invalid filter for column selection. Got {key} expected {', '.join(funcs.keys())}.")
             selected_cols = utils.select_columns(selected_cols, funcs[key], value)
         return df[selected_cols].to_numpy()
-
 
     def _split_data(self, test_size: float):
         """
@@ -194,7 +183,6 @@ class AutoMLManager:
         self.y_train_list = [target[train_indices] for target in self.preped_targets]
         self.y_val_list = [target[val_indices] for target in self.preped_targets]
 
-
     def search(self, features: Union[pd.DataFrame, dict], targets: pd.DataFrame, test_size: float):
         """
         Prepares features and targets for the AutoModel, and then performs the search/fit
@@ -208,17 +196,11 @@ class AutoMLManager:
         self.prepare_data(features, targets, test_size)
 
         self.auto_model.fit(
-            self.X_train_list,
-            self.y_train_list,
-            validation_data=(self.X_val_list, self.y_val_list),
-            **self.fit_config
+            self.X_train_list, self.y_train_list, validation_data=(self.X_val_list, self.y_val_list), **self.fit_config
         )
 
-
     def generate_report(
-        self, cv: PredefinedSplit,
-        metrics: MetricsHandler,
-        store_top_num_models: Union[int, float] = 0.1
+        self, cv: PredefinedSplit, metrics: MetricsHandler, store_top_num_models: Union[int, float] = 0.1
     ) -> dict:
         """
         Collect the data for the report by retraining the models for each cv split, and
@@ -251,7 +233,6 @@ class AutoMLManager:
 
         return self.report
 
-
     def _initialize_report(self):
         """
         Initializes the report structure.
@@ -259,16 +240,8 @@ class AutoMLManager:
         return {
             "model_data": {"reports": [], "metadata": None},
             "split_data": {"splits": [], "metadata": None},
-            "optimizer_data": {
-                "metadata": {
-                    "algorithm": "automl"
-                },
-                "additional_data": {
-                    "history":[]
-                }
-            }
+            "optimizer_data": {"metadata": {"algorithm": "automl"}, "additional_data": {"history": []}},
         }
-
 
     def _get_n_to_save(self, store_top_num_models: Union[int, float]) -> int:
         """
@@ -283,7 +256,9 @@ class AutoMLManager:
         - int: the number of models to store
         """
         n_candidates = len(self.auto_model.tuner.oracle.trials)
-        if type(store_top_num_models) == int or (isinstance(store_top_num_models, float) and store_top_num_models.is_integer() and store_top_num_models>1):
+        if isinstance(store_top_num_models, int) or (
+            isinstance(store_top_num_models, float) and store_top_num_models.is_integer() and store_top_num_models > 1
+        ):
             save_top_n = min(int(store_top_num_models), n_candidates)
         elif isinstance(store_top_num_models, float) and 0.0 < store_top_num_models <= 1.0:
             save_top_n = int(n_candidates * store_top_num_models)
@@ -292,14 +267,12 @@ class AutoMLManager:
 
         return max(1, min(save_top_n, n_candidates))
 
-
     def _prepare_model_save_directory(self):
         """
         Makes sure that the directory exsists and that it's empty.
         """
         self.model_save_dir_path.mkdir(parents=True, exist_ok=True)
         empty_directory(self.model_save_dir_path)
-
 
     def _get_best_models(self, num_models: int) -> Generator[tuple[Model, HyperParameters], None, None]:
         """
@@ -318,8 +291,14 @@ class AutoMLManager:
             model = self.auto_model.tuner.load_model(trial)
             yield model, trial.hyperparameters
 
-
-    def _process_model(self, idx: int, optimizer: Optimizer, hyperparameters: HyperParameters, cv: PredefinedSplit, metrics: MetricsHandler):
+    def _process_model(
+        self,
+        idx: int,
+        optimizer: Optimizer,
+        hyperparameters: HyperParameters,
+        cv: PredefinedSplit,
+        metrics: MetricsHandler,
+    ):
         """
         Retrains and evaluated the model for each cross validation split and collects the relevant data,
         while ensuring an equal starting point for each split.
@@ -336,7 +315,9 @@ class AutoMLManager:
 
         history_callbacks = []
 
-        for split_idx, (train_indices, test_indices) in enumerate(cv.split(self.preped_features[0], self.preped_targets[0])):
+        for split_idx, (train_indices, test_indices) in enumerate(
+            cv.split(self.preped_features[0], self.preped_targets[0])
+        ):
             history = keras.callbacks.History()
             fit_config = deepcopy(self.fit_config)
 
@@ -359,12 +340,14 @@ class AutoMLManager:
             y_pred, predict_time = self._predict(model, X_test)
             predict_times.append(predict_time)
 
-            model_data_per_split.append({
-                "model_path": save_path,
-                "y_pred": y_pred,
-                "y_true": np.stack(np.squeeze(y_test, axis=-1)), # correct the format into a single nd.array
-                "model_size": 0
-            })
+            model_data_per_split.append(
+                {
+                    "model_path": save_path,
+                    "y_pred": y_pred,
+                    "y_true": np.stack(np.squeeze(y_test, axis=-1)),  # correct the format into a single nd.array
+                    "model_size": model_size,
+                }
+            )
 
             self._update_scores(scores, metrics, y_test, y_pred)
             splits.append(test_indices)
@@ -378,7 +361,6 @@ class AutoMLManager:
         self.report["optimizer_data"]["additional_data"]["history"].append(history_callbacks)
         self._add_model_report(model_data_per_split, scores, hyperparameters, train_times, predict_times)
         self.report["split_data"]["splits"] = splits
-
 
     def _reset_training(self, optimizer: Optimizer, hyperparameters: HyperParameters) -> Model:
         """
@@ -394,9 +376,8 @@ class AutoMLManager:
         keras.utils.set_random_seed(self.seed)
         model = self.auto_model.tuner.hypermodel.build(hyperparameters)
         new_optimizer = type(optimizer).from_config(optimizer.get_config())
-        model.compile(optimizer=new_optimizer, loss='mse')
+        model.compile(optimizer=new_optimizer, loss="mse")
         return model
-
 
     def _prepare_split_data(self, train_indices, test_indices):
         """
@@ -417,7 +398,6 @@ class AutoMLManager:
         y_test = [safe_indexing(y, test_indices) for y in self.preped_targets]
         return X_train, X_test, y_train, y_test
 
-
     def _train_model(self, model, fit_settings, X_train, y_train, X_test, y_test):
         """
         Trains the model and measures the time it took.
@@ -432,7 +412,7 @@ class AutoMLManager:
         """
         start_time = time.perf_counter()
 
-        fit_settings.setdefault("epochs", 1000) # AutoKeras default
+        fit_settings.setdefault("epochs", 1000)  # AutoKeras default
 
         # AutoKeras inserts early-stopping to accelerate the search process
         # We have to do the same to get similar results
@@ -441,7 +421,6 @@ class AutoMLManager:
 
         model.fit(X_train, y_train, validation_data=(X_test, y_test), **fit_settings)
         return time.perf_counter() - start_time
-
 
     def _predict(self, model: Model, X_test) -> tuple[np.ndarray, float]:
         """
@@ -459,7 +438,6 @@ class AutoMLManager:
         predict_time = time.perf_counter() - start_time
         return np.squeeze(np.stack(y_pred, axis=0), axis=-1), predict_time
 
-
     def _update_scores(self, scores: list, metrics: MetricsHandler, y_test, y_pred):
         """
         Calculates each metrics.
@@ -474,8 +452,14 @@ class AutoMLManager:
         for name, func in metrics.metrics.items():
             scores[name].append(func(y_test, y_pred))
 
-
-    def _add_model_report(self, model_data_per_split: list, scores: list, hyperparameters: HyperParameters, train_times: list, predict_times: list):
+    def _add_model_report(
+        self,
+        model_data_per_split: list,
+        scores: list,
+        hyperparameters: HyperParameters,
+        train_times: list,
+        predict_times: list,
+    ):
         """
         Makes a report for each model.
 
@@ -495,19 +479,16 @@ class AutoMLManager:
         }
         self.report["model_data"]["reports"].append(model_report)
 
-
     def cleanup_tmp(self):
         """
         Cleans up the temporary directory (preserves '.gitignore').
         """
         project_folder = os.path.join(self.tmp_dir_path, self.project_name)
-        if os.path.basename(tmp_dir_path) == "tmp" and os.path.isdir(project_folder):
-            if os.path.commonpath([project_folder, tmp_dir_path]) == tmp_dir_path:
+        if os.path.basename(self.tmp_dir_path) == "tmp" and os.path.isdir(project_folder):
+            if os.path.commonpath([project_folder, self.tmp_dir_path]) == self.tmp_dir_path:
                 print(f"Deleting folder: {project_folder}")
                 shutil.rmtree(project_folder)
             else:
-                print(f"{project_folder} is not a direct subdirectory of {tmp_dir_path}")
+                print(f"{project_folder} is not a direct subdirectory of {self.tmp_dir_path}")
         else:
-            print(f"{tmp_dir_path} is not a 'tmp' directory or {project_folder} does not exist.")
-
-
+            print(f"{self.tmp_dir_path} is not a 'tmp' directory or {project_folder} does not exist.")

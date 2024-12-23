@@ -1,45 +1,46 @@
-from sklearn.model_selection import GridSearchCV
-from .modified_gridsearch import GridSearchCVWithStoredModels
-from sklearn import metrics
-import numpy as np
-import pandas as pd
-import os
-from pathlib import Path
-import joblib
-from tabulate import tabulate
-import humanize
-import shutil
 import glob
-from tqdm import tqdm
-
-
-from sklearn.base import BaseEstimator
-from sklearn.pipeline import Pipeline
-from skorch import NeuralNetClassifier, NeuralNetRegressor
-
 import importlib
 import inspect
+import os
+import shutil
+from pathlib import Path
+from typing import Any, Union
 
-from typing import Any, Union, Dict, Callable
+import humanize
+import joblib
+import numpy as np
+import pandas as pd
+from sklearn.base import BaseEstimator
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from skorch import NeuralNetClassifier, NeuralNetRegressor
+from tabulate import tabulate
+from tqdm import tqdm
 
 from src import empty_directory
 from src.metrics import MetricsHandler
 
-class GridSearchManager:
-    def __init__(self, scorers: MetricsHandler, tmp_dir_path: Path, model_save_dir_path : Path, save_models: bool = True, show_progress_bar : bool = True, single_thread: bool = False, verbose: int = 2):
+from .modified_gridsearch import GridSearchCVWithStoredModels
 
+
+class GridSearchManager:
+    def __init__(
+        self,
+        scorers: MetricsHandler,
+        tmp_dir_path: Path,
+        model_save_dir_path: Path,
+        save_models: bool = True,
+        show_progress_bar: bool = True,
+        single_thread: bool = False,
+        verbose: int = 2,
+    ):
         # Default grid search settings
-        self._search_default_params = {
-            "verbose" : 1,
-            "n_jobs" : 4,
-            "error_score" : "raise",
-            "refit": False
-        }
+        self._search_default_params = {"verbose": 1, "n_jobs": 4, "error_score": "raise", "refit": False}
 
         self._search_forced_params = {
-            "scoring" : scorers.to_GridsearchCV(),
+            "scoring": scorers.to_GridsearchCV(),
         }
-        self._scorers =  scorers.metrics_names
+        self._scorers = scorers.metrics_names
 
         # Forces single thread
         if single_thread:
@@ -55,7 +56,6 @@ class GridSearchManager:
         self.model_save_dir_path = model_save_dir_path
         self._show_progress_bar = show_progress_bar
 
-
     def _log(self, text: str, level: int = 1) -> None:
         """
         Logs messages based on the verbosity level.
@@ -65,16 +65,16 @@ class GridSearchManager:
         - level (int): Required level to print the text.
 
         """
-        # Only here so that it's easier to change in the future
         if self.verbose >= level:
             print(text)
 
     @classmethod
     def construct_model(cls, model_config) -> BaseEstimator:
+        is_skorch_module = False
         if "pipeline" in model_config:
             steps = []
             for step in model_config["pipeline"]:
-                step_estimator = construct_model_or_pipeline(step)
+                step_estimator = cls.construct_model(step)
                 steps.append((step["step"], step_estimator))
             return Pipeline(steps)
         else:
@@ -91,25 +91,24 @@ class GridSearchManager:
                 OptimizerClass = getattr(optimizer_module, parameters["optimizer"]["class"])
                 parameters["optimizer"] = OptimizerClass
 
-            # TODO: should `optimizer` be part of parameter or on same model as declaration
             if "callbacks" in parameters:
-                callbacks = [construct_model_or_pipeline(callback) for callback in parameters["callbacks"]]
+                callbacks = [cls.construct_model(callback) for callback in parameters["callbacks"]]
                 parameters["callbacks"] = callbacks
 
             if "estimator" in model_config:  # Handling nested models
                 # Check if the current model is a Skorch model and requires a PyTorch model class instead of instance
                 if ModelClass in [NeuralNetRegressor, NeuralNetClassifier]:
-                    quirks["is_skorch_module"] = True
+                    is_skorch_module = True
                     # Import the PyTorch model class without instantiating it
                     inner_module = importlib.import_module(model_config["estimator"]["module"])
                     InnerModelClass = getattr(inner_module, model_config["estimator"]["class"])
                     # Pass the PyTorch model class directly, without instantiation
                     return ModelClass(InnerModelClass, **parameters)
 
-                inner_model = construct_model_or_pipeline(model_config["estimator"])
+                inner_model = cls.construct_model(model_config["estimator"])
                 return ModelClass(inner_model, **parameters)
 
-            return ModelClass(**parameters)
+            return (ModelClass(**parameters), is_skorch_module)
 
         # Check if ModelClass has n_jobs parameter. If so, set it to number of cores (not threads)
         if "n_jobs" in inspect.signature(ModelClass).parameters:
@@ -133,23 +132,22 @@ class GridSearchManager:
         if scoring is None:
             scoring = self._scorers
 
-        rank_columns = [f'rank_test_{key}' for key in scoring]
+        rank_columns = [f"rank_test_{key}" for key in scoring]
 
         # Calculate the mean rank across all scoring metrics
-        results_df['mean_rank'] = results_df[rank_columns].mean(axis=1)
+        results_df["mean_rank"] = results_df[rank_columns].mean(axis=1)
 
         # Sort by mean rank, and then by individual rank columns
-        sort_columns = ['mean_rank'] + rank_columns
+        sort_columns = ["mean_rank"] + rank_columns
         sorted_df = results_df.sort_values(by=sort_columns)
 
         # Save original index and then reset it
-        sorted_df['candidate_idx'] = sorted_df.index
+        sorted_df["candidate_idx"] = sorted_df.index
         sorted_df.reset_index(drop=True, inplace=True)
 
         return sorted_df
 
-
-    def _correct_scores(self, df:pd.DataFrame, scores: dict) -> pd.DataFrame:
+    def _correct_scores(self, df: pd.DataFrame, scores: dict) -> pd.DataFrame:
         """
         Scores returned by GridSearchCV are negated if a lower score is better; this function
         corrects that by checking if greater is better for each scoring metric and applying corrections.
@@ -164,7 +162,7 @@ class GridSearchManager:
         """
         for scorer_name, greater_is_better in scores.items():
             # Identify all columns that contain the scorer name (e.g., split0_test_rmse, mean_test_rmse, etc.)
-            relevant_columns = [col for col in df.columns if (scorer_name in col and 'std_' not in col)]
+            relevant_columns = [col for col in df.columns if (scorer_name in col and "std_" not in col)]
 
             for col in relevant_columns:
                 # If a higher score is better, no need to change anything; otherwise, negate the values
@@ -173,10 +171,12 @@ class GridSearchManager:
 
         return df
 
-
-    def search(self, features: Union[pd.DataFrame, np.ndarray],
-               targets: Union[pd.DataFrame, np.ndarray],
-               search_parameters: dict[str, Any]) -> None:
+    def search(
+        self,
+        features: Union[pd.DataFrame, np.ndarray],
+        targets: Union[pd.DataFrame, np.ndarray],
+        search_parameters: dict[str, Any],
+    ) -> None:
         """
         Performs the grid search and saves the relevant data.
 
@@ -186,11 +186,11 @@ class GridSearchManager:
         - targets (pd.DataFame | np.ndarray): Output data for validation
         """
 
-
         # Merge provided parameters with default and forced settings
         parameters = {**self._search_default_params, **search_parameters, **self._search_forced_params}
 
-        assert "param_grid" in parameters and parameters["param_grid"], "'param_grid' must exist and not be empty"
+        assert "param_grid" in parameters, "'param_grid' must exist"
+        assert parameters["param_grid"], f"'param_grid' must not be empty ({parameters['param_grid']})"
 
         self._log("\n")
         self._log(f"Estimator: {parameters['estimator']}")
@@ -199,11 +199,8 @@ class GridSearchManager:
         # # Choose the appropriate GridSearchCV class based on whether models should be stored
         if self._store_models:
             self.grid_search = GridSearchCVWithStoredModels(**parameters)
-            custom_params = {
-                "tmp_dir_path": self.tmp_dir_path,
-                "show_progress_bar": self._show_progress_bar
-            }
-        else :
+            custom_params = {"tmp_dir_path": self.tmp_dir_path, "show_progress_bar": self._show_progress_bar}
+        else:
             self.grid_search = GridSearchCV(**parameters)
             custom_params = {}
 
@@ -215,8 +212,7 @@ class GridSearchManager:
         self.results = self._order_by_mean_rank(self.results)
         self.results = self._correct_scores(self.results, self._scorers)
 
-
-    def predict(self, X: Union[np.ndarray, pd.Series], index: Union[None, int] = None) -> np.ndarray: #DEPRECATED
+    def predict(self, X: Union[np.ndarray, pd.Series], index: Union[None, int] = None) -> np.ndarray:  # DEPRECATED
         """
         Predicts the output using the best model by default, or a specified model if `index` is provided.
 
@@ -245,7 +241,6 @@ class GridSearchManager:
 
         return y_pred
 
-
     def generate_report(self, store_top_num_models: Union[int, float] = 0.1) -> dict:
         """
         Generates a report of the top models based on the evaluation results.
@@ -269,7 +264,7 @@ class GridSearchManager:
         top_candidates = self._get_top_candidates(store_top_num_models, n_candidates)
 
         # Process top models
-        for idx, row in top_candidates.iterrows():
+        for _, row in top_candidates.iterrows():
             self._process_candidate(row, n_splits)
 
         self._process_splits(n_splits)
@@ -278,28 +273,19 @@ class GridSearchManager:
 
         return self.report
 
-
     def _initialize_report(self):
         """
         Initializes the report structure.
         """
-         # Prepare to log the report
+        # Prepare to log the report
         self._log("\n")
         self.table_data = []
 
         return {
             "model_data": {"reports": [], "metadata": None},
             "split_data": {"splits": [], "metadata": None},
-            "optimizer_data": {
-                "metadata": {
-                    "algorithm": "gridsearch"
-                },
-                "additional_data": {
-                     "results": self.results
-                }
-            }
+            "optimizer_data": {"metadata": {"algorithm": "gridsearch"}, "additional_data": {"results": self.results}},
         }
-
 
     def _prepare_model_save_directory(self):
         """
@@ -308,14 +294,12 @@ class GridSearchManager:
         self.model_save_dir_path.mkdir(parents=True, exist_ok=True)
         empty_directory(self.model_save_dir_path)
 
-
     def _load_general_info(self):
         """
         Loads the general info about the number of splits and candidates from a file.
         """
-        general_info = joblib.load(os.path.join(self.tmp_dir_path, f"general.pkl"))
+        general_info = joblib.load(os.path.join(self.tmp_dir_path, "general.pkl"))
         return general_info["n_splits"], general_info["n_candidates"]
-
 
     def _get_top_candidates(self, store_top_num_models: Union[int, float], n_candidates: int) -> pd.DataFrame:
         """
@@ -331,9 +315,11 @@ class GridSearchManager:
         - pd.DataFrame: the top candidates.
         """
 
-        if isinstance(store_top_num_models, int) or (isinstance(store_top_num_models, float) and store_top_num_models.is_integer()):
+        if isinstance(store_top_num_models, int) or (
+            isinstance(store_top_num_models, float) and store_top_num_models.is_integer() and store_top_num_models > 1
+        ):
             save_top_n = min(int(store_top_num_models), n_candidates)
-        elif isinstance(store_top_num_models, float) and 0.0 < store_top_num_models <= 1.:
+        elif isinstance(store_top_num_models, float) and 0.0 < store_top_num_models <= 1.0:
             save_top_n = int(n_candidates * store_top_num_models)
         else:
             save_top_n = 1
@@ -341,12 +327,11 @@ class GridSearchManager:
         save_top_n = max(1, min(save_top_n, n_candidates))
         return self.results.head(save_top_n).copy()
 
-
     def _process_candidate(self, model_results, n_splits: int):
         """
         Gets all the data for a candidate for each split, and add it to the report.
         """
-        candidate_idx = model_results['candidate_idx']
+        candidate_idx = model_results["candidate_idx"]
 
         # Load and move top models for each split
         model_data_per_split = []
@@ -355,7 +340,6 @@ class GridSearchManager:
             model_data_per_split.append(self._process_model_split(candidate_idx, split_idx))
 
         self._prepare_model_report(model_data_per_split, model_results)
-
 
     def _process_model_split(self, candidate_idx: int, split_idx: int):
         """
@@ -373,7 +357,7 @@ class GridSearchManager:
         else:
             model_size = None
             model_file = None
-            self._log(f"Warning: File '{model_file}' does not exist.", level = 0)
+            self._log(f"Warning: File '{model_file}' does not exist.", level=0)
 
         predictions_file = os.path.join(self.tmp_dir_path, f"pred-{candidate_idx}-{split_idx}.pkl")
         if os.path.exists(predictions_file):
@@ -383,28 +367,24 @@ class GridSearchManager:
         else:
             y_true = None
             y_pred = None
-            self._log(f"Warning: File '{predictions_file}' does not exist.", level = 0)
+            self._log(f"Warning: File '{predictions_file}' does not exist.", level=0)
 
-        return {"model_path": model_file, "y_true": y_true, "y_pred": y_pred, "model_size":model_size}
-
+        return {"model_path": model_file, "y_true": y_true, "y_pred": y_pred, "model_size": model_size}
 
     def _prepare_model_report(self, model_data_per_split, model_results):
         """
         Prepares the model report and the log.
         """
-         # Prepare the model report
+        # Prepare the model report
         model_report = {
             "model_data_per_split": model_data_per_split,
             "scores": {
-                key: {
-                    "mean": model_results[f'mean_test_{key}'],
-                    "std": model_results[f'std_test_{key}']
-                }
+                key: {"mean": model_results[f"mean_test_{key}"], "std": model_results[f"std_test_{key}"]}
                 for key in self._scorers
             },
-            "params": model_results['params'],
-            "fit_time": {"mean": model_results['mean_fit_time'], "std": model_results['std_fit_time']},
-            "score_time": {"mean": model_results['mean_score_time'], "std": model_results['std_score_time']}
+            "params": model_results["params"],
+            "fit_time": {"mean": model_results["mean_fit_time"], "std": model_results["std_fit_time"]},
+            "score_time": {"mean": model_results["mean_score_time"], "std": model_results["std_score_time"]},
         }
         self.report["model_data"]["reports"].append(model_report)
 
@@ -413,15 +393,17 @@ class GridSearchManager:
         model_size = model_report["model_data_per_split"][0]["model_size"]
         # Prepare the row for the logged report table
         table_row = [
-            len(self.report["model_data"]["reports"]), # Rank of the candidate
-            *[f"{model_report['scores'][key]['mean']:.4f} ± {model_report['scores'][key]['std']:.2f}" for key in self._scorers],
+            len(self.report["model_data"]["reports"]),  # Rank of the candidate
+            *[
+                f"{model_report['scores'][key]['mean']:.4f} ± {model_report['scores'][key]['std']:.2f}"
+                for key in self._scorers
+            ],
             f"{model_report['fit_time']['mean']:.1f} ± {model_report['fit_time']['std']:.0f} sec",
             f"{model_report['score_time']['mean']:.1f} ± {model_report['score_time']['std']:.0f} sec",
             f"{humanize.naturalsize(model_size , binary=True)} ({humanize.naturalsize(total_model_size, binary=True)})",
-            f"{model_report['params']}"
+            f"{model_report['params']}",
         ]
         self.table_data.append(table_row)
-
 
     def _process_splits(self, n_splits):
         """
@@ -434,9 +416,8 @@ class GridSearchManager:
                 split = joblib.load(split_file)
                 self.report["split_data"]["splits"].append(split)
             else:
-                self._log(f"Warning: File '{split_file}' does not exist.", level = 0)
+                self._log(f"Warning: File '{split_file}' does not exist.", level=0)
                 self.report["split_data"]["splits"].append(None)
-
 
     def _log_report(self):
         """
@@ -449,12 +430,10 @@ class GridSearchManager:
             "Fit Time",
             "Score Time",
             "Model Size (Total size)",
-            "Params"
+            "Params",
         ]
 
         self._log(tabulate(self.table_data, headers=headers, tablefmt="grid"))
-
-
 
     def cleanup_tmp(self):
         """
@@ -463,7 +442,7 @@ class GridSearchManager:
         """
 
         # Use glob to list all files in the temporary directory
-        files = glob.glob(os.path.join(self.tmp_dir_path, '*'))
+        files = glob.glob(os.path.join(self.tmp_dir_path, "*"))
 
         # Log the start of the cleanup process
         self._log("\nCleaning up temporary model storage directory")
@@ -472,30 +451,26 @@ class GridSearchManager:
         is_gitignore = False  # Flag to track if .gitignore is present
 
         # Initialize the progress bar with total iterations
-        progress_bar = tqdm(total=len(files), desc="Deleting tmp files", unit="files", dynamic_ncols=True, smoothing=0.1)
+        progress_bar = tqdm(
+            total=len(files), desc="Deleting tmp files", unit="files", dynamic_ncols=True, smoothing=0.1
+        )
 
         # Iterate over all files in the directory
         for file in files:
             # Check if the file is not .gitignore
-            if os.path.basename(file) != '.gitignore':
+            if os.path.basename(file) != ".gitignore":
                 try:
                     # Attempt to remove the file
                     os.remove(file)
-                    num_erased+=1
+                    num_erased += 1
 
                 except Exception as e:
                     print(f"Could not delete {file}: {e}")
             else:
-                is_gitignore = True # Mark that .gitignore is present
+                is_gitignore = True  # Mark that .gitignore is present
             progress_bar.update(1)
 
         progress_bar.close()
 
         # Log the number of files erased, excluding .gitignore if present
-        self._log (f"Erased {num_erased} out of {len(files) - int(is_gitignore)} files") #don't count git ignore
-
-
-
-
-
-
+        self._log(f"Erased {num_erased} out of {len(files) - int(is_gitignore)} files")  # don't count git ignore

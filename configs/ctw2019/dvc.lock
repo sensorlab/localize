@@ -3,9 +3,9 @@ stages:
   prepare:
     cmd:
     - unzip ../../artifacts/ctw2019/data/raw/CTW2019_Dataset_h5.zip -d ../../artifacts/ctw2019/data/raw/
-    - "python ../../src/ctw2019/prepare.py --data-h ../../artifacts/ctw2019/data/raw/h_Estimated_CTW_Train.h5\
-      \ --data-snr ../../artifacts/ctw2019/data/raw/SNR_CTW_Train.h5 --data-pos ../../artifacts/ctw2019/data/raw/r_Position_CTW_Train.h5\
-      \ --output ../../artifacts/ctw2019/data/interim/ctw2019.pkl\n"
+    - "python ../../src/ctw2019/prepare.py --data-h ../../artifacts/ctw2019/data/raw/h_Estimated_CTW_Train.h5
+      --data-snr ../../artifacts/ctw2019/data/raw/SNR_CTW_Train.h5 --data-pos ../../artifacts/ctw2019/data/raw/r_Position_CTW_Train.h5
+      --output ../../artifacts/ctw2019/data/interim/ctw2019.pkl\n"
     - rm ../../artifacts/ctw2019/data/raw/*.h5
     deps:
     - path: ../../artifacts/ctw2019/data/raw/CTW2019_Dataset_h5.zip
@@ -14,21 +14,21 @@ stages:
       size: 3961470982
     - path: ../../src/ctw2019/prepare.py
       hash: md5
-      md5: 4e866e228367979f8d8d8bb0a6085fd2
-      size: 2359
+      md5: f1f98d27fd9cc069da48a4069e52e9eb
+      size: 2377
     outs:
     - path: ../../artifacts/ctw2019/data/interim/ctw2019.pkl
       hash: md5
-      md5: f7da6e25307f7305fa2ac405ae9ffb7c
-      size: 2069433498
+      md5: e10a9e5035393c8b42b6c0b6c4a3eeae
+      size: 11835170
   featurize:
-    cmd: "python ../../src/ctw2019/featurize.py --input ../../artifacts/ctw2019/data/interim/ctw2019.pkl\
-      \ --output ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\n"
+    cmd: "python ../../src/ctw2019/featurize.py --input ../../artifacts/ctw2019/data/interim/ctw2019.pkl
+      --output ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/interim/ctw2019.pkl
       hash: md5
-      md5: f7da6e25307f7305fa2ac405ae9ffb7c
-      size: 2069433498
+      md5: e10a9e5035393c8b42b6c0b6c4a3eeae
+      size: 11835170
     - path: ../../src/ctw2019/featurize.py
       hash: md5
       md5: 442ae0495935ef0062fad542870403bc
@@ -36,16 +36,16 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
-      md5: 3fe82724f38155d4a7a78f2b2855eff3
-      size: 2069363555
+      md5: c838c55368f5368d952d1e55a12d1f04
+      size: 11834771
   split@ShortEdge:
-    cmd: "python ../../src/ctw2019/split.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split ShortEdge --output-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl\n"
+    cmd: "python ../../src/ctw2019/split.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split ShortEdge --output-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
-      md5: 3fe82724f38155d4a7a78f2b2855eff3
-      size: 2069363555
+      md5: c838c55368f5368d952d1e55a12d1f04
+      size: 11834771
     - path: ../../src/ctw2019/split.py
       hash: md5
       md5: b8fd0fe36c3db2520ed330841f38e535
@@ -59,16 +59,16 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl
       hash: md5
-      md5: 92d487a26dcfddfdc8e272a1c4560062
-      size: 140238
+      md5: c4da8affdcd3726dc4ff469ad0fdce0d
+      size: 1142
   split@Cutout:
-    cmd: "python ../../src/ctw2019/split.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split Cutout --output-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl\n"
+    cmd: "python ../../src/ctw2019/split.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split Cutout --output-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
-      md5: 3fe82724f38155d4a7a78f2b2855eff3
-      size: 2069363555
+      md5: d94cbf6332ace8623cb7b970a02b1a36
+      size: 1183811
     - path: ../../src/ctw2019/split.py
       hash: md5
       md5: b8fd0fe36c3db2520ed330841f38e535
@@ -82,11 +82,11 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl
       hash: md5
-      md5: d482455520e5a6d583342d4096965fb8
-      size: 140227
+      md5: a9e2556138c9681acd839de0c70091f9
+      size: 419
   split@LongEdge:
-    cmd: "python ../../src/ctw2019/split.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split LongEdge --output-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl\n"
+    cmd: "python ../../src/ctw2019/split.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split LongEdge --output-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -131,13 +131,13 @@ stages:
       md5: 199af3c437c9c014d78909477fc32fc2
       size: 700197
   split@Random:
-    cmd: "python ../../src/ctw2019/split.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split Random --output-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl\n"
+    cmd: "python ../../src/ctw2019/split.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split Random --output-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
-      md5: 3fe82724f38155d4a7a78f2b2855eff3
-      size: 2069363555
+      md5: c838c55368f5368d952d1e55a12d1f04
+      size: 11834771
     - path: ../../src/ctw2019/split.py
       hash: md5
       md5: b8fd0fe36c3db2520ed330841f38e535
@@ -151,11 +151,11 @@ stages:
     outs:
     - path: ../../artifacts/ctw2019/data/splits/RandomSplit.pkl
       hash: md5
-      md5: 08d18bb17d58cd555431df2167ad3e25
-      size: 700227
+      md5: 8791eb05af9c1a5ae61d76e6cd256bb5
+      size: 4723
   benchmark@LongEdge-RandomForestRegressor:
-    cmd: "python train.py --use RandomForestRegressor --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/RandomForestRegressor-LongEdgeSplit.pkl\n"
+    cmd: "python train.py --use RandomForestRegressor --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/RandomForestRegressor-LongEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -180,26 +180,26 @@ stages:
       md5: e419bff4ca7468950218f12013dd9c6c
       size: 47930
   evaluation:
-    cmd: "python ../../src/report.py ../../artifacts/ctw2019/models/*-results.pkl\
-      \ --output-report ../../artifacts/ctw2019/reports/metrics.json\n"
+    cmd: "python ../../src/report.py ../../artifacts/ctw2019/models/*-results.pkl
+      --output-report ../../artifacts/ctw2019/reports/performance.tex\n"
     deps:
     - path: ../../artifacts/ctw2019/models
       hash: md5
-      md5: a6663a54af0c450e8edc713492b4a791.dir
-      size: 1495248
-      nfiles: 16
+      md5: 8d1f30e6dd0c346e5e131b12c269f4a2.dir
+      size: 129552009
+      nfiles: 32
     - path: ../../src/report.py
       hash: md5
-      md5: d315d71b09a199d1b584e640cf9afe0f
-      size: 1644
+      md5: 141841b1df67410b323a17930d60860f
+      size: 27436
     outs:
-    - path: ../../artifacts/ctw2019/reports/metrics.json
+    - path: ../../artifacts/ctw2019/reports/performance.tex
       hash: md5
-      md5: 6b30c9306d0896733e2e8253088d1980
-      size: 2752
+      md5: 5cdb16e17773301be710bcfb77e6eeec
+      size: 2647
   benchmark@LongEdge-LinearRegression:
-    cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/LinearRegression-LongEdgeSplit.pkl\n"
+    cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/LinearRegression-LongEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -224,8 +224,8 @@ stages:
       md5: 5228c25fedc7fd048e34fa15be11675f
       size: 47925
   benchmark-deeplearning@LongEdge-arnold2019localization:
-    cmd: "python train_deep.py --use arnold2019localization --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/arnold2019localization-LongEdgeSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2019localization --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/arnold2019localization-LongEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -250,8 +250,8 @@ stages:
       md5: af33275a8a2661cdbfcc76618b873f06
       size: 47947
   benchmark-deeplearning@ShortEdge-arnold2019localization:
-    cmd: "python train_deep.py --use arnold2019localization --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/arnold2019localization-ShortEdgeSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2019localization --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/arnold2019localization-ShortEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -276,8 +276,8 @@ stages:
       md5: 4d765d995d372c6a998fdfb2c24947f7
       size: 44180
   benchmark-deeplearning@Random-arnold2019localization:
-    cmd: "python train_deep.py --use arnold2019localization --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/arnold2019localization-RandomSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2019localization --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/arnold2019localization-RandomSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -302,8 +302,8 @@ stages:
       md5: 9b9da7786c22efede72b6de4f9aea953
       size: 420931
   benchmark-deeplearning@Cutout-arnold2019localization:
-    cmd: "python train_deep.py --use arnold2019localization --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/arnold2019localization-CutoutSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2019localization --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/arnold2019localization-CutoutSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -328,8 +328,8 @@ stages:
       md5: 8d3aa81c77b3e0a2c267563c33e95e3c
       size: 46409
   benchmark-deeplearning@LongEdge-arnold2019sounding:
-    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/arnold2019sounding-LongEdgeSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/arnold2019sounding-LongEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -354,8 +354,8 @@ stages:
       md5: 0adf882610adf9914d1661a7ed3999e5
       size: 47943
   benchmark-deeplearning@Cutout-arnold2019sounding:
-    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/arnold2019sounding-CutoutSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/arnold2019sounding-CutoutSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -380,8 +380,8 @@ stages:
       md5: 7d368e1724441f0b7ec09366615a382d
       size: 46405
   benchmark-deeplearning@Random-arnold2019sounding:
-    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/arnold2019sounding-RandomSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/arnold2019sounding-RandomSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -406,8 +406,8 @@ stages:
       md5: b6264b2d6806e1716ebc1010ba28a2bf
       size: 420927
   benchmark-deeplearning@ShortEdge-arnold2019sounding:
-    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/arnold2019sounding-ShortEdgeSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2019sounding --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/arnold2019sounding-ShortEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -432,8 +432,8 @@ stages:
       md5: 2544f9f88aa512f00dd44e1168a0130c
       size: 44176
   benchmark-deeplearning@LongEdge-arnold2018deep:
-    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/arnold2018deep-LongEdgeSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/arnold2018deep-LongEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -458,8 +458,8 @@ stages:
       md5: 44ae5353abf5b507d9182aae7f165145
       size: 47939
   benchmark-deeplearning@ShortEdge-arnold2018deep:
-    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/arnold2018deep-ShortEdgeSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/arnold2018deep-ShortEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -484,8 +484,8 @@ stages:
       md5: db211b469dc8cd8646a24935e633115b
       size: 44172
   benchmark-deeplearning@Random-arnold2018deep:
-    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/arnold2018deep-RandomSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/arnold2018deep-RandomSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -510,8 +510,8 @@ stages:
       md5: 85fbe72b4d2d1f95b6c87fc059c10d47
       size: 420923
   benchmark-deeplearning@Cutout-arnold2018deep:
-    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/arnold2018deep-CutoutSplit.pkl\n"
+    cmd: "python train_deep.py --use arnold2018deep --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/arnold2018deep-CutoutSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -536,25 +536,25 @@ stages:
       md5: 5c67318432b4e7df977a5a49dcf515be
       size: 46401
   flatten:
-    cmd: "python ../../src/ctw2019/flatten.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --output ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\n"
+    cmd: "python ../../src/ctw2019/flatten.py --input ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --output ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
-      md5: 3fe82724f38155d4a7a78f2b2855eff3
-      size: 2069363555
+      md5: c838c55368f5368d952d1e55a12d1f04
+      size: 11834771
     - path: ../../src/ctw2019/flatten.py
       hash: md5
-      md5: daf8c32fa4b4c990c3d0e50ce14eaa84
-      size: 854
+      md5: d0e7a6a619086e238475d181043bb38d
+      size: 855
     outs:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
       hash: md5
-      md5: 411b70954fa29aeb9ea4880de3440cef
-      size: 2069363523
+      md5: 830fceaceec41bf5dc73d43da999206f
+      size: 11834739
   benchmark-deeplearning@Random-model0:
-    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Arnold2018DeepModel-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Arnold2018DeepModel-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -602,8 +602,8 @@ stages:
       md5: bd080b3184211f945dca9710d40fc8c9
       size: 280976
   benchmark-deeplearning@ShortEdge-model0:
-    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl\
-      \ --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/Arnold2018DeepModel-ShortEdgeSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/Arnold2018DeepModel-ShortEdgeSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -651,8 +651,8 @@ stages:
       md5: e58a733df2a1ded8f681e733ddd5a5f1
       size: 29617
   benchmark-deeplearning@Cutout-model0:
-    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl\
-      \ --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/Arnold2018DeepModel-CutoutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl
+      --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/Arnold2018DeepModel-CutoutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -700,8 +700,8 @@ stages:
       md5: e94cc518801e47bd4649824e9acd0ffd
       size: 31094
   benchmark-deeplearning@LongEdge-model0:
-    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl\
-      \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/Arnold2018DeepModel-LongEdgeSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Arnold2018DeepModel --data data/prepared/ctw2019.flatten.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/Arnold2018DeepModel-LongEdgeSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -749,8 +749,8 @@ stages:
       md5: f85aac9230456f0c25100f0cd7fc46c2
       size: 32120
   benchmark-deeplearning@Cutout-model1:
-    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/Arnold2019SoundingModel-CutoutSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/CutoutSplit.pkl --output-report models/reports/Arnold2019SoundingModel-CutoutSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -797,8 +797,8 @@ stages:
       md5: fdcafb0ba4d79b7d8f62b09fb5adabd9
       size: 31098
   benchmark-deeplearning@Random-model1:
-    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Arnold2019SoundingModel-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Arnold2019SoundingModel-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -845,8 +845,8 @@ stages:
       md5: 12802e844d85d83f23ddb3a7dfdd099f
       size: 280980
   benchmark-deeplearning@ShortEdge-model1:
-    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/Arnold2019SoundingModel-ShortEdgeSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/Arnold2019SoundingModel-ShortEdgeSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -893,8 +893,8 @@ stages:
       md5: cef05e07daa2f036e1d8d1569f94d7ef
       size: 29621
   benchmark-deeplearning@LongEdge-model1:
-    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/Arnold2019SoundingModel-LongEdgeSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Arnold2019SoundingModel --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/Arnold2019SoundingModel-LongEdgeSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -941,8 +941,8 @@ stages:
       md5: 9efd3aafe3103f3a17f9309cf252468d
       size: 32124
   benchmark@LongEdge-KNeighborsRegressor:
-    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/KNeighborsRegressor-LongEdgeSplit.pkl\n"
+    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/LongEdgeSplit.pkl --output-report models/reports/KNeighborsRegressor-LongEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -967,8 +967,8 @@ stages:
       md5: bc3cb362f874eafe8b072169cfa8f9cb
       size: 32088
   benchmark@Random-LinearRegression:
-    cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/LinearRegression-RandomSplit.pkl\n"
+    cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/LinearRegression-RandomSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -993,8 +993,8 @@ stages:
       md5: efd8dd6b126e90e148dd4a1320250d75
       size: 280989
   benchmark@ShortEdge-KNeighborsRegressor:
-    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/KNeighborsRegressor-ShortEdgeSplit.pkl\n"
+    cmd: "python train.py --use KNeighborsRegressor --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/KNeighborsRegressor-ShortEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -1019,8 +1019,8 @@ stages:
       md5: 35ff73cf899f2cbae7456362524ffd32
       size: 29585
   benchmark@ShortEdge-LinearRegression:
-    cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/LinearRegression-ShortEdgeSplit.pkl\n"
+    cmd: "python train.py --use LinearRegression --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/ShortEdgeSplit.pkl --output-report models/reports/LinearRegression-ShortEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -1045,8 +1045,8 @@ stages:
       md5: f7c5672515dfd1b1702f331251ccb999
       size: 29614
   benchmark@Random-RandomForestRegressor:
-    cmd: "python train.py --use RandomForestRegressor --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/RandomForestRegressor-RandomSplit.pkl\n"
+    cmd: "python train.py --use RandomForestRegressor --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/RandomForestRegressor-RandomSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -1071,8 +1071,8 @@ stages:
       md5: 0f46c81b1164ba2045783f10969d0609
       size: 420914
   benchmark@Cutout-XGBRegressor:
-    cmd: "python train.py --use XGBRegressor --data data/prepared/ctw2019.pkl --split-indices\
-      \ data/splits/CutoutSplit.pkl --output-report models/reports/XGBRegressor-CutoutSplit.pkl\n"
+    cmd: "python train.py --use XGBRegressor --data data/prepared/ctw2019.pkl --split-indices
+      data/splits/CutoutSplit.pkl --output-report models/reports/XGBRegressor-CutoutSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -1097,8 +1097,8 @@ stages:
       md5: 93205cf352787d9e2d27cbd52bcf0a93
       size: 31103
   benchmark@LongEdge-XGBRegressor:
-    cmd: "python train.py --use XGBRegressor --data data/prepared/ctw2019.pkl --split-indices\
-      \ data/splits/LongEdgeSplit.pkl --output-report models/reports/XGBRegressor-LongEdgeSplit.pkl\n"
+    cmd: "python train.py --use XGBRegressor --data data/prepared/ctw2019.pkl --split-indices
+      data/splits/LongEdgeSplit.pkl --output-report models/reports/XGBRegressor-LongEdgeSplit.pkl\n"
     deps:
     - path: data/prepared/ctw2019.pkl
       hash: md5
@@ -1123,8 +1123,8 @@ stages:
       md5: ca8d966f84906e1f10403282928826ef
       size: 32129
   AutoML@Random:
-    cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/RandomSplit.pkl\
-      \ --output-report models/reports/autokeras-RandomSplit.pkl\n"
+    cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/RandomSplit.pkl
+      --output-report models/reports/autokeras-RandomSplit.pkl\n"
     deps:
     - path: automl.py
       hash: md5
@@ -1144,8 +1144,8 @@ stages:
       md5: 361984e7f1c6e69e75e5448e8e30d418
       size: 280963
   AutoML@ShortEdge:
-    cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/ShortEdgeSplit.pkl\
-      \ --output-report models/reports/autokeras-ShortEdgeSplit.pkl\n"
+    cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/ShortEdgeSplit.pkl
+      --output-report models/reports/autokeras-ShortEdgeSplit.pkl\n"
     deps:
     - path: automl.py
       hash: md5
@@ -1165,8 +1165,8 @@ stages:
       md5: 534a953674aa43a0f2a3c639fbd3ec9e
       size: 22354
   AutoML@Cutout:
-    cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/CutoutSplit.pkl\
-      \ --output-report models/reports/autokeras-CutoutSplit.pkl\n"
+    cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/CutoutSplit.pkl
+      --output-report models/reports/autokeras-CutoutSplit.pkl\n"
     deps:
     - path: automl.py
       hash: md5
@@ -1186,8 +1186,8 @@ stages:
       md5: 7a3591557bf225ed327527aeb0e6ef71
       size: 23457
   AutoML@LongEdge:
-    cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/LongEdgeSplit.pkl\
-      \ --output-report models/reports/autokeras-LongEdgeSplit.pkl\n"
+    cmd: "python automl.py --data data/prepared/ctw2019.pkl --split-indices data/splits/LongEdgeSplit.pkl
+      --output-report models/reports/autokeras-LongEdgeSplit.pkl\n"
     deps:
     - path: automl.py
       hash: md5
@@ -1207,8 +1207,8 @@ stages:
       md5: 26efe0a5a5152751feed0358bba05ce1
       size: 24229
   benchmark-deeplearning@Random-model2:
-    cmd: "python ../../scripts/benchmark.py --use Pirnat2022Pirnat1G --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Pirnat2022Pirnat1G-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Pirnat2022Pirnat1G --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Pirnat2022Pirnat1G-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -1241,8 +1241,8 @@ stages:
       md5: 2f1f2975b989a462de6cb37d6191ed14
       size: 280975
   benchmark-deeplearning@Random-model3:
-    cmd: "python ../../scripts/benchmark.py --use Cerar2021Localization --data data/prepared/ctw2019.pkl\
-      \ --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Cerar2021Localization-RandomSplit.pkl\n"
+    cmd: "python ../../scripts/benchmark.py --use Cerar2021Localization --data data/prepared/ctw2019.pkl
+      --split-indices data/splits/RandomSplit.pkl --output-report models/reports/Cerar2021Localization-RandomSplit.pkl\n"
     deps:
     - path: ../../scripts/benchmark.py
       hash: md5
@@ -1275,9 +1275,9 @@ stages:
       md5: 04e5b49f020735214bafb65bfe7fc69f
       size: 280978
   optimization@Random-model3:
-    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Cerar2021Localization-RandomSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Cerar2021Localization-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1309,9 +1309,9 @@ stages:
       md5: 24f8002ad8d3d42a86caacff61c5e5c6
       size: 280978
   optimization@ShortEdge-model1:
-    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Arnold2019SoundingModel-ShortEdgeSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Arnold2019SoundingModel-ShortEdgeSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1352,14 +1352,15 @@ stages:
             device: cuda
             compile: false
     outs:
-    - path: ../../artifacts/ctw2019/models/Arnold2019SoundingModel-ShortEdgeSplit-results.pkl
+    - path:
+        ../../artifacts/ctw2019/models/Arnold2019SoundingModel-ShortEdgeSplit-results.pkl
       hash: md5
       md5: dd263b8299c0ec235193f1202b65abe8
       size: 29621
   optimization@ShortEdge-model0:
-    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Arnold2018DeepModel-ShortEdgeSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Arnold2018DeepModel-ShortEdgeSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
       hash: md5
@@ -1406,9 +1407,9 @@ stages:
       md5: 87685852eacb5cec66b89e0578ef9bd4
       size: 29617
   optimization@Random-model0:
-    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Arnold2018DeepModel-RandomSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Arnold2018DeepModel-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
       hash: md5
@@ -1455,9 +1456,9 @@ stages:
       md5: 9c2bf5ebc016eaabbe931aa7c318424b
       size: 280976
   optimization@Random-model1:
-    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Arnold2019SoundingModel-RandomSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Arnold2019SoundingModel-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1503,9 +1504,9 @@ stages:
       md5: 32b4eb0c0f67ff8926153db02ab9de37
       size: 280980
   optimization@Random-model2:
-    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-RandomSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1537,9 +1538,9 @@ stages:
       md5: f2f34c567f93c1788558d20775838493
       size: 280975
   optimization@ShortEdge-model2:
-    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-ShortEdgeSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-ShortEdgeSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1571,9 +1572,9 @@ stages:
       md5: d3a488be4b811cac66d134df9e68acb2
       size: 29616
   optimization@ShortEdge-model3:
-    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Cerar2021Localization-ShortEdgeSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/ShortEdgeSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Cerar2021Localization-ShortEdgeSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1605,9 +1606,9 @@ stages:
       md5: 56503041ea042161bc63cb53af3ac0be
       size: 29619
   optimization@LongEdge-model0:
-    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Arnold2018DeepModel-LongEdgeSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Arnold2018DeepModel-LongEdgeSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
       hash: md5
@@ -1654,9 +1655,9 @@ stages:
       md5: 2f02379f213adbf85324379411c9b916
       size: 32120
   optimization@LongEdge-model1:
-    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Arnold2019SoundingModel-LongEdgeSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Arnold2019SoundingModel-LongEdgeSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1702,9 +1703,9 @@ stages:
       md5: fb3e2d749c5ffa4010f33247cdce5f99
       size: 32124
   optimization@LongEdge-model2:
-    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-LongEdgeSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-LongEdgeSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1736,9 +1737,9 @@ stages:
       md5: 6e5f15c5669bf4dd7f1f4a1662d1b62d
       size: 32119
   optimization@LongEdge-model3:
-    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Cerar2021Localization-LongEdgeSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/LongEdgeSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Cerar2021Localization-LongEdgeSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1770,9 +1771,9 @@ stages:
       md5: 1e100a9cd9bd442b6a4718ce4cc4cdfc
       size: 32122
   optimization@Cutout-model0:
-    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Arnold2018DeepModel-CutoutSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Arnold2018DeepModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Arnold2018DeepModel-CutoutSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
       hash: md5
@@ -1819,9 +1820,9 @@ stages:
       md5: d82e8ebf4c9c14c1ea3c4a2d23d03171
       size: 31094
   optimization@Cutout-model1:
-    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Arnold2019SoundingModel-CutoutSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Arnold2019SoundingModel-CutoutSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1867,9 +1868,9 @@ stages:
       md5: 3325f5a5bf344b42aabc16eb4d7c0678
       size: 31098
   optimization@Cutout-model2:
-    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-CutoutSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Pirnat2022Pirnat1G --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Pirnat2022Pirnat1G-CutoutSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1901,9 +1902,9 @@ stages:
       md5: 4b3001307151a0d68ed5ceb737d71079
       size: 31093
   optimization@Cutout-model3:
-    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl\
-      \ --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results\
-      \ ../../artifacts/ctw2019/models/Cerar2021Localization-CutoutSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use Cerar2021Localization --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/CutoutSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/Cerar2021Localization-CutoutSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
       hash: md5
@@ -1934,3 +1935,182 @@ stages:
       hash: md5
       md5: b5cc7c2bf1bdb2f1d43e3151fd9881dd
       size: 31096
+  automl@Random-example:
+    cmd: "python ../../src/benchmark.py --use example --optimizer automl --data ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      --split-indices ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/ctw2019/models/example-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.pkl
+      hash: md5
+      md5: c838c55368f5368d952d1e55a12d1f04
+      size: 11834771
+    - path: ../../artifacts/ctw2019/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 8791eb05af9c1a5ae61d76e6cd256bb5
+      size: 4723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 9da0bc68e4027ccb2994e1f30cfcf2b6
+      size: 5711
+    params:
+      params.yaml:
+        automl.example:
+          inputs:
+          - name: data_input
+            input:
+              key: h
+          outputs:
+          - name: x_out
+          - name: y_out
+          fit_settings:
+            epochs: 10
+          settings:
+            max_trials: 3
+            overwrite: true
+    outs:
+    - path: ../../artifacts/ctw2019/models/example-RandomSplit-results.pkl
+      hash: md5
+      md5: 7eeb597b8bea5a37dbf1827158c14899
+      size: 57054346
+  gridsearch@Random-KNeighborsRegressor:
+    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --optimizer gridsearch
+      --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl --split-indices
+      ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results ../../artifacts/ctw2019/models/KNeighborsRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 830fceaceec41bf5dc73d43da999206f
+      size: 11834739
+    - path: ../../artifacts/ctw2019/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 8791eb05af9c1a5ae61d76e6cd256bb5
+      size: 4723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 9da0bc68e4027ccb2994e1f30cfcf2b6
+      size: 5711
+    params:
+      params.yaml:
+        gridsearch.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          hyperparameters:
+            n_neighbors:
+            - 5
+            - 10
+            - 15
+            weights:
+            - uniform
+            - distance
+    outs:
+    - path: ../../artifacts/ctw2019/models/KNeighborsRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: ebe507b58459d902398823758845ee42
+      size: 13129
+  gridsearch@Random-LinearRegression:
+    cmd: "python ../../src/benchmark.py --use LinearRegression --optimizer gridsearch
+      --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl --split-indices
+      ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results ../../artifacts/ctw2019/models/LinearRegression-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 830fceaceec41bf5dc73d43da999206f
+      size: 11834739
+    - path: ../../artifacts/ctw2019/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 8791eb05af9c1a5ae61d76e6cd256bb5
+      size: 4723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 9da0bc68e4027ccb2994e1f30cfcf2b6
+      size: 5711
+    params:
+      params.yaml:
+        gridsearch.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
+    outs:
+    - path: ../../artifacts/ctw2019/models/LinearRegression-RandomSplit-results.pkl
+      hash: md5
+      md5: b086ae3eccbab065528b7fe6ae89449c
+      size: 10503
+  gridsearch@Random-RandomForestRegressor:
+    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --optimizer gridsearch
+      --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl --split-indices
+      ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results ../../artifacts/ctw2019/models/RandomForestRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 830fceaceec41bf5dc73d43da999206f
+      size: 11834739
+    - path: ../../artifacts/ctw2019/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 8791eb05af9c1a5ae61d76e6cd256bb5
+      size: 4723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 9da0bc68e4027ccb2994e1f30cfcf2b6
+      size: 5711
+    params:
+      params.yaml:
+        gridsearch.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+    outs:
+    - path: ../../artifacts/ctw2019/models/RandomForestRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 4848575f1f2cf7d032c2cfc6bcfaeb69
+      size: 12446
+  gridsearch@Random-XGBRegressor:
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --optimizer gridsearch
+      --data ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl --split-indices
+      ../../artifacts/ctw2019/data/splits/RandomSplit.pkl --output-results ../../artifacts/ctw2019/models/XGBRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2019/data/prepared/ctw2019.flatten.pkl
+      hash: md5
+      md5: 830fceaceec41bf5dc73d43da999206f
+      size: 11834739
+    - path: ../../artifacts/ctw2019/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 8791eb05af9c1a5ae61d76e6cd256bb5
+      size: 4723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 9da0bc68e4027ccb2994e1f30cfcf2b6
+      size: 5711
+    params:
+      params.yaml:
+        gridsearch.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            enable_categorical: true
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            learning_rate:
+            - 0.01
+            - 0.1
+            - 0.2
+    outs:
+    - path: ../../artifacts/ctw2019/models/XGBRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 365d669eb7dacd02182277b2ae6685f7
+      size: 14480

@@ -13,7 +13,6 @@ vars:
   # Models are defined in params.yaml
 
 stages:
-
   prepare:
     desc: Download, unzip, and convert dataset to pickle format
     matrix:
@@ -69,7 +68,7 @@ stages:
       - ${path.data}/prepared/${item.subset}.pkl
     outs:
       - ${path.reports}/prepared/${item.subset}.tex
-      
+
   split:
     desc: Prepare train-test split indices for model training and evaluation
     matrix:
@@ -135,17 +134,16 @@ stages:
     outs:
       - ${path.models}/${item.subset}-${item.model}-${item.split}Split-results.pkl
 
-
   evaluation:
     matrix:
       subset: ${subsets}
     cmd: >
       python ${path.common}/report.py
-      ${path.models}/${item.subset}-*-results.pkl
-      --output-report ${path.reports}/metrics-${item.subset}.json
+      ${path.models}/${item.subset}*-results.pkl
+      --output-report ${path.reports}/performance-${item.subset}.tex
     deps:
       - ${path.common}/report.py
       - ${path.models}
     metrics:
-      - ${path.reports}/metrics-${item.subset}.json:
+      - ${path.reports}/performance-${item.subset}.tex:
           cache: false

@@ -4,8 +4,8 @@ stages:
     cmd:
     - unzip -d ../../artifacts/ctw2020/data/raw/ -j ../../artifacts/ctw2020/data/raw/CTW2020_labelled_data.zip
       "CTW2020_labelled_data/*.hdf5"
-    - "python ../../src/ctw2020/prepare.py ../../artifacts/ctw2020/data/raw/file_*.hdf5\
-      \ --output ../../artifacts/ctw2020/data/interim/ctw2020.pkl\n"
+    - "python ../../src/ctw2020/prepare.py ../../artifacts/ctw2020/data/raw/file_*.hdf5
+      --output ../../artifacts/ctw2020/data/interim/ctw2020.pkl\n"
     - rm ../../artifacts/ctw2020/data/raw/*.hdf5
     deps:
     - path: ../../artifacts/ctw2020/data/raw/CTW2020_labelled_data.zip
@@ -14,38 +14,38 @@ stages:
       size: 3246322711
     - path: ../../src/ctw2020/prepare.py
       hash: md5
-      md5: 6f86ecddc22d118ad9592c67d785e2f8
-      size: 1227
+      md5: a0ec2b1f6bd24cc45aa81e943f1d94e4
+      size: 1247
     outs:
     - path: ../../artifacts/ctw2020/data/interim/ctw2020.pkl
       hash: md5
-      md5: b6b5cafc5a0173afb1187a2b43291da7
-      size: 10310971718
+      md5: 9d6a58a0cc227048f0c336ffb3fe6e7e
+      size: 20709354
   featurize:
-    cmd: "python ../../src/ctw2020/featurize.py --input ../../artifacts/ctw2020/data/interim/ctw2020.pkl\
-      \ --output ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\n"
+    cmd: "python ../../src/ctw2020/featurize.py --input ../../artifacts/ctw2020/data/interim/ctw2020.pkl
+      --output ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\n"
     deps:
     - path: ../../artifacts/ctw2020/data/interim/ctw2020.pkl
       hash: md5
-      md5: b6b5cafc5a0173afb1187a2b43291da7
-      size: 10310971718
+      md5: 9d6a58a0cc227048f0c336ffb3fe6e7e
+      size: 20709354
     - path: ../../src/ctw2020/featurize.py
       hash: md5
-      md5: 21754d12c970bf6d23560f403c8cb283
-      size: 1474
+      md5: dfa2e8235faea390d3cdd87095ff9a37
+      size: 1472
     outs:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
       hash: md5
-      md5: bea9e053dabd5507008cd142d278559c
-      size: 10311111051
+      md5: fb8f7efeb1164041421ab54c557f32ef
+      size: 20709571
   split@Random:
-    cmd: "python ../../src/ctw2020/split.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\
-      \ --split Random --output-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl\n"
+    cmd: "python ../../src/ctw2020/split.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
+      --split Random --output-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl\n"
     deps:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
       hash: md5
-      md5: bea9e053dabd5507008cd142d278559c
-      size: 10311111051
+      md5: fb8f7efeb1164041421ab54c557f32ef
+      size: 20709571
     - path: ../../src/ctw2020/split.py
       hash: md5
       md5: 8bac1c6e719c42c8361900f8dc380a92
@@ -59,16 +59,16 @@ stages:
     outs:
     - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
       hash: md5
-      md5: 7042559c7e0dd6ff6535f053041287c0
-      size: 996571
+      md5: 775d3236a0322c5e63c4351d7828081f
+      size: 2723
   flatten:
-    cmd: "python ../../src/ctw2020/flatten.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl\
-      \ --output ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\n"
+    cmd: "python ../../src/ctw2020/flatten.py --input ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
+      --output ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\n"
     deps:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
       hash: md5
-      md5: 2637c2f1392e6ea36808c15ea84f0d07
-      size: 414184371
+      md5: fb8f7efeb1164041421ab54c557f32ef
+      size: 20709571
     - path: ../../src/ctw2020/flatten.py
       hash: md5
       md5: a185fffb436cdff572a4b0a331ce1923
@@ -76,12 +76,12 @@ stages:
     outs:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
       hash: md5
-      md5: 7ced9642db6a826e38d00e26d674941d
-      size: 414184339
+      md5: df039709423daf9e01a78c189b1fc53a
+      size: 20709539
   benchmark@Random-model0:
-    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl\
-      \ --split-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/ctw2020/models/XGBRegressor-RandomSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
+      --split-indices ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/ctw2020/models/XGBRegressor-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
       hash: md5
@@ -109,20 +109,359 @@ stages:
       md5: ee3ebbe2116ac82ab38e9de5ce9742e2
       size: 2263
   evaluation:
-    cmd: "python ../../src/report.py ../../artifacts/ctw2020/models/*-results.pkl\
-      \ --output-report ../../artifacts/ctw2020/reports/metrics.json\n"
+    cmd: "python ../../src/report.py ../../artifacts/ctw2020/models/*-results.pkl
+      --output-report ../../artifacts/ctw2020/reports/performance.tex\n"
     deps:
     - path: ../../artifacts/ctw2020/models
       hash: md5
-      md5: b48a2d65530d36fae6ead077d7634a62.dir
-      size: 399329
-      nfiles: 2
+      md5: 23e059c0f661851aadf5ea036c40164a.dir
+      size: 2231707177
+      nfiles: 31
     - path: ../../src/report.py
       hash: md5
-      md5: d315d71b09a199d1b584e640cf9afe0f
-      size: 1644
+      md5: 141841b1df67410b323a17930d60860f
+      size: 27436
     outs:
-    - path: ../../artifacts/ctw2020/reports/metrics.json
+    - path: ../../artifacts/ctw2020/reports/performance.tex
       hash: md5
-      md5: 8e39195bbdb83ad6b0f33080123d2579
-      size: 184
+      md5: b36f9f75ee5d39216594d297fd06f1b0
+      size: 2756
+  automl@Random-Arnold2019SoundingModel:
+    cmd: "python ../../src/benchmark.py --use Arnold2019SoundingModel --optimizer
+      automl --data ../../artifacts/ctw2020/data/prepared/ctw2020.pkl --split-indices
+      ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results ../../artifacts/ctw2020/models/Arnold2019SoundingModel-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.pkl
+      hash: md5
+      md5: fb8f7efeb1164041421ab54c557f32ef
+      size: 20709571
+    - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 775d3236a0322c5e63c4351d7828081f
+      size: 2723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 9da0bc68e4027ccb2994e1f30cfcf2b6
+      size: 5711
+    params:
+      params.yaml:
+        automl.Arnold2019SoundingModel:
+          inputs:
+          - name: input_h
+            class: Input
+            module: autokeras
+            args:
+              shape:
+              - 16
+              - 924
+              - 2
+            input:
+              key: h
+          blocks:
+          - name: arnold_block
+            input: input_h
+            layers:
+            - class: Conv2D
+              module: keras.layers
+              args:
+                filters: 32
+                kernel_size: 3
+                strides: 1
+                padding: same
+                use_bias: true
+                kernel_initializer:
+                  class: HeUniform
+                  module: keras.initializers
+                kernel_regularizer:
+                  class: l2
+                  module: keras.regularizers
+                  args:
+                    l2: 0.01
+            - class: ReLU
+              module: keras.layers
+            - class: AveragePooling2D
+              module: keras.layers
+              args:
+                pool_size:
+                - 1
+                - 4
+                padding: valid
+            - class: ZeroPadding2D
+              module: keras.layers
+              args:
+                padding:
+                - - 0
+                  - 0
+                - - 0
+                  - 1
+            - class: Conv2D
+              module: keras.layers
+              args:
+                filters: 32
+                kernel_size: 3
+                strides: 1
+                padding: same
+                use_bias: true
+                kernel_initializer:
+                  class: HeUniform
+                  module: keras.initializers
+                kernel_regularizer:
+                  class: l2
+                  module: keras.regularizers
+                  args:
+                    l2: 0.01
+            - class: ReLU
+              module: keras.layers
+            - class: AveragePooling2D
+              module: keras.layers
+              args:
+                pool_size:
+                - 1
+                - 4
+                padding: valid
+            - class: Flatten
+              module: keras.layers
+            - class: Dense
+              module: keras.layers
+              args:
+                units: 256
+                kernel_initializer:
+                  class: HeUniform
+                  module: keras.initializers
+                kernel_regularizer:
+                  class: l2
+                  module: keras.regularizers
+                  args:
+                    l2: 0.01
+            - class: LeakyReLU
+              module: keras.layers
+              args:
+                alpha: 0.01
+            - class: Dense
+              module: keras.layers
+              args:
+                units: 256
+                kernel_initializer:
+                  class: HeUniform
+                  module: keras.initializers
+                kernel_regularizer:
+                  class: l2
+                  module: keras.regularizers
+                  args:
+                    l2: 0.01
+            - class: LeakyReLU
+              module: keras.layers
+              args:
+                alpha: 0.01
+            - class: Dropout
+              module: keras.layers
+              args:
+                rate: 0.2
+            - class: Dense
+              module: keras.layers
+              args:
+                units: 256
+                kernel_initializer:
+                  class: HeUniform
+                  module: keras.initializers
+                kernel_regularizer:
+                  class: l2
+                  module: keras.regularizers
+                  args:
+                    l2: 0.01
+            - class: LeakyReLU
+              module: keras.layers
+              args:
+                alpha: 0.01
+            - class: Dropout
+              module: keras.layers
+              args:
+                rate: 0.2
+          outputs:
+          - name: output_x
+            class: RegressionHead
+            module: autokeras
+            input: arnold_block
+            args:
+              metrics: []
+          - name: output_y
+            class: RegressionHead
+            module: autokeras
+            input: arnold_block
+            args:
+              metrics: []
+          settings:
+            seed: 42
+            max_trials: 1
+            overwrite: true
+            tuner: greedy
+          fit_settings:
+            batch_size: 64
+            epochs: 250
+            callbacks:
+            - class: EarlyStopping
+              module: keras.callbacks
+              args:
+                patience: 20
+            - class: ReduceLROnPlateau
+              module: keras.callbacks
+              args:
+                monitor: val_loss
+                factor: 0.1
+                patience: 4
+                min_lr: 1e-08
+            - class: TensorBoard
+              module: keras.callbacks
+              args:
+                log_dir: ../../tmp/tensorboard_logs
+                write_graph: true
+                write_images: true
+          additional_hyperparameters:
+            learning_rate: 0.0005
+    outs:
+    - path: ../../artifacts/ctw2020/models/Arnold2019SoundingModel-RandomSplit-results.pkl
+      hash: md5
+      md5: 97aa6efdbd1cb1a02eeb56ca3759729c
+      size: 1605377688
+  gridsearch@Random-KNeighborsRegressor:
+    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --optimizer gridsearch
+      --data ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl --split-indices
+      ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results ../../artifacts/ctw2020/models/KNeighborsRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
+      hash: md5
+      md5: df039709423daf9e01a78c189b1fc53a
+      size: 20709539
+    - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 775d3236a0322c5e63c4351d7828081f
+      size: 2723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 95e19bc411f60e3da8c0670127917b23
+      size: 5712
+    params:
+      params.yaml:
+        gridsearch.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          hyperparameters:
+            n_neighbors:
+            - 5
+            - 10
+            - 15
+            weights:
+            - uniform
+            - distance
+    outs:
+    - path: ../../artifacts/ctw2020/models/KNeighborsRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 74be31435394e6bfc9ef4696f1e93cb7
+      size: 10969
+  gridsearch@Random-XGBRegressor:
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --optimizer gridsearch
+      --data ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl --split-indices
+      ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results ../../artifacts/ctw2020/models/XGBRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
+      hash: md5
+      md5: df039709423daf9e01a78c189b1fc53a
+      size: 20709539
+    - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 775d3236a0322c5e63c4351d7828081f
+      size: 2723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 9da0bc68e4027ccb2994e1f30cfcf2b6
+      size: 5711
+    params:
+      params.yaml:
+        gridsearch.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            enable_categorical: true
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            learning_rate:
+            - 0.01
+            - 0.1
+            - 0.2
+    outs:
+    - path: ../../artifacts/ctw2020/models/XGBRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 210ee7990d2e6fea006dce5bc76ae57a
+      size: 13280
+  gridsearch@Random-LinearRegression:
+    cmd: "python ../../src/benchmark.py --use LinearRegression --optimizer gridsearch
+      --data ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl --split-indices
+      ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results ../../artifacts/ctw2020/models/LinearRegression-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
+      hash: md5
+      md5: df039709423daf9e01a78c189b1fc53a
+      size: 20709539
+    - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 775d3236a0322c5e63c4351d7828081f
+      size: 2723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 9da0bc68e4027ccb2994e1f30cfcf2b6
+      size: 5711
+    params:
+      params.yaml:
+        gridsearch.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
+    outs:
+    - path: ../../artifacts/ctw2020/models/LinearRegression-RandomSplit-results.pkl
+      hash: md5
+      md5: 44f9e072b785a13a88a0f3062b9a49dd
+      size: 9383
+  gridsearch@Random-RandomForestRegressor:
+    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --optimizer gridsearch
+      --data ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl --split-indices
+      ../../artifacts/ctw2020/data/splits/RandomSplit.pkl --output-results ../../artifacts/ctw2020/models/RandomForestRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/ctw2020/data/prepared/ctw2020.flatten.pkl
+      hash: md5
+      md5: df039709423daf9e01a78c189b1fc53a
+      size: 20709539
+    - path: ../../artifacts/ctw2020/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 775d3236a0322c5e63c4351d7828081f
+      size: 2723
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 9da0bc68e4027ccb2994e1f30cfcf2b6
+      size: 5711
+    params:
+      params.yaml:
+        gridsearch.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+    outs:
+    - path: ../../artifacts/ctw2020/models/RandomForestRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: e41cb5055091dbf0a3ea5b3177b09563
+      size: 10846

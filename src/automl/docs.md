@@ -43,7 +43,7 @@ A list of outputs.
 - **args** _(list)_: all values are passed as kwargs.
 
 ### 4. Settings
-Settings passed as kwargs to `autokeras.AutoModel()`. 
+Settings passed as kwargs to `autokeras.AutoModel()`.
 - **project_name** _(str)_: The name of the AutoModel, the project will be saved to `tmp/{project_name}`
 - **max_trials** _(int)_: The maximum number of different Keras Models to try. The search may finish before reaching max_trials. (`100`)
 - **objective** _(str)_: name of model metric to minimize or maximize (`"val_loss"`)
@@ -93,7 +93,7 @@ args:
         sampling: "log"
         step: 10
     ```
-- you can also specify class (_required_) and module (`keras_tuner`), or a list of class and module pairs. 
+- you can also specify class (_required_) and module (`keras_tuner`), or a list of class and module pairs.
     - if you don't specify `args:` the `module.class` is passed on
     - if `args:` is a dict `module.class(**args)` will be passed on
     - if `args:` is anything else `module.class()` will be passed on
@@ -113,7 +113,7 @@ automl:
   minimal_example:
     inputs:
       - name: "data_input"
-    
+
     outputs:
       - name: "regression_output"
 ```
@@ -135,8 +135,8 @@ This is the minimal configuration required for automl, autokeras will automatica
       - name: "dense_block"
         class: "DenseBlock"
         input: "tabular_data_input"
-     
-      - name: "image_block" 
+
+      - name: "image_block"
         class: "ImageBlock"
         input: "image_data_input"
         args:
@@ -179,7 +179,7 @@ This is the minimal configuration required for automl, autokeras will automatica
 ```
 This is an example of a model with a custom architecture. In this example autokeras will optimize all the hyperparameters that haven't been specified, while also optimizing the given values for each of the specified hyperparameters (passed as args). Autokeras will not change the values that are set to fixed values eg. `use_bn: False`, `block_type: vanilla`.
 ```YAML
-      - name: "custom_block" 
+      - name: "custom_block"
         input: "input_data"
         layers:
           - class: "Dense"
@@ -189,4 +189,4 @@ This is an example of a model with a custom architecture. In this example autoke
           - class: "BatchNormalization"
           - class: "ReLU"
 ```
-This is an example of a custom block that can be defined using [keras.layers](https://keras.io/api/layers/). For example this is a reimplementation of the `DenseBlock` with `use_bn: True` and `num_layers: 1`.  Note that in this example only the number of units will be auto optimized, no other hyperparameters will be changed. You cannot specify class and layers to the same block (each layer must have a class, but the block itself can't)
+This is an example of a custom block that can be defined using [keras.layers](https://keras.io/api/layers/). For example this is a reimplementation of the `DenseBlock` with `use_bn: True` and `num_layers: 1`.  Note that in this example only the number of units will be auto optimized, no other hyperparameters will be changed. You cannot specify class and layers for the same block (each layer must have a class, but the block itself can't)

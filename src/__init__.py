@@ -3,6 +3,7 @@ The `src` package is the root of this project.
 """
 
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -129,7 +130,3 @@ def empty_directory(directory_path: Path):
             item.unlink()  # Remove file or symlink
         elif item.is_dir():
             shutil.rmtree(item)  # Remove directory and its contents
-
-
-
-

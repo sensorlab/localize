@@ -1,6 +1,7 @@
 evaluation:
   metrics: {'rmse': False, 'r_squared': True, 'mae': False, 'mede': False, 'mape': False}
   save_top_models: 0.1
+  score_with: 'rmse'
 
 split:
   seed: 42
@@ -19,9 +20,19 @@ gridsearch:
     class: RandomForestRegressor
     parameters:
       random_state: 42
-    hyperparmeters:
+    hyperparameters:
       n_estimators: [10, 50, 100, 250, 400]
       max_depth: [5, 10, 30, 50, 150, 200, null]
+
+  KNeighborsRegressor:
+    module: sklearn.neighbors
+    class: KNeighborsRegressor
+    hyperparameters:
+      n_neighbors: [5, 10, 15]
+      weights: [uniform, distance]
+      p: [1, 2]
+      leaf_size: [5, 10, 15, 30, 45]
+      metric: [minkowski, euclidean]
 
   XGBRegressor:
     module: xgboost
@@ -34,40 +45,28 @@ gridsearch:
       max_depth: [3, 5, 10, 30, 50]
       learning_rate: [0.01, 0.1, 0.2]
 
-
-  KNeighborsRegressor:
-    module: sklearn.neighbors
-    class: KNeighborsRegressor
-    hyperparameters:
-      n_neighbors: [5, 10, 15]
-      weights: [uniform, distance]
-      p: [1, 2]
-      leaf_size: [5, 10, 15, 30, 45]
-      metric: [minkowski, euclidean]
-
-
-  Pirnat2022Pirnat1G:
-    pipeline:
-      - step: preparation
-        module: src.data
-        class: ExtractByKeyword
-        parameters:
-          keyname: h
-      - step: regressor
-        module: src.models_keras
-        class: Pirnat1G
+#  Pirnat2022Pirnat1G:
+#    pipeline:
+#      - step: preparation
+#        module: src.data
+#        class: ExtractByKeyword
+#        parameters:
+#          keyname: h
+#      - step: regressor
+#        module: src.models_keras
+#        class: Pirnat1G
 
 
-  Cerar2021Localization:
-    pipeline:
-      - step: preparation
-        module: src.data
-        class: ExtractByKeyword
-        parameters:
-          keyname: h
-      - step: regressor
-        module: src.models_keras
-        class: Cerar2021
+#  Cerar2021Localization:
+#    pipeline:
+#      - step: preparation
+#        module: src.data
+#        class: ExtractByKeyword
+#        parameters:
+#          keyname: h
+#      - step: regressor
+#        module: src.models_keras
+#        class: Cerar2021
 
 
   # Arnold2018DeepModel:
@@ -123,59 +122,6 @@ gridsearch:
   #     batch_size: 64
   #     device: cuda
   #     compile: false
-
-_automl:
-  custom:
-    inputs:
-      - name: "image"
-        class: "ImageInput"
-        input:
-          key: "h"
-
-      - name: "tabular"
-        input:
-          key: "snr"
-
-    blocks:
-      - name: "dense_block"
-        class: "DenseBlock"
-        input: "tabular"
-
-      - name: "image_block"
-        class: "ImageBlock"
-        input: "image"
-
-      - name: "merge_block"
-        class: "Merge"
-        input: ["dense_block", "image_block"]
-
-      - name: "final_block"
-        class: "DenseBlock"
-        input: "merge_block"
-
-    outputs:
-      - name: "first_out"
-        input: "final_block"
-
-      - name: "second_out"
-        input: "final_block"
-
-    fit_settings:
-      epochs: 50
-
-    settings:
-      max_trials: 10
-      overwrite: True
-      seed: 42
-      tuner: "bayesian"
-
-    additional_hyperparameters:
-      learning_rate:
-        min: !!float 1e-06
-        max: !!float 1e-03
-        sampling: "log"
-      optimizer:
-        values: ["adam", "adam_weight_decay"]
 
 automl:
   Arnold2019SoundingModel:
@@ -348,5 +294,3 @@ automl:
 
     additional_hyperparameters:
       learning_rate: 0.0005
-
-

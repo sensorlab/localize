@@ -1,25 +1,21 @@
-from keras_tuner import HyperParameters
+import importlib
 from typing import Callable, Union
 
-import importlib
-import inspect
-
-import pandas as pd
 import numpy as np
-class utils:
+import pandas as pd
 
+
+class utils:
     @staticmethod
     def get_class(module_name: str, class_name: str):
         """Import module and return the required class."""
         module = importlib.import_module(module_name)
         return getattr(module, class_name)
 
-
     @staticmethod
     def parse_choice_param(key, value, hp):
         """Parse choice parameters for discrete values."""
         return hp.Choice(key, value["values"])
-
 
     @staticmethod
     def parse_range_param(key, value, hp):
@@ -35,10 +31,11 @@ class utils:
             range_step = value.get("step", None)
             if range_step is None:
                 range_step = 0.1 if value.get("sampling", "linear") == "linear" else 10.0
-            return hp.Float(key, min_value=min_val, max_value=max_val, step=range_step, sampling=value.get("sampling", "linear"))
+            return hp.Float(
+                key, min_value=min_val, max_value=max_val, step=range_step, sampling=value.get("sampling", "linear")
+            )
         else:
             raise ValueError(f"Unsupported range type for key: {key}\n{value}")
-
 
     @staticmethod
     def parse_class_param(value):
@@ -56,7 +53,6 @@ class utils:
             return imported_class(**param_args) if isinstance(param_args, dict) else imported_class()
         return imported_class
 
-
     @staticmethod
     def parse_class_list_param(value):
         """Parse list of class parameters."""
@@ -66,7 +62,7 @@ class utils:
         return parsed_list
 
     @staticmethod
-    def to_numpy(data: pd.DataFrame|np.ndarray):
+    def to_numpy(data: pd.DataFrame | np.ndarray):
         """
         Converts to numpy array.
         """
@@ -102,16 +98,18 @@ class utils:
     @staticmethod
     def contains_instance(instance_list, instance_type):
         """Checks the list if an instance of a specified type is present."""
-        return any(
-            [isinstance(instance, instance_type) for instance in instance_list]
-        )
+        return any([isinstance(instance, instance_type) for instance in instance_list])
 
     @staticmethod
-    def select_columns(columns: list[str], func: Callable[[str, str], bool], search_str: Union[list[str], str]) -> list[str]:
+    def select_columns(
+        columns: list[str], func: Callable[[str, str], bool], search_str: Union[list[str], str]
+    ) -> list[str]:
         """Select columns specified by the function, and modify the function to operate on lists."""
         if isinstance(search_str, list):
-            func = lambda col, vals: any(func(col, val) for val in vals)
+
+            def wrapped_func(col, vals):
+                return any(func(col, val) for val in vals)
+
+            func = wrapped_func
 
         return [col for col in columns if func(col, search_str)]
-
-
