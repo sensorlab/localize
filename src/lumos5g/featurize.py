@@ -8,7 +8,6 @@ from sklearn.compose import make_column_selector, make_column_transformer
 from sklearn.preprocessing import OneHotEncoder
 
 
-
 # def haversine(lon1, lat1, lon2, lat2, earth_radius=6367.):
 #     """
 #     Calculate the great circle distance between two points
@@ -41,7 +40,6 @@ from sklearn.preprocessing import OneHotEncoder
 def cli(input_path: Path, output_path: Path):
     df: pd.DataFrame = joblib.load(input_path)
 
-
     # Find target column(s)
     targets = [col for col in df.columns if col.startswith("target")]
 
@@ -62,7 +60,6 @@ def cli(input_path: Path, output_path: Path):
 
     assert not X.isna().values.any()
     assert not np.isinf(X).any().any()
-    
 
     joblib.dump((X, y), output_path)
 

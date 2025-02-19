@@ -13,7 +13,6 @@ vars:
   # Models are defined in params.yaml
 
 stages:
-
   prepare:
     desc: Download, unzip, and convert dataset to pickle format
     matrix:
@@ -69,7 +68,7 @@ stages:
       - ${path.data}/prepared/${item.subset}.pkl
     outs:
       - ${path.reports}/prepared/${item.subset}.tex
-      
+
   split:
     desc: Prepare train-test split indices for model training and evaluation
     matrix:
@@ -90,21 +89,22 @@ stages:
       - ${path.data}/splits/${item.subset}-${item.split}Split.pkl
 
 
-  optimization:
+  gridsearch:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
       subset: ${subsets}
       split: ${splits}
-      model: ${models}
+      model: ${gridsearch}
     cmd: >
       python ${path.common}/benchmark.py
       --use ${item.model}
+      --optimizer gridsearch
       --data ${path.data}/prepared/${item.subset}.pkl
       --split-indices ${path.data}/splits/${item.subset}-${item.split}Split.pkl
       --output-results ${path.models}/${item.subset}-${item.model}-${item.split}Split-results.pkl
     params:
       - seed
-      - models.${item.model}
+      - gridsearch.${item.model}
     deps:
       - ${path.common}/benchmark.py
       - ${path.data}/prepared/${item.subset}.pkl
@@ -112,17 +112,38 @@ stages:
     outs:
       - ${path.models}/${item.subset}-${item.model}-${item.split}Split-results.pkl
 
+  automl:
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      subset: ${subsets}
+      split: ${splits}
+      model: ${automl}
+    cmd: >
+      python ${path.common}/benchmark.py
+      --use ${item.model}
+      --optimizer automl
+      --data ${path.data}/prepared/${item.subset}.pkl
+      --split-indices ${path.data}/splits/${item.subset}-${item.split}Split.pkl
+      --output-results ${path.models}/${item.subset}-${item.model}-${item.split}Split-results.pkl
+    params:
+      - automl.${item.model}
+    deps:
+      - ${path.common}/benchmark.py
+      - ${path.data}/prepared/${item.subset}.pkl
+      - ${path.data}/splits/${item.subset}-${item.split}Split.pkl
+    outs:
+      - ${path.models}/${item.subset}-${item.model}-${item.split}Split-results.pkl
 
   evaluation:
     matrix:
       subset: ${subsets}
     cmd: >
       python ${path.common}/report.py
-      ${path.models}/${item.subset}-*-results.pkl
-      --output-report ${path.reports}/metrics-${item.subset}.json
+      ${path.models}/${item.subset}*-results.pkl
+      --output-report ${path.reports}/performance-${item.subset}.tex
     deps:
       - ${path.common}/report.py
       - ${path.models}
     metrics:
-      - ${path.reports}/metrics-${item.subset}.json:
+      - ${path.reports}/performance-${item.subset}.tex:
           cache: false

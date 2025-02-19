@@ -36,10 +36,9 @@ dependencies:
   - dask
   - dvc
 
-  - curl
-
   - pip:
-    - ydata_profiling
+    - ydata_profiling~=4.12.1
+    - Pillow~=11.0.0
     - openpyxl
     - lightning~=2.2
     - lightning-bolts
@@ -49,7 +48,9 @@ dependencies:
     - ruff
     - SciencePlots~=2.1
     - humanize
-    - autokeras
+    - tensorflow[and-cuda]~=2.16.1
+    - keras~=3.5.0
+    - autokeras~=2.0.0
 
     - scikeras
     - -e .

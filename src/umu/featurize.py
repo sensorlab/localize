@@ -1,8 +1,9 @@
-from pathlib import Path
 import math
+from pathlib import Path
 
 import click
 import joblib
+
 
 def lat_lon_to_meters(origin_lat, origin_lon, point_lat, point_lon) -> tuple[float, float]:
     """Works "fine" for distances less than 100km"""
@@ -23,6 +24,7 @@ def lat_lon_to_meters(origin_lat, origin_lon, point_lat, point_lon) -> tuple[flo
     delta_meters_lon = delta_lon_rad * R * math.cos(origin_lat_rad)
 
     return delta_meters_lat, delta_meters_lon
+
 
 @click.command()
 @click.option(
