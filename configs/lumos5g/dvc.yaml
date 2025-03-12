@@ -12,7 +12,6 @@ vars:
   # Models are defined in params.yaml
 
 stages:
-
   # download:
   #   desc: Download dataset from authors website.
   #   cmd: curl --insecure -o ${path.data}/raw/Lumos5G-v1.0.zip http://lumos5g.umn.edu/downloads/Lumos5G-v1.0.zip
@@ -21,6 +20,7 @@ stages:
   #   outs:
   #     - ${path.data}/raw/Lumos5G-v1.0.zip
 ####################
+
   prepare:
     desc: Prepare Lumos5G dataset for MLOps pipeline
     cmd: |
@@ -132,10 +132,10 @@ stages:
     cmd: >
       python ${path.common}/report.py
       ${path.models}/*-results.pkl
-      --output-report ${path.reports}/metrics.json
+      --output-report ${path.reports}/performance.tex
     deps:
       - ${path.common}/report.py
       - ${path.models}
     metrics:
-      - ${path.reports}/metrics.json:
+      - ${path.reports}/performance.tex:
           cache: false

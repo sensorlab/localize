@@ -5,14 +5,6 @@ import joblib
 import numpy as np
 from sklearn import model_selection
 
-import os
-import sys
-# Add the project root directory to sys.path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if project_root not in sys.path:
-    print(project_root)
-    sys.path.insert(0, project_root)
-
 from src import load_data, load_params
 
 
@@ -49,7 +41,7 @@ def cli(input_path: Path, output_indices_path: Path, split: str):
     # Load parameters
     params = load_params("./params.yaml")
 
-    random_state = params["seed"]
+    random_state = params["split"]["seed"]
     split_params = params["split"]
 
     # Load dataset

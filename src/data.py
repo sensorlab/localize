@@ -64,6 +64,7 @@ class ReshapeTransformer(BaseEstimator, TransformerMixin):
         else:
             raise NotImplementedError
 
+
 def replace_extreme_outliers(series: pd.Series, multiplier: float = 3.0) -> pd.Series:
     """
     Replaces extreme outliers in a pandas Series with interpolated values.
@@ -89,7 +90,7 @@ def replace_extreme_outliers(series: pd.Series, multiplier: float = 3.0) -> pd.S
 
     # Replace outliers with NaN for interpolation
     series_cleaned[outliers] = np.nan
-    series_cleaned = series_cleaned.interpolate(method='linear')
+    series_cleaned = series_cleaned.interpolate(method="linear")
 
     # In case of any remaining NaNs at the beginning or end, forward/backward fill them
     series_cleaned = series_cleaned.bfill().ffill()

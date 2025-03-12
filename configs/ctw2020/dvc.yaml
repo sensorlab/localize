@@ -28,17 +28,17 @@ stages:
     outs:
     - ${path.data}/interim/ctw2020.pkl
 
-  eda_raw:
-    desc: Exploratory data analysis
-    cmd: >
-      python ${path.common}/eda.py
-      --input ${path.data}/interim/ctw2020.pkl
-      --output ${path.reports}/interim/ctw2020.tex
-    deps:
-      - ${path.common}/eda.py
-      - ${path.data}/interim/ctw2020.pkl
-    outs:
-      - ${path.reports}/interim/ctw2020.tex
+#  eda_raw:
+#    desc: Exploratory data analysis
+#    cmd: >
+#      python ${path.common}/eda.py
+#      --input ${path.data}/interim/ctw2020.pkl
+#      --output ${path.reports}/interim/ctw2020.tex
+#    deps:
+#      - ${path.common}/eda.py
+#      - ${path.data}/interim/ctw2020.pkl
+#    outs:
+#      - ${path.reports}/interim/ctw2020.tex
 
   featurize:
     desc: Enrich dataset with additional features
@@ -65,17 +65,17 @@ stages:
     outs:
       - ${path.data}/prepared/ctw2020.flatten.pkl
 
-  eda_features:
-    desc: Exploratory data analysis
-    cmd: >
-      python ${path.common}/eda.py
-      --input ${path.data}/prepared/ctw2020.flatten.pkl
-      --output ${path.reports}/prepared/ctw2020.tex
-    deps:
-      - ${path.common}/eda.py
-      - ${path.data}/prepared/ctw2020.flatten.pkl
-    outs:
-      - ${path.reports}/prepared/ctw2020.tex
+#  eda_features:
+#    desc: Exploratory data analysis
+#    cmd: >
+#      python ${path.common}/eda.py
+#      --input ${path.data}/prepared/ctw2020.flatten.pkl
+#      --output ${path.reports}/prepared/ctw2020.tex
+#    deps:
+#      - ${path.common}/eda.py
+#      - ${path.data}/prepared/ctw2020.flatten.pkl
+#    outs:
+#      - ${path.reports}/prepared/ctw2020.tex
 
   split:
     desc: Split dataset and store indices
@@ -99,34 +99,22 @@ stages:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
       split: ${splits}
-      model:
-        - name: XGBRegressor
-          input: ${path.data}/prepared/ctw2020.flatten.pkl
-        #- name: RandomForestRegressor
-        #  input: ${path.data}/prepared/ctw2020.flatten.pkl
-        #- name: Arnold2018DeepModel
-        #  input: ${path.data}/prepared/ctw2020.flatten.pkl
-        #-# name: Arnold2019SoundingModel
-         # input: ${path.data}/prepared/ctw2020.pkl
-        #- name: Pirnat2022Pirnat1G
-        #  input: ${path.data}/prepared/ctw2020.pkl
-        #- name: Cerar2021Localization
-        #  input: ${path.data}/prepared/ctw2020.pkl
+      model: ${gridsearch}
     cmd: >
       python ${path.common}/benchmark.py
-      --use ${item.model.name}
+      --use ${item.model}
       --optimizer gridsearch
-      --data ${item.model.input}
+      --data ${path.data}/prepared/ctw2020.flatten.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
-      --output-results ${path.models}/${item.model.name}-${item.split}Split-results.pkl
+      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
     params:
-      - models.${item.model.name}
+      - gridsearch.${item.model}
     deps:
       - ${path.common}/benchmark.py
-      - ${item.model.input}
+      - ${path.data}/prepared/ctw2020.flatten.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.model.name}-${item.split}Split-results.pkl
+      - ${path.models}/${item.model}-${item.split}Split-results.pkl
 
   automl:
     desc: Determine best hyper-parameters for algorithm on several CVs
@@ -141,7 +129,7 @@ stages:
       --split-indices ${path.data}/splits/${item.split}Split.pkl
       --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
     params:
-      - models.${item.model}
+      - automl.${item.model}
     deps:
       - ${path.common}/benchmark.py
       - ${path.data}/prepared/ctw2020.pkl
@@ -154,10 +142,10 @@ stages:
     cmd: >
       python ${path.common}/report.py
       ${path.models}/*-results.pkl
-      --output-report ${path.reports}/metrics.json
+      --output-report ${path.reports}/performance.tex
     deps:
       - ${path.common}/report.py
       - ${path.models}
     metrics:
-      - ${path.reports}/metrics.json:
+      - ${path.reports}/performance.tex:
           cache: false

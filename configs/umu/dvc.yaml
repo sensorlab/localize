@@ -127,10 +127,10 @@ stages:
     cmd: >
       python ${path.common}/report.py
       ${path.models}/*-results.pkl
-      --output-report ${path.reports}/metrics.json
+      --output-report ${path.reports}/performance.tex
     deps:
       - ${path.common}/report.py
       - ${path.models}
     metrics:
-      - ${path.reports}/metrics.json:
+      - ${path.reports}/performance.tex:
           cache: false

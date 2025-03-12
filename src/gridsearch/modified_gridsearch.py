@@ -1,32 +1,43 @@
-from pathlib import Path
-import warnings
-import os
 import gc
-
-import pandas as pd
-import numpy as np
-
+import os
+import warnings
+from pathlib import Path
 from unittest.mock import patch
+
 import joblib
+import numpy as np
+import pandas as pd
+from sklearn.metrics import make_scorer
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection._validation import _fit_and_score as original_fit_and_score
 
 from .progress_bar import GSCVProgressBar
-from sklearn.model_selection._validation import _fit_and_score as original_fit_and_score
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import make_scorer
+
+
+def to_numpy(data: pd.DataFrame | np.ndarray):
+    """
+    Converts to numpy array.
+    """
+    if isinstance(data, pd.DataFrame):
+        return data.to_numpy()
+    return data
+
 
 def make_prediction_saver_scorer(candidate_idx, split_idx, tmp_dir_path):
     # Adds context to the scorer
     def prediction_saver_metric(y_true, y_pred):
-        y_true = np.hsplit(y_true.to_numpy(), 2)
+        y_true = np.hsplit(to_numpy(y_true), 2)
         y_true = np.squeeze(np.stack(y_true, axis=0), axis=-1)
 
-        y_pred = np.hsplit(y_pred, 2)
+        y_pred = np.hsplit(to_numpy(y_pred), 2)
         y_pred = np.squeeze(np.stack(y_pred, axis=0), axis=-1)
         filename = os.path.join(tmp_dir_path, f"pred-{candidate_idx}-{split_idx}.pkl")
-        joblib.dump({'y_true': y_true, 'y_pred': y_pred}, filename)
+        joblib.dump({"y_true": y_true, "y_pred": y_pred}, filename)
         # Return 0 to not affect the scoring
         return 0
-    return make_scorer(prediction_saver_metric, greater_is_better = False)
+
+    return make_scorer(prediction_saver_metric, greater_is_better=False)
+
 
 class GridSearchCVWithStoredModels(GridSearchCV):
     """
@@ -35,7 +46,7 @@ class GridSearchCVWithStoredModels(GridSearchCV):
     bar during the fitting process.
     """
 
-    def fit(self, *args, tmp_dir_path:Path, show_progress_bar: bool = False, **kwargs):
+    def fit(self, *args, tmp_dir_path: Path, show_progress_bar: bool = False, **kwargs):
         """
         A wrapper for the fit function that patches the default _fit_and_score function with a custom wrapper for it,
         that handles the model saving and progress tracking.
@@ -49,20 +60,19 @@ class GridSearchCVWithStoredModels(GridSearchCV):
 
         # Initialize the progress bar if requested
         if show_progress_bar:
-            progress_bar = GSCVProgressBar(progress_file = progress_file, general_file = general_file)
+            progress_bar = GSCVProgressBar(progress_file=progress_file, general_file=general_file)
             progress_bar.start()
 
         def fit_and_score_wrapper(*args, **kwargs):
+            # Ensure the estimator is returned in the results
+            kwargs["return_estimator"] = True
 
-             # Ensure the estimator is returned in the results
-            kwargs['return_estimator'] = True
-
-             # Extract the split and candidate indices
+            # Extract the split and candidate indices
             split_idx = kwargs["split_progress"][0]
             candidate_idx = kwargs["candidate_progress"][0]
 
             # Modify the scorer to include our custom scorer
-            original_scorer = kwargs['scorer']
+            original_scorer = kwargs["scorer"]
 
             # Make a copy to avoid modifying the original scorer
             if isinstance(original_scorer, dict):
@@ -70,22 +80,18 @@ class GridSearchCVWithStoredModels(GridSearchCV):
                 modified_scorer = original_scorer.copy()
             else:
                 # The scorer is a single callable; convert it to a dict
-                modified_scorer = {'score': original_scorer}
+                modified_scorer = {"score": original_scorer}
 
             # Create our custom metric function
-            prediction_saver_scorer = make_prediction_saver_scorer(
-                candidate_idx, split_idx, tmp_dir_path
-            )
+            prediction_saver_scorer = make_prediction_saver_scorer(candidate_idx, split_idx, tmp_dir_path)
 
             # Add the custom scorer to the scorer dict
-            modified_scorer['prediction_saver'] = prediction_saver_scorer
+            modified_scorer["prediction_saver"] = prediction_saver_scorer
 
             # Replace the scorer in kwargs with our modified scorer
-            kwargs['scorer'] = modified_scorer
+            kwargs["scorer"] = modified_scorer
 
             results = original_fit_and_score(*args, **kwargs)
-
-
 
             # Save the estimator to a file for this candidate and split
             joblib.dump(results["estimator"], os.path.join(tmp_dir_path, f"est-{candidate_idx}-{split_idx}.pkl"))
@@ -100,12 +106,14 @@ class GridSearchCVWithStoredModels(GridSearchCV):
                 joblib.dump(kwargs["test"], os.path.join(tmp_dir_path, f"split-{split_idx}"))
 
                 if split_idx == 0:
-                    joblib.dump({"n_splits":kwargs["split_progress"][1],
-                                "n_candidates":kwargs["candidate_progress"][1]}, general_file)
+                    joblib.dump(
+                        {"n_splits": kwargs["split_progress"][1], "n_candidates": kwargs["candidate_progress"][1]},
+                        general_file,
+                    )
             # Update progress if the progress bar is being shown
             if show_progress_bar:
                 # Record progress in the file
-                with open(progress_file, 'a') as f:
+                with open(progress_file, "a") as f:
                     f.write("1\n")
 
             gc.collect()
@@ -118,9 +126,10 @@ class GridSearchCVWithStoredModels(GridSearchCV):
                 "ignore",
                 message="A worker stopped while some jobs were given to the executor. This can be caused by a too short worker timeout or by a memory leak.",
                 category=UserWarning,
-                module="joblib.externals.loky.process_executor")
+                module="joblib.externals.loky.process_executor",
+            )
 
-            # Call the origina lfit method
+            # Call the original fit method
             super().fit(*args, **kwargs)
         if show_progress_bar:
             # Stop the progress bar if it was started

@@ -1,24 +1,16 @@
+import math
 from pathlib import Path
 
-import math
 import click
 import joblib
 import pandas as pd
-
-import os
-import sys
-# Add the project root directory to sys.path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if project_root not in sys.path:
-    print(project_root)
-    sys.path.insert(0, project_root)
-    
 from data import replace_extreme_outliers
 
 
 def load_raw_data(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
     return df
+
 
 def lat_lon_to_meters(origin_lat, origin_lon, point_lat, point_lon) -> tuple[float, float]:
     """Works "fine" for distances less than 100km"""
@@ -73,7 +65,6 @@ def lat_lon_to_meters(origin_lat, origin_lon, point_lat, point_lon) -> tuple[flo
 def cli(input_path: Path, output_path: Path, task: str):
     df = pd.read_csv(input_path)
 
-
     # TODO: Convert to relative coordinates (instead of absolute)
     # longitude = west-east; latitude = south-north;
     # df.longitude = (df.longitude - df.longitude.min()) / (df.longitude.max() - df.longitude.min())
@@ -101,7 +92,7 @@ def cli(input_path: Path, output_path: Path, task: str):
     for key in ("lte_rssi", "lte_rsrp", "lte_rsrq", "nr_ssRsrp", "nr_ssRsrq", "nr_ssSinr"):
         df[key].fillna(df[key].min() - 10, inplace=True)
 
-    for col in df.select_dtypes(include='number').columns:
+    for col in df.select_dtypes(include="number").columns:
         df[col] = replace_extreme_outliers(df[col])
 
     # Convert string columns into "category" type
@@ -128,7 +119,6 @@ def cli(input_path: Path, output_path: Path, task: str):
     # TODO: Lumos can potentially have multiple different targets:
     #   1. Exact position estimation (regression, same as for CTW, logatec)
     #   2. Future position estimation
-
 
     joblib.dump(df, output_path)
 
