@@ -122,6 +122,29 @@ class ExploratoryDataAnalysis:
         plt.savefig(figure_path)
         plt.close()
 
+    def allinone(self):
+         # provide the path to save to
+        figure_path = Path(str(self.output_path).replace(self.output_path.name, f"figures/{self.output_path.stem}-allinone.png"))
+
+        # Normalize selected columns
+        scaler = MinMaxScaler()
+        df_normalized = pd.DataFrame(scaler.fit_transform(self.df), columns=self.df.columns)
+
+        # Plot each normalized column on a single figure
+        plt.figure(figsize=(18, 6))
+        for column in df_normalized.columns:
+            print(df_normalized.head())
+            plt.plot(df_normalized[column], label=column.replace("nas_value_", ""))
+
+        # Customize plot
+        plt.title('Normalized plot')
+        plt.xlabel('Index')
+        plt.ylabel('Normalized Value')
+        plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
+        plt.tight_layout()
+        plt.grid(True)
+        plt.savefig(figure_path)
+
     def generate_latex_document(self, dataframes, figures, output_path):
         # Add beginning of .tex
         latex_content = """
@@ -182,10 +205,11 @@ class ExploratoryDataAnalysis:
         hist_figs = self.column_histogram()
 
         self.heatmap()
+        self.allinone()
 
-
-        # prepare the dataframe with heatnao details to add to thee histogram df
-        mapdf = pd.DataFrame([{ "ColName": "heatmap", "Path": Path('./figures/heatmap.png') }])
+        # prepare the dataframe with heatmap and allinone details to add to thee histogram df
+        mapdf = pd.DataFrame([{ "ColName": "heatmap", "Path": Path('./figures/heatmap.png') },
+                              { "ColName": "allinone", "Path": Path('./figures/allinone.png') }])
 
         # generate the .tex report
         self.generate_latex_document(

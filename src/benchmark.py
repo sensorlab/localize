@@ -186,7 +186,7 @@ def cli(
 
         grid_search.cleanup_tmp()
 
-    else:
+    elif optimizer_name == "automl":
         auto_ml = AutoMLManager(
             config = config["automl"][model_name],
             tmp_dir_path = tmp_dir_path,
@@ -198,6 +198,8 @@ def cli(
         reports = auto_ml.generate_report(store_top_num_models = store_top_num_models, cv = cv, metrics = metrics_handler)
 
         auto_ml.cleanup_tmp()
+    else:
+        print("gridsearch OR automl should appear in the config files for this to work.")
 
     reports["model_data"]["metadata"] = {"algorithm": model_name}
     reports["split_data"]["metadata"] = splits["metadata"]
