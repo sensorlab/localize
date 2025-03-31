@@ -14,7 +14,6 @@ dependencies:
   - nodejs~=18.0
 
   - pytorch~=2.2.0
-  - pytorch-cuda=12.1
   - torchvision
   - skorch~=0.15.0
 
@@ -37,9 +36,10 @@ dependencies:
   - dask
   - dvc
 
-  - curl
-
   - pip:
+    - ydata_profiling~=4.12.1
+    - Pillow~=11.0.0
+    - openpyxl
     - lightning~=2.2
     - lightning-bolts
     - torch-metrics
@@ -47,9 +47,10 @@ dependencies:
     - pre-commit
     - ruff
     - SciencePlots~=2.1
-
-    - tensorflow[and-cuda]~=2.15.0
-    - autokeras
+    - humanize
+    - tensorflow[and-cuda]~=2.16.1
+    - keras~=3.5.0
+    - autokeras~=2.0.0
 
     - scikeras
     - -e .

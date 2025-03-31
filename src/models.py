@@ -1,4 +1,17 @@
+# check if running on MacOS
+import platform
+
 import torch
+
+
+if platform.system() == "Darwin":
+    # check if M1/M2
+    if torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+
+
 from torch import Tensor, nn
 
 

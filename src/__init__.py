@@ -3,6 +3,7 @@ The `src` package is the root of this project.
 """
 
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -115,3 +116,17 @@ class PredefinedSplit(model_selection.BaseCrossValidator):
         """Generate indices to split data into training and test set."""
         for train_idx, test_idx in self.idx_pairs:
             yield train_idx, test_idx
+
+
+def empty_directory(directory_path: Path):
+    """
+    Remove all contents of a directory without deleting the directory itself.
+
+    Args:
+        directory_path (Path or str): The path to the directory you want to empty.
+    """
+    for item in directory_path.iterdir():
+        if item.is_file() or item.is_symlink():
+            item.unlink()  # Remove file or symlink
+        elif item.is_dir():
+            shutil.rmtree(item)  # Remove directory and its contents

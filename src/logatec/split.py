@@ -41,7 +41,7 @@ def cli(input_path: Path, output_indices_path: Path, split: str):
     # Load parameters
     params = load_params("./params.yaml")
 
-    random_state = params["seed"]
+    random_state = params["split"]["seed"]
     split_params = params["split"]
 
     # Load dataset
