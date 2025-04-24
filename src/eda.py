@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from ydata_profiling import ProfileReport
+from sklearn.preprocessing import MinMaxScaler
 
 from src import load_data
 
@@ -122,7 +123,7 @@ class ExploratoryDataAnalysis:
         sns.heatmap(corr_matrix, annot=True, cmap="coolwarm")
 
         # Save the heatmap to the specified output path
-        plt.savefig(figure_path)
+        plt.savefig(figure_path, dpi=300, bbox_inches="tight", pad_inches=0.1)
         plt.close()
 
     def allinone(self):

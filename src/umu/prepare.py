@@ -46,6 +46,7 @@ def cli(input_path: Path, output_path: Path, method: str):
             "Column78",
             "Column79",
         ]
+
     ]
     df.columns = df.iloc[0]
     df = df[1:]
@@ -54,6 +55,8 @@ def cli(input_path: Path, output_path: Path, method: str):
     for column in df.columns:
         if df[column].dtype == "object":
             df[column] = pd.to_numeric(df[column], errors="coerce")
+
+    df.columns = [col.replace('nas_value_nr5g_', '') for col in df.columns]
 
     print(df.head())
     df = df.dropna()  # drom the ~2 rows with NaN
