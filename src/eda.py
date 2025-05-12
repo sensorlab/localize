@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from ydata_profiling import ProfileReport
 from sklearn.preprocessing import MinMaxScaler
+from ydata_profiling import ProfileReport
 
 from src import load_data
 
@@ -127,8 +127,10 @@ class ExploratoryDataAnalysis:
         plt.close()
 
     def allinone(self):
-         # provide the path to save to
-        figure_path = Path(str(self.output_path).replace(self.output_path.name, f"figures/{self.output_path.stem}-allinone.png"))
+        # provide the path to save to
+        figure_path = Path(
+            str(self.output_path).replace(self.output_path.name, f"figures/{self.output_path.stem}-allinone.png")
+        )
 
         # Normalize selected columns
         scaler = MinMaxScaler()
@@ -137,13 +139,14 @@ class ExploratoryDataAnalysis:
         # Plot each normalized column on a single figure
         plt.figure(figsize=(18, 6))
         for column in df_normalized.columns:
-            print(df_normalized.head())
+            # print(column)
+            print(df_normalized[column].agg(["count", "nunique", "min", "max", "mean", "median", "std"]))
             plt.plot(df_normalized[column], label=column.replace("nas_value_", ""))
 
         # Customize plot
-        plt.title('Normalized plot')
-        plt.xlabel('Index')
-        plt.ylabel('Normalized Value')
+        plt.title("Normalized plot")
+        plt.xlabel("Index")
+        plt.ylabel("Normalized Value")
         plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
         plt.tight_layout()
         plt.grid(True)
@@ -203,8 +206,12 @@ class ExploratoryDataAnalysis:
         self.allinone()
 
         # prepare the dataframe with heatnao details to add to thee histogram df
-        mapdf = pd.DataFrame([{"ColName": "heatmap", "Path": Path(f"./figures/{self.output_path.stem}-heatmap.png")},
-                            { "ColName": "allinone", "Path": Path('./figures/{self.output_path.stem}-allinone.png') }])
+        mapdf = pd.DataFrame(
+            [
+                {"ColName": "heatmap", "Path": Path(f"./figures/{self.output_path.stem}-heatmap.png")},
+                {"ColName": "allinone", "Path": Path("./figures/{self.output_path.stem}-allinone.png")},
+            ]
+        )
 
         # generate the .tex report
         self.generate_latex_document(
@@ -306,7 +313,11 @@ def cli(input_path: Path, output_path: Path):
     edai.gen_tex_report()
 
     # generate html eda report
-    profile = ProfileReport(df, title="Profiling Report")
+    profile = ProfileReport(
+        df,
+        title="Profiling Report",
+        vars={"num": {"chi_squared_threshold": 0.0}, "cat": {"chi_squared_threshold": 0.0}},
+    )
     htmlpath = str(output_path).replace(".tex", ".html")
     profile.to_file(htmlpath)
 
