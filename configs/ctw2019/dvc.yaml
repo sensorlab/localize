@@ -7,13 +7,7 @@ vars:
       models: ../../artifacts/ctw2019/models
       reports: ../../artifacts/ctw2019/reports
 
-  - splits:
-      - Random
-      - ShortEdge
-      - LongEdge
-      - Cutout
-
-  # Models are defined in params.yaml
+  # Models and splits are defined in params.yaml
 
 
 
@@ -91,7 +85,7 @@ stages:
   split:
     desc: Split dataset and store indices
     matrix:
-      split: ${splits}
+      split: ${split.types}
     cmd: >
       python ${path.scripts}/split.py
       --input ${path.data}/prepared/ctw2019.pkl
@@ -109,7 +103,7 @@ stages:
   gridsearch:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
-      split: ${splits}
+      split: ${split.types}
       model: ${gridsearch}
     cmd: >
       python ${path.common}/benchmark.py
@@ -117,7 +111,7 @@ stages:
       --optimizer gridsearch
       --data ${path.data}/prepared/ctw2019.flatten.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
-      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+      --output-results ${path.models}/gridsearch-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
     params:
       - gridsearch.${item.model}
     deps:
@@ -125,12 +119,12 @@ stages:
       - ${path.data}/prepared/ctw2019.flatten.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/gridsearch-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
 
   automl:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
-      split: ${splits}
+      split: ${split.types}
       model: ${automl}
     cmd: >
       python ${path.common}/benchmark.py
@@ -138,7 +132,7 @@ stages:
       --optimizer automl
       --data ${path.data}/prepared/ctw2019.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
-      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+      --output-results ${path.models}/automl-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
     params:
       - automl.${item.model}
     deps:
@@ -146,7 +140,7 @@ stages:
       - ${path.data}/prepared/ctw2019.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/automl-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
 
 
   evaluation:

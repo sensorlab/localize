@@ -7,9 +7,7 @@ vars:
       models: ../../artifacts/lumos5g/models
       reports: ../../artifacts/lumos5g/reports
 
-  - splits: [KFold]
-
-  # Models are defined in params.yaml
+  # Models and splits are defined in params.yaml
 
 stages:
   # download:
@@ -33,17 +31,17 @@ stages:
     outs:
       - ${path.data}/interim/lumos5g.pkl
 
-  eda_raw:
-    desc: Exploratory data analysis
-    cmd: >
-      python ${path.common}/eda.py
-      --input ${path.data}/interim/lumos5g.pkl
-      --output ${path.reports}/interim/lumos5g.tex
-    deps:
-      - ${path.common}/eda.py
-      - ${path.data}/interim/lumos5g.pkl
-    outs:
-      - ${path.reports}/interim/lumos5g.tex
+#  eda_raw:
+#    desc: Exploratory data analysis
+#    cmd: >
+#      python ${path.common}/eda.py
+#      --input ${path.data}/interim/lumos5g.pkl
+#      --output ${path.reports}/interim/lumos5g.tex
+#    deps:
+#      - ${path.common}/eda.py
+#      - ${path.data}/interim/lumos5g.pkl
+#    outs:
+#      - ${path.reports}/interim/lumos5g.tex
 
   featurize:
     desc: Featurize dataset
@@ -72,7 +70,7 @@ stages:
   split:
     desc: Split dataset and store indices
     matrix:
-      split: ${splits}
+      split: ${split.types}
     cmd: >
       python ${path.scripts}/split.py
       --input ${path.data}/prepared/lumos5g.pkl
@@ -87,30 +85,30 @@ stages:
       - ${path.data}/splits/${item.split}Split.pkl
 
   gridsearch:
-     desc: Determine best hyper-parameters for algorithm on several CVs
-     matrix:
-       split: ${splits}
-       model: ${gridsearch}
-     cmd: >
-       python ${path.common}/benchmark.py
-       --use ${item.model}
-       --optimizer gridsearch
-       --data ${path.data}/prepared/lumos5g.pkl
-       --split-indices ${path.data}/splits/${item.split}Split.pkl
-       --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
-     params:
-       - gridsearch.${item.model}
-     deps:
-       - ${path.common}/benchmark.py
-       - ${path.data}/prepared/lumos5g.pkl
-       - ${path.data}/splits/${item.split}Split.pkl
-     outs:
-       - ${path.models}/${item.model}-${item.split}Split-results.pkl
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      split: ${split.types}
+      model: ${gridsearch}
+    cmd: >
+      python ${path.common}/benchmark.py
+      --use ${item.model}
+      --optimizer gridsearch
+      --data ${path.data}/prepared/lumos5g.pkl
+      --split-indices ${path.data}/splits/${item.split}Split.pkl
+      --output-results ${path.models}/gridsearch-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
+    params:
+      - gridsearch.${item.model}
+    deps:
+      - ${path.common}/benchmark.py
+      - ${path.data}/prepared/umu.pkl
+      - ${path.data}/splits/${item.split}Split.pkl
+    outs:
+      - ${path.models}/gridsearch-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
 
   automl:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
-      split: ${splits}
+      split: ${split.types}
       model: ${automl}
     cmd: >
       python ${path.common}/benchmark.py
@@ -118,20 +116,20 @@ stages:
       --optimizer automl
       --data ${path.data}/prepared/lumos5g.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
-      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+      --output-results ${path.models}/automl-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
     params:
       - automl.${item.model}
     deps:
       - ${path.common}/benchmark.py
-      - ${path.data}/prepared/lumos5g.pkl
+      - ${path.data}/prepared/umu.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/automl-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
 
   evaluation:
     cmd: >
       python ${path.common}/report.py
-      ${path.models}/*-results.pkl
+      ${path.models}/*/*-results.pkl
       --output-report ${path.reports}/performance.tex
     deps:
       - ${path.common}/report.py

@@ -32,7 +32,7 @@ import tensorflow as tf
 import yaml
 from skorch.helper import SliceDict
 
-from src import PredefinedSplit
+from src import PredefinedSplit, empty_directory
 from src.automl.automl_manager import AutoMLManager
 from src.gridsearch.gridsearch_manager import GridSearchManager
 from src.metrics import MetricsHandler
@@ -152,6 +152,11 @@ def cli(
     metrics_handler = MetricsHandler(config["evaluation"]["metrics"])
     store_top_num_models = config["evaluation"].get("save_top_models", 0.1)
 
+    # Clean up any old result files
+    if results_path.parent.name == f"{optimizer_name}-{model_name}":
+        results_path.parent.mkdir(parents=True, exist_ok=True)
+        empty_directory(results_path.parent)
+
     if optimizer_name == "gridsearch":
         gridsearch_config = config["gridsearch"][model_name]
         hyperparameters = get_hyperparameters(model_name, config["gridsearch"])
@@ -170,6 +175,7 @@ def cli(
             model_save_dir_path=Path(str(results_path).replace(".pkl", "")),
             single_thread=is_skorch_module,
             scorers=metrics_handler,
+            score_with=config["evaluation"]["score_with"],
             save_models=True,
         )
 

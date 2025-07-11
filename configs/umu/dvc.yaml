@@ -7,9 +7,7 @@ vars:
       models: ../../artifacts/umu/models
       reports: ../../artifacts/umu/reports
 
-  - splits: [Random, KFold] #, LeaveOneGroupOut]
-
-  # Models are defined in params.yaml
+  # Models and splits are defined in params.yaml
 
 
 stages:
@@ -17,7 +15,7 @@ stages:
     desc: Prepare UMU dataset for the MLOps pipeline
     cmd: |
       unzip ${path.data}/raw/umu.zip -d ${path.data}/raw/
-      python ${path.scripts}/prepare.py --method average --input ${path.data}/raw/tcp_nokia_20240325.xlsx --output ${path.data}/interim/umu.pkl
+      python ${path.scripts}/prepare.py --method average --input ${path.data}/raw/udp_nokia_20240325.xlsx --output ${path.data}/interim/umu.pkl
       rm ${path.data}/raw/*.xlsx
       rm ${path.data}/raw/__MACOSX/.*.xlsx
     deps:
@@ -25,18 +23,6 @@ stages:
       - ${path.data}/raw/umu.zip
     outs:
       - ${path.data}/interim/umu.pkl
-
-  eda_raw:
-    desc: Exploratory data analysis
-    cmd: >
-      python ${path.common}/eda.py
-      --input ${path.data}/interim/umu.pkl
-      --output ${path.reports}/interim/umu.tex
-    deps:
-      - ${path.common}/eda.py
-      - ${path.data}/interim/umu.pkl
-    outs:
-      - ${path.reports}/interim/umu.tex
 
   featurize:
     desc: Enrich dataset with additional features
@@ -58,14 +44,15 @@ stages:
       --output ${path.reports}/prepared/umu.tex
     deps:
       - ${path.common}/eda.py
-      - ${path.data}/interim/umu.pkl
+      - ${path.data}/prepared/lumos5g.pkl
     outs:
-      - ${path.reports}/prepared/umu.tex
+      - ${path.reports}/prepared/lumos5g.tex
+
 
   split:
     desc: Split dataset and store indices
     matrix:
-      split: ${splits}
+      split: ${split.types}
     cmd: >
       python ${path.scripts}/split.py
       --input ${path.data}/prepared/umu.pkl
@@ -83,7 +70,7 @@ stages:
   gridsearch:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
-      split: ${splits}
+      split: ${split.types}
       model: ${gridsearch}
     cmd: >
       python ${path.common}/benchmark.py
@@ -91,7 +78,7 @@ stages:
       --optimizer gridsearch
       --data ${path.data}/prepared/umu.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
-      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+      --output-results ${path.models}/gridsearch-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
     params:
       - gridsearch.${item.model}
     deps:
@@ -99,12 +86,12 @@ stages:
       - ${path.data}/prepared/umu.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/gridsearch-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
 
   automl:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
-      split: ${splits}
+      split: ${split.types}
       model: ${automl}
     cmd: >
       python ${path.common}/benchmark.py
@@ -112,7 +99,7 @@ stages:
       --optimizer automl
       --data ${path.data}/prepared/umu.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
-      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+      --output-results ${path.models}/automl-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
     params:
       - automl.${item.model}
     deps:
@@ -120,13 +107,13 @@ stages:
       - ${path.data}/prepared/umu.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/automl-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
 
 
   evaluation:
     cmd: >
       python ${path.common}/report.py
-      ${path.models}/*-results.pkl
+      ${path.models}/*/*-results.pkl
       --output-report ${path.reports}/performance.tex
     deps:
       - ${path.common}/report.py

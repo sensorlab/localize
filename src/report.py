@@ -77,7 +77,7 @@ class ReportsManager:
     ```
     """
 
-    def __init__(self, report_paths: list, evaluation: dict, save_dir: Path):
+    def __init__(self, report_paths: list, evaluation: dict, save_dir: Path, config: dict):
         """
         Initializes the ReportsManager with paths to reports, evaluation metrics, and the save directory.
 
@@ -89,9 +89,11 @@ class ReportsManager:
         self.score_with = evaluation["score_with"]
         self.metrics = evaluation["metrics"]
         self.save_figures_as = "png"
-        self.figure_paths = []
+        self.figure_paths = {}
         self.save_dir = save_dir
+        self.config = config
         self.reports = self._load_reports(report_paths)
+        self.selected_split = None
         self._selected_optimizer = None
         self._selected_models = None
 
@@ -108,9 +110,13 @@ class ReportsManager:
         reports = {}
         for report_path in report_paths:
             report = joblib.load(report_path, mmap_mode=None)
+            split = report["split_data"]["metadata"]["split_type"]
             optimizer = report["optimizer_data"]["metadata"]["algorithm"]
             model = report["model_data"]["metadata"]["algorithm"]
-            reports.setdefault(optimizer, {})[model] = report
+
+            # Ignores any results left over from other runs
+            if self.config.get(optimizer, {}).get(model, None) is not None and split in self.config["split"]["types"]:
+                reports.setdefault(split, {}).setdefault(optimizer, {})[model] = report
         return reports
 
     def _get_save_path(self, path, *paths) -> Path:
@@ -139,9 +145,9 @@ class ReportsManager:
         Returns:
         - Path: The path to the saved figure.
         """
-        path = self._get_save_path("figures", *args)
+        path = self._get_save_path(f"figures/{self.selected_split}", *args)
         plt.savefig(path, format=self.save_figures_as)
-        self.figure_paths.append(path)
+        self.figure_paths.setdefault(self.selected_split, []).append(path)
         if close_plt:
             plt.close()
         return Path(path)
@@ -153,14 +159,27 @@ class ReportsManager:
         Returns:
         - dict: Dictionary of selected reports grouped by model name.
         """
+        if self.selected_split is None:
+            raise ValueError(
+                "No data split has been selected, 'self.selected_split' must be set to a valid split type."
+            )
+        if self.selected_split not in self.config["split"]["types"]:
+            raise ValueError(
+                "Invalid split type selected. 'self.selected_split' has been set to a split type not present in the configs."
+            )
+
         if self._selected_optimizer == "all":
-            return {model: report for opt_reports in self.reports.values() for model, report in opt_reports.items()}
-        reports = self.reports.get(self._selected_optimizer, {})
+            return {
+                model: report
+                for opt_reports in self.reports[self.selected_split].values()
+                for model, report in opt_reports.items()
+            }
+        reports = self.reports[self.selected_split].get(self._selected_optimizer, {})
         if self._selected_models:
             return {model: reports[model] for model in self._selected_models if model in reports}
         return reports
 
-    def for_optimizer(self, optimizer_name: str):
+    def for_optimizer(self, optimizer_name: str, skip_if_unavaliable=False):
         """
         Filters reports by optimizer name or selects all reports.
 
@@ -172,10 +191,14 @@ class ReportsManager:
         """
         if optimizer_name.lower() == "all":
             self._selected_optimizer = "all"
-        elif optimizer_name in self.reports:
+        elif optimizer_name in self.reports[self.selected_split]:
             self._selected_optimizer = optimizer_name
+        elif skip_if_unavaliable:
+            self._selected_optimizer = None
         else:
-            raise ValueError(f"Optimizer '{optimizer_name}' not found. Available: {self.reports.keys()}")
+            raise ValueError(
+                f"Optimizer '{optimizer_name}' not found. Available: {self.reports[self.selected_split].keys()}"
+            )
         return self
 
     def for_models(self, models: Optional[List[str]] = None):
@@ -191,9 +214,44 @@ class ReportsManager:
         self._selected_models = models
         return self
 
-    def generate_latex(self, leaderboard_df: pd.DataFrame, file_name: str, pdf_title: str = "Performance Report"):
+    def initialize_latex_report(self, file_name: str):
+        self.tex_path = self._get_save_path(file_name)
+
+    def generate_latex_for_split(self, leaderboard_df: pd.DataFrame) -> str:
         """
-        Generates a LaTeX report containing the leaderboard and figures.
+        Generates the latex for each split
+
+        Args:
+        - leaderboard_df (pd.DataFrame): The leaderboard DataFrame for this split.
+
+        Returns:
+        - str: The latex generated for this split.
+
+        """
+
+        latex_lines = []
+
+        # Add leaderboard as a table
+        latex_lines.append(rf"\section*{{{self.selected_split}}}" + "\n")
+        latex_lines.append(r"\subsection*{Leaderboard}" + "\n")
+        latex_lines.append(r"\resizebox{\textwidth}{!}{" + "\n")  # Resize table to fit
+        latex_lines.append(leaderboard_df.to_latex(index=False, escape=True))
+        latex_lines.append(r"}" + "\n")
+
+        # Add each figure
+        latex_lines.append(r"\subsection*{Figures}" + "\n")
+        for path in self.figure_paths[self.selected_split]:
+            rel_path = os.path.relpath(path, start=os.path.dirname(self.tex_path))
+            latex_lines.append(r"\begin{figure}[H]" + "\n")
+            latex_lines.append(r"\centering" + "\n")
+            latex_lines.append(rf"\includegraphics[width=\textwidth]{{{rel_path}}}" + "\n")
+            latex_lines.append(r"\end{figure}" + "\n")
+
+        return "\n".join(latex_lines)
+
+    def save_combined_latex_report(self, split_latex: list[str], pdf_title: str = "Performance Report"):
+        """
+        Combines the latex from all splits and saves it to a `.tex` file.
 
         Args:
         - leaderboard_df (pd.DataFrame): The leaderboard DataFrame.
@@ -203,8 +261,8 @@ class ReportsManager:
         Returns:
         - Path: The path to the generated `.tex` file.
         """
-        tex_path = self._get_save_path(file_name)
-        with open(tex_path, "w") as tex_file:
+
+        with open(self.tex_path, "w") as tex_file:
             tex_file.write(r"\documentclass{article}" + "\n")
             tex_file.write(r"\usepackage{graphicx}" + "\n")
             tex_file.write(r"\usepackage{booktabs}" + "\n")
@@ -214,24 +272,32 @@ class ReportsManager:
             tex_file.write("\\author{Generated by Python}\n")
             tex_file.write(r"\maketitle" + "\n")
 
-            # Add leaderboard as a table
-            tex_file.write(r"\section*{Leaderboard}" + "\n")
-            tex_file.write(r"\resizebox{\textwidth}{!}{" + "\n")  # Resize table to fit
-            tex_file.write(leaderboard_df.to_latex(index=False, escape=True))
-            tex_file.write(r"}" + "\n")
-
-            # Add each figure
-            tex_file.write(r"\section*{Figures}" + "\n")
-            for path in self.figure_paths:
-                rel_path = os.path.relpath(path, start=os.path.dirname(tex_path))
-                tex_file.write(r"\begin{figure}[H]" + "\n")
-                tex_file.write(r"\centering" + "\n")
-                tex_file.write(rf"\includegraphics[width=\textwidth]{{{rel_path}}}" + "\n")
-                tex_file.write(r"\end{figure}" + "\n")
+            for latex in split_latex:
+                tex_file.write(latex)
 
             tex_file.write(r"\end{document}" + "\n")
 
-        return tex_path
+        return Path(self.tex_path)
+
+    # =====================================================================================================================
+    #                              Modify below to customize report generation logic.
+    #
+    # Framework for writing report generation functions:
+    #
+    #     def make_<function_name>(self):
+    #         selected_reports = self._get_selected_reports()
+    #         for model_name, reports in selected_reports.items():
+    #             ...
+    #             self._save_figure(f"<unique_name>.{self._save_figures_as}")  # Automatically calls plt.close()
+    # f
+    # Guidelines:
+    # - Use `self._get_selected_reports()` to retrieve report data.
+    # - If no reports are returned, the function must fail gracefully — no side effects or state changes.
+    # - Figures should be saved using `self._save_figure(...)`, which handles path formatting and cleanup.
+    # - Functions should be self-contained, modular, and avoid altering external state unless explicitly intended.
+    #
+    # NOTE: If `self._get_selected_reports()` returns an empty dict, this function must skip execution cleanly.
+    # =====================================================================================================================
 
     def make_predictions_scatter_plot_2d(self):
         """
@@ -424,7 +490,7 @@ class ReportsManager:
         - Optionally saves a logarithmic-scaled version of the plot if the scale difference is large.
         """
         assert (
-            self._selected_optimizer == "automl"
+            self._selected_optimizer == "automl" or self._selected_optimizer is None
         ), "'make_performance_history_plot' is only compatible with the optimizer 'automl'"
 
         base_color = (0.2, 0.4, 0.8)
@@ -527,7 +593,7 @@ class ReportsManager:
                         f"{score_values['mean']:.4f} (± {score_values['std']:.4f})"
                     )
 
-                    # Add the numeric mean value as a column for sorting
+                    # Add the score as a column for sorting
                     if score_name == self.score_with:
                         leaderboard_entry["score_with"] = score_values["mean"]
 
@@ -578,27 +644,39 @@ def cli(input_reports: list[Path], output_path: Path):
     print("Starting report generation.")
 
     # Initialize the ReportsManager
+    print("Input reports:", input_reports)
     reports = ReportsManager(
-        report_paths=input_reports, evaluation=config["evaluation"], save_dir=os.path.dirname(output_path)
+        report_paths=input_reports,
+        evaluation=config["evaluation"],
+        save_dir=os.path.dirname(output_path),
+        config=config,
     )
 
-    # Generate all plots and leaderboard
-    print("Making predicitons scatter plot.")
-    reports.for_optimizer("All").make_predictions_scatter_plot_2d()
-    print("Making performance comparison plot.")
-    reports.for_optimizer("All").make_comparison_plot()
-    print("Making hyperparameter performance plot.")
-    reports.for_optimizer("gridsearch").make_hyperparameter_performance_plot()
-    print("Making performance history plot.")
-    reports.for_optimizer("automl").make_performance_history_plot()
-    print("Making model performance leaderboard.")
-    leaderboard_df = reports.for_optimizer("All").make_shortened_leaderboard(max_scores_per_model=10)
-    # leaderboard_df = reports.for_optimizer("All").make_leaderboard()
+    latex = []
+    reports.initialize_latex_report(file_name=os.path.basename(output_path))
+
+    for split in config["split"]["types"]:
+        reports.selected_split = split
+
+        # Generate all plots and leaderboard
+        print(f"Making predicitons scatter plot, for split {split}.")
+        reports.for_optimizer("All").make_predictions_scatter_plot_2d()
+        print(f"Making performance comparison plot, for split {split}.")
+        reports.for_optimizer("All").make_comparison_plot()
+        print(f"Making hyperparameter performance plot, for split {split}.")
+        reports.for_optimizer("gridsearch", skip_if_unavaliable=True).make_hyperparameter_performance_plot()
+        print(f"Making performance history plot, for split {split}.")
+        reports.for_optimizer("automl", skip_if_unavaliable=True).make_performance_history_plot()
+        print(f"Making model performance leaderboard, for split {split}.")
+        # leaderboard_df = reports.for_optimizer("All").make_shortened_leaderboard(max_scores_per_model=10)
+        leaderboard_df = reports.for_optimizer("All").make_leaderboard()
+
+        latex.append(reports.generate_latex_for_split(leaderboard_df))
 
     # Generate LaTeX report and compile it into a PDF
     print("Generating LaTex report.")
-    tex_report_path = reports.generate_latex(leaderboard_df, file_name=os.path.basename(output_path))
-    print("Compliing to pdf.")
+    tex_report_path = reports.save_combined_latex_report(latex)
+    print("Compiling to pdf.")
     compile_tex_to_pdf(tex_report_path)
 
 
