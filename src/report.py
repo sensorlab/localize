@@ -644,7 +644,6 @@ def cli(input_reports: list[Path], output_path: Path):
     print("Starting report generation.")
 
     # Initialize the ReportsManager
-    print("Input reports:", input_reports)
     reports = ReportsManager(
         report_paths=input_reports,
         evaluation=config["evaluation"],
