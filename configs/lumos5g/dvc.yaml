@@ -1,7 +1,7 @@
 vars:
   - path:
       # Path are relative to location of dvc.yaml file
-      scripts: ../../src/lumos5g
+      scripts: ../../src/datasets/lumos5g
       common: ../../src
       data: ../../artifacts/lumos5g/data
       models: ../../artifacts/lumos5g/models
@@ -23,35 +23,35 @@ stages:
     desc: Prepare Lumos5G dataset for MLOps pipeline
     cmd: |
       unzip -j ${path.data}/raw/Lumos5G-v1.0.zip Lumos5G-v1.0/Lumos5G-v1.0.csv -d ${path.data}/raw/
-      python ${path.scripts}/prepare.py --input ${path.data}/raw/Lumos5G-v1.0.csv --output ${path.data}/interim/lumos5g.pkl
+      python ${path.scripts}/prepare.py --input ${path.data}/raw/Lumos5G-v1.0.csv --output ${path.data}/featurized/lumos5g.pkl
       rm ${path.data}/raw/Lumos5G-v1.0.csv
     deps:
       - ${path.data}/raw/Lumos5G-v1.0.zip
       - ${path.scripts}/prepare.py
     outs:
-      - ${path.data}/interim/lumos5g.pkl
+      - ${path.data}/featurized/lumos5g.pkl
 
 #  eda_raw:
 #    desc: Exploratory data analysis
 #    cmd: >
 #      python ${path.common}/eda.py
-#      --input ${path.data}/interim/lumos5g.pkl
-#      --output ${path.reports}/interim/lumos5g.tex
+#      --input ${path.data}/featurized/lumos5g.pkl
+#      --output ${path.reports}/featurized/lumos5g.tex
 #    deps:
 #      - ${path.common}/eda.py
-#      - ${path.data}/interim/lumos5g.pkl
+#      - ${path.data}/featurized/lumos5g.pkl
 #    outs:
-#      - ${path.reports}/interim/lumos5g.tex
+#      - ${path.reports}/featurized/lumos5g.tex
 
   featurize:
     desc: Featurize dataset
     cmd: >
       python ${path.scripts}/featurize.py
-      --input ${path.data}/interim/lumos5g.pkl
+      --input ${path.data}/featurized/lumos5g.pkl
       --output ${path.data}/prepared/lumos5g.pkl
     deps:
       - ${path.scripts}/featurize.py
-      - ${path.data}/interim/lumos5g.pkl
+      - ${path.data}/featurized/lumos5g.pkl
     outs:
       - ${path.data}/prepared/lumos5g.pkl
 

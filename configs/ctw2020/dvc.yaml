@@ -1,7 +1,7 @@
 vars:
   - path:
       # Path are relative to location of dvc.yaml file
-      scripts: ../../src/ctw2020
+      scripts: ../../src/datasets/ctw2020
       common: ../../src
       data: ../../artifacts/ctw2020/data
       models: ../../artifacts/ctw2020/models
@@ -18,35 +18,35 @@ stages:
     - >
       python ${path.scripts}/prepare.py
       ${path.data}/raw/file_*.hdf5
-      --output ${path.data}/interim/ctw2020.pkl
+      --output ${path.data}/featurized/ctw2020.pkl
     - rm ${path.data}/raw/*.hdf5
     deps:
     - ${path.scripts}/prepare.py
     - ${path.data}/raw/CTW2020_labelled_data.zip
     outs:
-    - ${path.data}/interim/ctw2020.pkl
+    - ${path.data}/featurized/ctw2020.pkl
 
 #  eda_raw:
 #    desc: Exploratory data analysis
 #    cmd: >
 #      python ${path.common}/eda.py
-#      --input ${path.data}/interim/ctw2020.pkl
-#      --output ${path.reports}/interim/ctw2020.tex
+#      --input ${path.data}/featurized/ctw2020.pkl
+#      --output ${path.reports}/featurized/ctw2020.tex
 #    deps:
 #      - ${path.common}/eda.py
-#      - ${path.data}/interim/ctw2020.pkl
+#      - ${path.data}/featurized/ctw2020.pkl
 #    outs:
-#      - ${path.reports}/interim/ctw2020.tex
+#      - ${path.reports}/featurized/ctw2020.tex
 
   featurize:
     desc: Enrich dataset with additional features
     cmd: >
       python ${path.scripts}/featurize.py
-      --input ${path.data}/interim/ctw2020.pkl
+      --input ${path.data}/featurized/ctw2020.pkl
       --output ${path.data}/prepared/ctw2020.pkl
     deps:
       - ${path.scripts}/featurize.py
-      - ${path.data}/interim/ctw2020.pkl
+      - ${path.data}/featurized/ctw2020.pkl
     outs:
       - ${path.data}/prepared/ctw2020.pkl
 

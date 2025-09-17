@@ -1,7 +1,7 @@
 vars:
   - path:
       # Path are relative to location of dvc.yaml file
-      scripts: ../../src/umu
+      scripts: ../../src/datasets/umu
       common: ../../src
       data: ../../artifacts/umu/data
       models: ../../artifacts/umu/models
@@ -15,24 +15,24 @@ stages:
     desc: Prepare UMU dataset for the MLOps pipeline
     cmd: |
       unzip ${path.data}/raw/umu.zip -d ${path.data}/raw/
-      python ${path.scripts}/prepare.py --method average --input ${path.data}/raw/udp_nokia_20240325.xlsx --output ${path.data}/interim/umu.pkl
+      python ${path.scripts}/prepare.py --method average --input ${path.data}/raw/udp_nokia_20240325.xlsx --output ${path.data}/featurized/umu.pkl
       rm ${path.data}/raw/*.xlsx
       rm ${path.data}/raw/__MACOSX/.*.xlsx
     deps:
       - ${path.scripts}/prepare.py
       - ${path.data}/raw/umu.zip
     outs:
-      - ${path.data}/interim/umu.pkl
+      - ${path.data}/featurized/umu.pkl
 
   featurize:
     desc: Enrich dataset with additional features
     cmd: >
       python ${path.scripts}/featurize.py
-      --input ${path.data}/interim/umu.pkl
+      --input ${path.data}/featurized/umu.pkl
       --output ${path.data}/prepared/umu.pkl
     deps:
       - ${path.scripts}/featurize.py
-      - ${path.data}/interim/umu.pkl
+      - ${path.data}/featurized/umu.pkl
     outs:
       - ${path.data}/prepared/umu.pkl
 
@@ -44,10 +44,9 @@ stages:
       --output ${path.reports}/prepared/umu.tex
     deps:
       - ${path.common}/eda.py
-      - ${path.data}/prepared/lumos5g.pkl
+      - ${path.data}/prepared/umu.pkl
     outs:
-      - ${path.reports}/prepared/lumos5g.tex
-
+      - ${path.reports}/prepared/umu.tex
 
   split:
     desc: Split dataset and store indices
@@ -65,7 +64,6 @@ stages:
       - ${path.data}/prepared/umu.pkl
     outs:
       - ${path.data}/splits/${item.split}Split.pkl
-
 
   gridsearch:
     desc: Determine best hyper-parameters for algorithm on several CVs

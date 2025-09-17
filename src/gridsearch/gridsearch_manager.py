@@ -13,7 +13,6 @@ import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
-from skorch import NeuralNetClassifier, NeuralNetRegressor
 from tabulate import tabulate
 from tqdm import tqdm
 
@@ -72,7 +71,6 @@ class GridSearchManager:
 
     @classmethod
     def construct_model(cls, model_config) -> BaseEstimator:
-        is_skorch_module = False
         if "pipeline" in model_config:
             steps = []
             for step in model_config["pipeline"]:
@@ -98,23 +96,10 @@ class GridSearchManager:
                 parameters["callbacks"] = callbacks
 
             if "estimator" in model_config:  # Handling nested models
-                # Check if the current model is a Skorch model and requires a PyTorch model class instead of instance
-                if ModelClass in [NeuralNetRegressor, NeuralNetClassifier]:
-                    is_skorch_module = True
-                    # Import the PyTorch model class without instantiating it
-                    inner_module = importlib.import_module(model_config["estimator"]["module"])
-                    InnerModelClass = getattr(inner_module, model_config["estimator"]["class"])
-                    # Pass the PyTorch model class directly, without instantiation
-                    return ModelClass(InnerModelClass, **parameters)
-
                 inner_model = cls.construct_model(model_config["estimator"])
                 return ModelClass(inner_model, **parameters)
 
-            return (ModelClass(**parameters), is_skorch_module)
-
-        # Check if ModelClass has n_jobs parameter. If so, set it to number of cores (not threads)
-        if "n_jobs" in inspect.signature(ModelClass).parameters:
-            parameters["n_jobs"] = joblib.cpu_count(only_physical_cores=True)
+            return ModelClass(**parameters)
 
         return ModelClass(**parameters)
 
