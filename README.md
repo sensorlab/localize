@@ -1,12 +1,15 @@
-# NANCY SaaS Localization: Self-Evolving Model Repository
+# LOCALIZE
 
-This project automates the training of machine learning models using Data Version Control (DVC), focusing on a streamlined and efficient pipeline management system. It is designed to work with four distinct datasets: CTW2019, CTW2020, Log-a-Tec, and Lumos5G, each with its dedicated pipeline to cater to the specific requirements and structure of the dataset.
+This project automates the training of wireless localization machine learning models using a low-code, configuration-first framework for radio localization in which 1) experiments are declared in human-readable configuration, 2) a workflow orchestrator runs standardized pipelines from data preparation to reporting, and 3) all artifacts, such as datasets, models, metrics, and reports are versioned. The pre-configured, versioned datasets reduce initial setup and boilerplate speeding up model development and evaluation. The design, with clear extension points, let experts add components without reworking the infrastructure.
 
 ## Features
 
-- **Automated Training Pipelines**: Four specialized pipelines for CTW2019, CTW2020, Log-a-Tec, and Lumos5G datasets.
+- **A low-code, configuration-first** framework that bridges ease of use with scientific rigor by making reproducibility its default operating mode, integrating version control, execution isolation, and transparent artifact tracking
+- **Automated Training Pipelines**: Five specialized pipelines for CTW2019, CTW2020, Log-a-Tec, Lumos5G and UMU datasets.
 - **Easy Setup**: Minimal setup required with Conda dependencies.
 - **DVC Integration**: Leveraging DVC for efficient data and model versioning, ensuring reproducibility and traceability.
+- **automated report generation** consistent, comparable evaluation by applying a standardized set of metrics and reporting procedures across all methods and datasets, eliminating glue code and improving the credibility of result.
+- 
 
 ## Project Layout
 
