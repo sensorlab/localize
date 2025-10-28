@@ -8,37 +8,24 @@ except ImportError:
     pass
 
 # check if running on MacOS
-import platform
-
-import click
-import joblib
-import numpy as np
-import torch
-
-
-if platform.system() == "Darwin":
-    # check if M1/M2
-    if torch.backends.mps.is_available():
-        device = torch.device("mps")
-    else:
-        device = torch.device("cpu")
-
 
 import os
 from pathlib import Path
 
+import click
+import joblib
 import keras
+import numpy as np
 import tensorflow as tf
 import yaml
-from skorch.helper import SliceDict
 
-from src import PredefinedSplit
+# from skorch.helper import SliceDict
+from src import PredefinedSplit, empty_directory
 from src.automl.automl_manager import AutoMLManager
 from src.gridsearch.gridsearch_manager import GridSearchManager
 from src.metrics import MetricsHandler
 
 
-torch.set_float32_matmul_precision("high")
 # Just to make sure that everything stays deterministic
 os.environ["TF_DETERMINISTIC_OPS"] = "1"
 os.environ["PYTHONHASHSEED"] = "42"
@@ -133,10 +120,6 @@ def cli(
     # load dataset
     features, targets = joblib.load(input_dataset_path, mmap_mode=None)
 
-    # https://github.com/skorch-dev/skorch/blob/master/docs/user/FAQ.rst#how-do-i-use-sklearn-gridseachcv-when-my-data-is-in-a-dataset
-    if isinstance(features, dict):
-        features = SliceDict(**features)
-
     # load split indices
     splits = joblib.load(split_indices_path, mmap_mode=None)
 
@@ -152,11 +135,16 @@ def cli(
     metrics_handler = MetricsHandler(config["evaluation"]["metrics"])
     store_top_num_models = config["evaluation"].get("save_top_models", 0.1)
 
+    # Clean up any old result files
+    if results_path.parent.name == f"{optimizer_name}-{model_name}":
+        results_path.parent.mkdir(parents=True, exist_ok=True)
+        empty_directory(results_path.parent)
+
     if optimizer_name == "gridsearch":
         gridsearch_config = config["gridsearch"][model_name]
         hyperparameters = get_hyperparameters(model_name, config["gridsearch"])
 
-        estimator, is_skorch_module = GridSearchManager.construct_model(gridsearch_config)
+        estimator = GridSearchManager.construct_model(gridsearch_config)
 
         grid_search_parameters = {
             "estimator": estimator,
@@ -168,8 +156,9 @@ def cli(
         grid_search = GridSearchManager(
             tmp_dir_path=tmp_dir_path,
             model_save_dir_path=Path(str(results_path).replace(".pkl", "")),
-            single_thread=is_skorch_module,
+            single_thread=False,
             scorers=metrics_handler,
+            score_with=config["evaluation"]["score_with"],
             save_models=True,
         )
 
@@ -179,7 +168,7 @@ def cli(
 
         # grid_search.cleanup_tmp()
 
-    else:
+    elif optimizer_name == "automl":
         auto_ml = AutoMLManager(
             config=config["automl"][model_name],
             tmp_dir_path=tmp_dir_path,
