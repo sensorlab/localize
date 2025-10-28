@@ -4,6 +4,7 @@ evaluation:
   score_with: 'rmse'
 
 split:
+  types: [KFold]
   seed: 42
   n_splits: 5
   test_size: 0.20
@@ -24,35 +25,35 @@ gridsearch:
       n_estimators: [10, 50, 100, 250, 400]
       max_depth: [5, 10, 30, 50, 150, 200, null]
 
-  KNeighborsRegressor:
-    module: sklearn.neighbors
-    class: KNeighborsRegressor
-    hyperparameters:
-      n_neighbors: [3, 5, 10]
-      weights: [uniform, distance]
-      p: [1, 2]
-      leaf_size: [10, 15, 30]
-      metric: [minkowski, euclidean]
+#  KNeighborsRegressor:
+#    module: sklearn.neighbors
+#    class: KNeighborsRegressor
+#    hyperparameters:
+#      n_neighbors: [3, 5, 10]
+#      weights: [uniform, distance]
+#      p: [1, 2]
+#      leaf_size: [10, 15, 30]
+#      metric: [minkowski, euclidean]
+#
+#  XGBRegressor:
+#    module: xgboost
+#    class: XGBRegressor
+#    parameters:
+#      random_state: 42
+#      enable_categorical: true
+#    hyperparameters:
+#      n_estimators: [10, 50, 100, 250]
+#      max_depth: [3, 5, 10, 30, 50]
+#      learning_rate: [0.01, 0.1, 0.2]
 
-  XGBRegressor:
-    module: xgboost
-    class: XGBRegressor
-    parameters:
-      random_state: 42
-      enable_categorical: true
-    hyperparameters:
-      n_estimators: [10, 50, 100, 250]
-      max_depth: [3, 5, 10, 30, 50]
-      learning_rate: [0.01, 0.1, 0.2]
-
-automl:
-  example:
-    inputs:
-      - name: data_input
-
-    outputs:
-      - name: x_out
-      - name: y_out
-
-    settings:
-      overwrite: true
+automl: []
+#  example:
+#    inputs:
+#      - name: data_input
+#
+#    outputs:
+#      - name: x_out
+#      - name: y_out
+#
+#    settings:
+#      overwrite: true

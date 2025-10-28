@@ -1,16 +1,15 @@
 vars:
   - path:
       # Path are relative to location of dvc.yaml file
-      scripts: ../../src/logatec
+      scripts: ../../src/datasets/logatec
       common: ../../src
       data: ../../artifacts/logatec/data
       models: ../../artifacts/logatec/models
       reports: ../../artifacts/logatec/reports
 
   - subsets: [winter, spring]
-  - splits: [Random] #, KFold, LeaveOneGroupOut]
 
-  # Models are defined in params.yaml
+  # Models and splits are defined in params.yaml
 
 stages:
   prepare:
@@ -19,13 +18,13 @@ stages:
       subset: ${subsets}
     cmd: |
       unzip -j ${path.data}/raw/logatec.zip ${item.subset}_data.json -d ${path.data}/raw/
-      python ${path.scripts}/prepare.py --method average --input ${path.data}/raw/${item.subset}_data.json --output ${path.data}/interim/${item.subset}.pkl
+      python ${path.scripts}/prepare.py --method average --input ${path.data}/raw/${item.subset}_data.json --output ${path.data}/featurized/${item.subset}.pkl
       rm ${path.data}/raw/${item.subset}_data.json
     deps:
       - ${path.scripts}/prepare.py
       - ${path.data}/raw/logatec.zip
     outs:
-      - ${path.data}/interim/${item.subset}.pkl
+      - ${path.data}/featurized/${item.subset}.pkl
 
   eda_raw:
     desc: Exploratory data analysis
@@ -33,13 +32,13 @@ stages:
       subset: ${subsets}
     cmd: >
       python ${path.common}/eda.py
-      --input ${path.data}/interim/${item.subset}.pkl
-      --output ${path.reports}/interim/${item.subset}.tex
+      --input ${path.data}/featurized/${item.subset}.pkl
+      --output ${path.reports}/featurized/${item.subset}.tex
     deps:
       - ${path.common}/eda.py
-      - ${path.data}/interim/${item.subset}.pkl
+      - ${path.data}/featurized/${item.subset}.pkl
     outs:
-      - ${path.reports}/interim/${item.subset}.tex
+      - ${path.reports}/featurized/${item.subset}.tex
 
   featurize:
     desc: Enrich dataset with additional features
@@ -47,11 +46,11 @@ stages:
       subset: ${subsets}
     cmd: >
       python ${path.scripts}/featurize.py
-      --input ${path.data}/interim/${item.subset}.pkl
+      --input ${path.data}/featurized/${item.subset}.pkl
       --output ${path.data}/prepared/${item.subset}.pkl
     deps:
       - ${path.scripts}/featurize.py
-      - ${path.data}/interim/${item.subset}.pkl
+      - ${path.data}/featurized/${item.subset}.pkl
     outs:
       - ${path.data}/prepared/${item.subset}.pkl
 
@@ -73,14 +72,13 @@ stages:
     desc: Prepare train-test split indices for model training and evaluation
     matrix:
       subset: ${subsets}
-      split: ${splits}
+      split: ${split.types}
     cmd: >
       python ${path.scripts}/split.py
       --input ${path.data}/prepared/${item.subset}.pkl
       --split ${item.split}
       --output-indices ${path.data}/splits/${item.subset}-${item.split}Split.pkl
     params:
-      - seed
       - split
     deps:
       - ${path.scripts}/split.py
@@ -93,7 +91,7 @@ stages:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
       subset: ${subsets}
-      split: ${splits}
+      split: ${split.types}
       model: ${gridsearch}
     cmd: >
       python ${path.common}/benchmark.py
@@ -101,22 +99,21 @@ stages:
       --optimizer gridsearch
       --data ${path.data}/prepared/${item.subset}.pkl
       --split-indices ${path.data}/splits/${item.subset}-${item.split}Split.pkl
-      --output-results ${path.models}/${item.subset}-${item.model}-${item.split}Split-results.pkl
+      --output-results ${path.models}/gridsearch-${item.subset}-${item.split}-${item.model}/${item.subset}-${item.model}-${item.split}Split-results.pkl
     params:
-      - seed
       - gridsearch.${item.model}
     deps:
       - ${path.common}/benchmark.py
       - ${path.data}/prepared/${item.subset}.pkl
       - ${path.data}/splits/${item.subset}-${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.subset}-${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/gridsearch-${item.subset}-${item.split}-${item.model}/${item.subset}-${item.model}-${item.split}Split-results.pkl
 
   automl:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
       subset: ${subsets}
-      split: ${splits}
+      split: ${split.types}
       model: ${automl}
     cmd: >
       python ${path.common}/benchmark.py
@@ -124,7 +121,7 @@ stages:
       --optimizer automl
       --data ${path.data}/prepared/${item.subset}.pkl
       --split-indices ${path.data}/splits/${item.subset}-${item.split}Split.pkl
-      --output-results ${path.models}/${item.subset}-${item.model}-${item.split}Split-results.pkl
+      --output-results ${path.models}/automl-${item.subset}-${item.split}-${item.model}/${item.subset}-${item.model}-${item.split}Split-results.pkl
     params:
       - automl.${item.model}
     deps:
@@ -132,7 +129,7 @@ stages:
       - ${path.data}/prepared/${item.subset}.pkl
       - ${path.data}/splits/${item.subset}-${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.subset}-${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/automl-${item.subset}-${item.split}-${item.model}/${item.subset}-${item.model}-${item.split}Split-results.pkl
 
   evaluation:
     matrix:

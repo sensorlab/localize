@@ -4,6 +4,7 @@ evaluation:
   score_with: 'rmse'
 
 split:
+  types: [Random] #, KFold] #, LeaveOneGroupOut]
   seed: 42
   n_splits: 5
   test_size: 0.20
@@ -21,8 +22,8 @@ gridsearch:
     parameters:
       random_state: 42
     hyperparameters:
-      n_estimators: [10, 50, 100, 250, 400]
-      max_depth: [5, 10, 30, 50, 150, 200, null]
+      n_estimators: [10, 50] #, 100, 250, 400]
+      #max_depth: [5, 10, 30, 50, 150, 200, null]
 
   KNeighborsRegressor:
     module: sklearn.neighbors
@@ -30,9 +31,9 @@ gridsearch:
     hyperparameters:
       n_neighbors: [3, 5, 10]
       weights: [uniform, distance]
-      p: [1, 2]
-      leaf_size: [10, 15, 30]
-      metric: [minkowski, euclidean]
+      #p: [1, 2]
+      #leaf_size: [10, 15, 30]
+      #metric: [minkowski, euclidean]
 
   XGBRegressor:
     module: xgboost
@@ -42,8 +43,8 @@ gridsearch:
       enable_categorical: true
     hyperparameters:
       n_estimators: [10, 50, 100, 250]
-      max_depth: [3, 5, 10, 30, 50]
-      learning_rate: [0.01, 0.1, 0.2]
+      #max_depth: [3, 5, 10, 30, 50]
+      #learning_rate: [0.01, 0.1, 0.2]
 
 automl:
   example:

@@ -54,13 +54,9 @@ def lat_lon_to_meters(origin_lat, origin_lon, point_lat, point_lon) -> tuple[flo
 )
 def cli(input_path: Path, output_path: Path, task: str):
     df = joblib.load(input_path)
-    print(df.head())
+    # print(df.head())
 
-    # apply the dtype attribute
-    result = df.dtypes
-
-    print("Output:")
-    print(result)
+    print(df.dtypes)
 
     origin_lat, origin_lon = df.gpsd_tpv_lat.min(), df.gpsd_tpv_lon.min()
 

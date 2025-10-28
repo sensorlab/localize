@@ -13,7 +13,6 @@ import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
-from skorch import NeuralNetClassifier, NeuralNetRegressor
 from tabulate import tabulate
 from tqdm import tqdm
 
@@ -27,6 +26,7 @@ class GridSearchManager:
     def __init__(
         self,
         scorers: MetricsHandler,
+        score_with: str,
         tmp_dir_path: Path,
         model_save_dir_path: Path,
         save_models: bool = True,
@@ -41,6 +41,7 @@ class GridSearchManager:
             "scoring": scorers.to_GridsearchCV(),
         }
         self._scorers = scorers.metrics_names
+        self.score_with = score_with
 
         # Forces single thread
         if single_thread:
@@ -70,7 +71,6 @@ class GridSearchManager:
 
     @classmethod
     def construct_model(cls, model_config) -> BaseEstimator:
-        is_skorch_module = False
         if "pipeline" in model_config:
             steps = []
             for step in model_config["pipeline"]:
@@ -96,27 +96,14 @@ class GridSearchManager:
                 parameters["callbacks"] = callbacks
 
             if "estimator" in model_config:  # Handling nested models
-                # Check if the current model is a Skorch model and requires a PyTorch model class instead of instance
-                if ModelClass in [NeuralNetRegressor, NeuralNetClassifier]:
-                    is_skorch_module = True
-                    # Import the PyTorch model class without instantiating it
-                    inner_module = importlib.import_module(model_config["estimator"]["module"])
-                    InnerModelClass = getattr(inner_module, model_config["estimator"]["class"])
-                    # Pass the PyTorch model class directly, without instantiation
-                    return ModelClass(InnerModelClass, **parameters)
-
                 inner_model = cls.construct_model(model_config["estimator"])
                 return ModelClass(inner_model, **parameters)
 
-            return (ModelClass(**parameters), is_skorch_module)
-
-        # Check if ModelClass has n_jobs parameter. If so, set it to number of cores (not threads)
-        if "n_jobs" in inspect.signature(ModelClass).parameters:
-            parameters["n_jobs"] = joblib.cpu_count(only_physical_cores=True)
+            return ModelClass(**parameters)
 
         return ModelClass(**parameters)
 
-    def _order_by_mean_rank(self, results_df: pd.DataFrame, scoring: Union[dict, None] = None) -> pd.DataFrame:
+    def _order_by_score(self, results_df: pd.DataFrame, scoring: Union[dict, None] = None) -> pd.DataFrame:
         """
         Orders the candidates in the results DataFrame by their mean rank, and then by individual scoring columns.
 
@@ -132,14 +119,11 @@ class GridSearchManager:
         if scoring is None:
             scoring = self._scorers
 
-        rank_columns = [f"rank_test_{key}" for key in scoring]
-
-        # Calculate the mean rank across all scoring metrics
-        results_df["mean_rank"] = results_df[rank_columns].mean(axis=1)
+        score_columns = [f"mean_test_{key}" for key in scoring if key != self.score_with]
 
         # Sort by mean rank, and then by individual rank columns
-        sort_columns = ["mean_rank"] + rank_columns
-        sorted_df = results_df.sort_values(by=sort_columns)
+        sort_columns = [f"mean_test_{self.score_with}"] + score_columns
+        sorted_df = results_df.sort_values(by=sort_columns, ascending=False)
 
         # Save original index and then reset it
         sorted_df["candidate_idx"] = sorted_df.index
@@ -209,7 +193,7 @@ class GridSearchManager:
 
         # Store the results and sort them by mean rank
         self.results = pd.DataFrame(self.grid_search.cv_results_)
-        self.results = self._order_by_mean_rank(self.results)
+        self.results = self._order_by_score(self.results)
         self.results = self._correct_scores(self.results, self._scorers)
 
     def predict(self, X: Union[np.ndarray, pd.Series], index: Union[None, int] = None) -> np.ndarray:  # DEPRECATED

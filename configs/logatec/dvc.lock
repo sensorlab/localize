@@ -2,32 +2,32 @@ schema: '2.0'
 stages:
   prepare@spring:
     cmd: "unzip -j ../../artifacts/logatec/data/raw/logatec.zip spring_data.json -d
-      ../../artifacts/logatec/data/raw/\npython ../../src/logatec/prepare.py --method
-      average --input ../../artifacts/logatec/data/raw/spring_data.json --output ../../artifacts/logatec/data/interim/spring.pkl\n
-      rm ../../artifacts/logatec/data/raw/spring_data.json\n"
+      ../../artifacts/logatec/data/raw/\npython ../../src/datasets/logatec/prepare.py
+      --method average --input ../../artifacts/logatec/data/raw/spring_data.json --output
+      ../../artifacts/logatec/data/featurized/spring.pkl\nrm ../../artifacts/logatec/data/raw/spring_data.json\n"
     deps:
     - path: ../../artifacts/logatec/data/raw/logatec.zip
       hash: md5
       md5: 7cdafacc2da2889c56fc8a13cbe3a35e
       size: 1942041
-    - path: ../../src/logatec/prepare.py
+    - path: ../../src/datasets/logatec/prepare.py
       hash: md5
       md5: 5fe5b2a7b7592a49d5b7e21cfd857bea
       size: 4909
     outs:
-    - path: ../../artifacts/logatec/data/interim/spring.pkl
+    - path: ../../artifacts/logatec/data/featurized/spring.pkl
       hash: md5
       md5: 583a69820aa4cf1aee822e79c98596e1
       size: 262439
   featurize@spring:
-    cmd: "python ../../src/logatec/featurize.py --input ../../artifacts/logatec/data/interim/spring.pkl
+    cmd: "python ../../src/datasets/logatec/featurize.py --input ../../artifacts/logatec/data/featurized/spring.pkl
       --output ../../artifacts/logatec/data/prepared/spring.pkl\n"
     deps:
-    - path: ../../artifacts/logatec/data/interim/spring.pkl
+    - path: ../../artifacts/logatec/data/featurized/spring.pkl
       hash: md5
       md5: 583a69820aa4cf1aee822e79c98596e1
       size: 262439
-    - path: ../../src/logatec/featurize.py
+    - path: ../../src/datasets/logatec/featurize.py
       hash: md5
       md5: c7d4930fff715c3ec2291b1935d61ba6
       size: 1343
@@ -61,32 +61,32 @@ stages:
       size: 60212
   prepare@winter:
     cmd: "unzip -j ../../artifacts/logatec/data/raw/logatec.zip winter_data.json -d
-      ../../artifacts/logatec/data/raw/\npython ../../src/logatec/prepare.py --method
-      average --input ../../artifacts/logatec/data/raw/winter_data.json --output ../../artifacts/logatec/data/interim/winter.pkl\n
-      rm ../../artifacts/logatec/data/raw/winter_data.json\n"
+      ../../artifacts/logatec/data/raw/\npython ../../src/datasets/logatec/prepare.py
+      --method average --input ../../artifacts/logatec/data/raw/winter_data.json --output
+      ../../artifacts/logatec/data/featurized/winter.pkl\nrm ../../artifacts/logatec/data/raw/winter_data.json\n"
     deps:
     - path: ../../artifacts/logatec/data/raw/logatec.zip
       hash: md5
       md5: 7cdafacc2da2889c56fc8a13cbe3a35e
       size: 1942041
-    - path: ../../src/logatec/prepare.py
+    - path: ../../src/datasets/logatec/prepare.py
       hash: md5
       md5: 5fe5b2a7b7592a49d5b7e21cfd857bea
       size: 4909
     outs:
-    - path: ../../artifacts/logatec/data/interim/winter.pkl
+    - path: ../../artifacts/logatec/data/featurized/winter.pkl
       hash: md5
       md5: 187f65b60a857caec3311e1281391e4d
       size: 33514
   featurize@winter:
-    cmd: "python ../../src/logatec/featurize.py --input ../../artifacts/logatec/data/interim/winter.pkl
+    cmd: "python ../../src/datasets/logatec/featurize.py --input ../../artifacts/logatec/data/featurized/winter.pkl
       --output ../../artifacts/logatec/data/prepared/winter.pkl\n"
     deps:
-    - path: ../../artifacts/logatec/data/interim/winter.pkl
+    - path: ../../artifacts/logatec/data/featurized/winter.pkl
       hash: md5
       md5: 187f65b60a857caec3311e1281391e4d
       size: 33514
-    - path: ../../src/logatec/featurize.py
+    - path: ../../src/datasets/logatec/featurize.py
       hash: md5
       md5: c7d4930fff715c3ec2291b1935d61ba6
       size: 1343
@@ -789,23 +789,24 @@ stages:
       md5: e16f68a3539c80f065034b41a1edbc8c
       size: 39428
   split@spring-Random:
-    cmd: "python ../../src/logatec/split.py --input ../../artifacts/logatec/data/prepared/spring.pkl
+    cmd: "python ../../src/datasets/logatec/split.py --input ../../artifacts/logatec/data/prepared/spring.pkl
       --split Random --output-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl\n"
     deps:
     - path: ../../artifacts/logatec/data/prepared/spring.pkl
       hash: md5
       md5: da33de3c4a20cba83a662ffbc17fdc6e
       size: 263252
-    - path: ../../src/logatec/split.py
+    - path: ../../src/datasets/logatec/split.py
       hash: md5
-      md5: e1817b79e687635e57c512260be576d6
-      size: 3419
+      md5: 14901d5acb84b2ebc0e6613f463dd313
+      size: 3188
     params:
       params.yaml:
-        seed: 42
         split:
-          n_splits: 5
+          types:
+          - Random
           seed: 42
+          n_splits: 5
           test_size: 0.1
     outs:
     - path: ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl
@@ -2457,7 +2458,7 @@ stages:
   gridsearch@spring-Random-KNeighborsRegressor:
     cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --optimizer gridsearch
       --data ../../artifacts/logatec/data/prepared/spring.pkl --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl
-      --output-results ../../artifacts/logatec/models/spring-KNeighborsRegressor-RandomSplit-results.pkl\n"
+      --output-results ../../artifacts/logatec/models/gridsearch-spring-Random-KNeighborsRegressor/spring-KNeighborsRegressor-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/logatec/data/prepared/spring.pkl
       hash: md5
@@ -2469,8 +2470,8 @@ stages:
       size: 94615
     - path: ../../src/benchmark.py
       hash: md5
-      md5: 9d09135deacec972b818f7f753efceba
-      size: 5863
+      md5: 9ee9a3bbdc63b34f732bb74054a9f271
+      size: 5772
     params:
       params.yaml:
         gridsearch.KNeighborsRegressor:
@@ -2492,13 +2493,15 @@ stages:
             - 10
             - 15
             - 30
-        seed: 42
+            metric:
+            - minkowski
+            - euclidean
     outs:
     - path:
-        ../../artifacts/logatec/models/spring-KNeighborsRegressor-RandomSplit-results.pkl
+        ../../artifacts/logatec/models/gridsearch-spring-Random-KNeighborsRegressor/spring-KNeighborsRegressor-RandomSplit-results.pkl
       hash: md5
-      md5: 5c816ce9ef5a1392e745d02873319e05
-      size: 545891
+      md5: 9c4ae58ac78c12a5fdce877d9d700f73
+      size: 1179926
   gridsearch@spring-Random-RandomForestRegressor:
     cmd: "python ../../src/benchmark.py --use RandomForestRegressor --optimizer gridsearch
       --data ../../artifacts/logatec/data/prepared/spring.pkl --split-indices ../../artifacts/logatec/data/splits/spring-RandomSplit.pkl

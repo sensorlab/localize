@@ -1,68 +1,70 @@
 schema: '2.0'
 stages:
   prepare:
-    cmd: "unzip ../../artifacts/umu/data/raw/umu.zip -d ../../artifacts/umu/data/raw/\n\
-      python ../../src/umu/prepare.py --method average --input ../../artifacts/umu/data/raw/tcp_nokia_20240325.xlsx\
-      \ --output ../../artifacts/umu/data/interim/umu.pkl\nrm ../../artifacts/umu/data/raw/*.xlsx\n\
+    cmd: "unzip ../../artifacts/umu/data/raw/umu.zip -d ../../artifacts/umu/data/raw/\n
+      python ../../src/datasets/umu/prepare.py --method average --input ../../artifacts/umu/data/raw/udp_nokia_20240325.xlsx
+      --output ../../artifacts/umu/data/featurized/umu.pkl\nrm ../../artifacts/umu/data/raw/*.xlsx\n
       rm ../../artifacts/umu/data/raw/__MACOSX/.*.xlsx\n"
     deps:
     - path: ../../artifacts/umu/data/raw/umu.zip
       hash: md5
-      md5: 1345918b8746ab5f376b8787f408f32b
-      size: 2489104
-    - path: ../../src/umu/prepare.py
+      md5: fb7f8b8a5de2cc6e975a34ae0461b1ce
+      size: 2489093
+    - path: ../../src/datasets/umu/prepare.py
       hash: md5
-      md5: 0dda223716a47bfd45a800f93c7f05c0
-      size: 1299
+      md5: 14bb0b048c66c1866fa13d4beb0a54ed
+      size: 1648
     outs:
-    - path: ../../artifacts/umu/data/interim/umu.pkl
+    - path: ../../artifacts/umu/data/featurized/umu.pkl
       hash: md5
-      md5: c6e81e2d30f7b20a4a5ab7ca834dcb0e
-      size: 40240
+      md5: ddf5baedaa142137f13120dddd4b8d93
+      size: 34547
   featurize:
-    cmd: "python ../../src/umu/featurize.py --input ../../artifacts/umu/data/interim/umu.pkl\
-      \ --output ../../artifacts/umu/data/prepared/umu.pkl\n"
+    cmd: "python ../../src/datasets/umu/featurize.py --input ../../artifacts/umu/data/featurized/umu.pkl
+      --output ../../artifacts/umu/data/prepared/umu.pkl\n"
     deps:
-    - path: ../../artifacts/umu/data/interim/umu.pkl
+    - path: ../../artifacts/umu/data/featurized/umu.pkl
       hash: md5
-      md5: c6e81e2d30f7b20a4a5ab7ca834dcb0e
-      size: 40240
-    - path: ../../src/umu/featurize.py
+      md5: ddf5baedaa142137f13120dddd4b8d93
+      size: 34547
+    - path: ../../src/datasets/umu/featurize.py
       hash: md5
-      md5: 3299259f9b378945ca5ef0549875fad8
-      size: 2234
+      md5: 782c216fdb6240bd58b481deb6f2a167
+      size: 2164
     outs:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
-      md5: b2beedabe6c806473fa8729c79ad04f0
-      size: 43301
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
   split@Random:
-    cmd: "python ../../src/umu/split.py --input ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split Random --output-indices ../../artifacts/umu/data/splits/RandomSplit.pkl\n"
+    cmd: "python ../../src/datasets/umu/split.py --input ../../artifacts/umu/data/prepared/umu.pkl
+      --split Random --output-indices ../../artifacts/umu/data/splits/RandomSplit.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
-      md5: b2beedabe6c806473fa8729c79ad04f0
-      size: 43301
-    - path: ../../src/umu/split.py
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../src/datasets/umu/split.py
       hash: md5
-      md5: b9482219ab17f1dcae27076cd8c24ed2
-      size: 2355
+      md5: 2f953e0e376539683c8c401c523702b0
+      size: 2116
     params:
       params.yaml:
         split:
+          types:
+          - Random
           seed: 42
           n_splits: 5
           test_size: 0.2
     outs:
     - path: ../../artifacts/umu/data/splits/RandomSplit.pkl
       hash: md5
-      md5: 814c76b0cf768cf84ae564d75c149ff9
-      size: 88707
+      md5: 56563d64a25481f29acec94e7473f298
+      size: 61427
   optimization@Random-LinearRegression:
-    cmd: "python ../../src/benchmark.py --use LinearRegression --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/umu/models/LinearRegression-RandomSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use LinearRegression --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/umu/models/LinearRegression-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -87,32 +89,35 @@ stages:
       md5: 28480d5360dccb3fafbcd5019b7ace1a
       size: 73117
   split@KFold:
-    cmd: "python ../../src/umu/split.py --input ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split KFold --output-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl\n"
+    cmd: "python ../../src/datasets/umu/split.py --input ../../artifacts/umu/data/prepared/umu.pkl
+      --split KFold --output-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
-      md5: b2beedabe6c806473fa8729c79ad04f0
-      size: 43301
-    - path: ../../src/umu/split.py
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../src/datasets/umu/split.py
       hash: md5
-      md5: b9482219ab17f1dcae27076cd8c24ed2
-      size: 2355
+      md5: 2f953e0e376539683c8c401c523702b0
+      size: 2116
     params:
       params.yaml:
         split:
+          types:
+          - Random
+          - KFold
           seed: 42
           n_splits: 5
           test_size: 0.2
     outs:
     - path: ../../artifacts/umu/data/splits/KFoldSplit.pkl
       hash: md5
-      md5: 054f46afa6fb485a4dde577e295abf3b
-      size: 88666
+      md5: 8984bc2101f2246b00e789bde9d7bf09
+      size: 61434
   optimization@KFold-XGBRegressor:
-    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl --output-results\
-      \ ../../artifacts/umu/models/XGBRegressor-KFoldSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl --output-results
+      ../../artifacts/umu/models/XGBRegressor-KFoldSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -140,9 +145,9 @@ stages:
       md5: 32ae512b234634e11aa220aea6bf8eaf
       size: 72976
   optimization@KFold-RandomForestRegressor:
-    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl --output-results\
-      \ ../../artifacts/umu/models/RandomForestRegressor-KFoldSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl --output-results
+      ../../artifacts/umu/models/RandomForestRegressor-KFoldSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -174,17 +179,17 @@ stages:
       md5: 457d9840c06326986fb33db6b700f944
       size: 73018
   split@LeaveOneGroupOut:
-    cmd: "python ../../src/umu/split.py --input ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split LeaveOneGroupOut --output-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl\n"
+    cmd: "python ../../src/umu/split.py --input ../../artifacts/umu/data/prepared/umu.pkl
+      --split LeaveOneGroupOut --output-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
-      md5: b2beedabe6c806473fa8729c79ad04f0
-      size: 43301
+      md5: 072f9708a656112a8848b86c243f0ba2
+      size: 43281
     - path: ../../src/umu/split.py
       hash: md5
-      md5: b9482219ab17f1dcae27076cd8c24ed2
-      size: 2355
+      md5: 2f953e0e376539683c8c401c523702b0
+      size: 2116
     params:
       params.yaml:
         split:
@@ -197,9 +202,9 @@ stages:
       md5: 604b430f9d0361ac2c0c4e43afe7b7be
       size: 34990661
   optimization@LeaveOneGroupOut-KNeighborsRegressor:
-    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl\
-      \ --output-results ../../artifacts/umu/models/KNeighborsRegressor-LeaveOneGroupOutSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl --output-results
+      ../../artifacts/umu/models/KNeighborsRegressor-LeaveOneGroupOutSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -235,9 +240,9 @@ stages:
       md5: 16266d0aabbeb8b74302f991b723b049
       size: 710385
   optimization@Random-RandomForestRegressor:
-    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/umu/models/RandomForestRegressor-RandomSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/umu/models/RandomForestRegressor-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -269,9 +274,9 @@ stages:
       md5: a104004cfce2832e0c5ed9036c10621c
       size: 73155
   optimization@Random-KNeighborsRegressor:
-    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/umu/models/KNeighborsRegressor-RandomSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/umu/models/KNeighborsRegressor-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -307,9 +312,9 @@ stages:
       md5: 8f952e2c5acf71c2efe988ca268b323c
       size: 73199
   optimization@Random-XGBRegressor:
-    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl --output-results\
-      \ ../../artifacts/umu/models/XGBRegressor-RandomSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl --output-results
+      ../../artifacts/umu/models/XGBRegressor-RandomSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -337,9 +342,9 @@ stages:
       md5: 73a8046e47f21a9198d5acf0bcc4ddbb
       size: 73113
   optimization@KFold-LinearRegression:
-    cmd: "python ../../src/benchmark.py --use LinearRegression --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl --output-results\
-      \ ../../artifacts/umu/models/LinearRegression-KFoldSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use LinearRegression --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl --output-results
+      ../../artifacts/umu/models/LinearRegression-KFoldSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -364,9 +369,9 @@ stages:
       md5: 70d9d143b672812cedc43d96cb91b94d
       size: 72980
   optimization@KFold-KNeighborsRegressor:
-    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl --output-results\
-      \ ../../artifacts/umu/models/KNeighborsRegressor-KFoldSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl --output-results
+      ../../artifacts/umu/models/KNeighborsRegressor-KFoldSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -402,9 +407,9 @@ stages:
       md5: eceef85db86242d4068ae921b3c3ed62
       size: 73062
   optimization@LeaveOneGroupOut-LinearRegression:
-    cmd: "python ../../src/benchmark.py --use LinearRegression --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl\
-      \ --output-results ../../artifacts/umu/models/LinearRegression-LeaveOneGroupOutSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use LinearRegression --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl --output-results
+      ../../artifacts/umu/models/LinearRegression-LeaveOneGroupOutSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -429,9 +434,9 @@ stages:
       md5: 28a4e647cf09e983b06d08a868a5e4e3
       size: 710303
   optimization@LeaveOneGroupOut-RandomForestRegressor:
-    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl\
-      \ --output-results ../../artifacts/umu/models/RandomForestRegressor-LeaveOneGroupOutSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl --output-results
+      ../../artifacts/umu/models/RandomForestRegressor-LeaveOneGroupOutSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -458,14 +463,15 @@ stages:
             max_depth:
             - 5
     outs:
-    - path: ../../artifacts/umu/models/RandomForestRegressor-LeaveOneGroupOutSplit-results.pkl
+    - path:
+        ../../artifacts/umu/models/RandomForestRegressor-LeaveOneGroupOutSplit-results.pkl
       hash: md5
       md5: c4eb97b937fdaa17323bcf8b95eb6339
       size: 710341
   optimization@LeaveOneGroupOut-XGBRegressor:
-    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --split-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl\
-      \ --output-results ../../artifacts/umu/models/XGBRegressor-LeaveOneGroupOutSplit-results.pkl\n"
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --data ../../artifacts/umu/data/prepared/umu.pkl
+      --split-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl --output-results
+      ../../artifacts/umu/models/XGBRegressor-LeaveOneGroupOutSplit-results.pkl\n"
     deps:
     - path: ../../artifacts/umu/data/prepared/umu.pkl
       hash: md5
@@ -493,26 +499,26 @@ stages:
       md5: 620c600cb3ccf67e49d5620c448eb56d
       size: 710299
   evaluation:
-    cmd: "python ../../src/report.py ../../artifacts/umu/models/*-results.pkl --output-report\
-      \ ../../artifacts/umu/reports/metrics.json\n"
+    cmd: "python ../../src/report.py ../../artifacts/umu/models/*/*-results.pkl --output-report
+      ../../artifacts/umu/reports/performance.tex\n"
     deps:
     - path: ../../artifacts/umu/models
       hash: md5
-      md5: 2d107c5f3271078ab4f0107d6a8664e7.dir
-      size: 3425948
-      nfiles: 13
+      md5: 4669b1f0df4e1f954ec28c24f069079e.dir
+      size: 1292760884
+      nfiles: 202
     - path: ../../src/report.py
       hash: md5
-      md5: d315d71b09a199d1b584e640cf9afe0f
-      size: 1644
+      md5: 4ca7d6755db140e95c65dc2a5bd824d2
+      size: 30898
     outs:
-    - path: ../../artifacts/umu/reports/metrics.json
+    - path: ../../artifacts/umu/reports/performance.tex
       hash: md5
-      md5: d5fb777ba4a9e8de778ad844df98d0a5
-      size: 2076
+      md5: 10ee4bc5e6beaf50d880a2d84bd73a11
+      size: 3563
   eda:
-    cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/interim/umu.pkl\
-      \ --output ../../artifacts/umu/reports/interim/umu.tex\n"
+    cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/interim/umu.pkl
+      --output ../../artifacts/umu/reports/interim/umu.tex\n"
     deps:
     - path: ../../artifacts/umu/data/interim/umu.pkl
       hash: md5
@@ -528,36 +534,376 @@ stages:
       md5: e937b5997077487f98f7781b3e76e0ad
       size: 6096
   eda_raw:
-    cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/interim/umu.pkl\
-      \ --output ../../artifacts/umu/reports/interim/umu.tex\n"
+    cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/interim/umu.pkl
+      --output ../../artifacts/umu/reports/interim/umu.tex\n"
     deps:
     - path: ../../artifacts/umu/data/interim/umu.pkl
       hash: md5
-      md5: c6e81e2d30f7b20a4a5ab7ca834dcb0e
-      size: 40240
+      md5: bb49053e750efe35ceca84b160e57949
+      size: 39633
     - path: ../../src/eda.py
       hash: md5
-      md5: e6c9a4d447ccb8c1bda8160e694c241b
-      size: 9439
+      md5: ac000b068bed542a916256abb8e177fb
+      size: 11798
     outs:
     - path: ../../artifacts/umu/reports/interim/umu.tex
       hash: md5
-      md5: e7767c3a60a0dbc9089e94825213b9fe
-      size: 10444
+      md5: 47a9b30670c55c3b73418c0b41a86a37
+      size: 10485
   eda_features:
-    cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/prepared/umu.pkl\
-      \ --output ../../artifacts/umu/reports/prepared/umu.tex\n"
+    cmd: "python ../../src/eda.py --input ../../artifacts/umu/data/prepared/umu.pkl
+      --output ../../artifacts/umu/reports/prepared/umu.tex\n"
     deps:
-    - path: ../../artifacts/umu/data/prepared/umu.pkl
+    - path: ../../artifacts/umu/data/interim/umu.pkl
       hash: md5
-      md5: b2beedabe6c806473fa8729c79ad04f0
-      size: 43301
+      md5: bb49053e750efe35ceca84b160e57949
+      size: 39633
     - path: ../../src/eda.py
       hash: md5
-      md5: e6c9a4d447ccb8c1bda8160e694c241b
-      size: 9439
+      md5: ac000b068bed542a916256abb8e177fb
+      size: 11798
     outs:
     - path: ../../artifacts/umu/reports/prepared/umu.tex
       hash: md5
-      md5: f52eaef1ab8af1d5b65542950309894d
-      size: 10570
+      md5: d04d5d72cbd880cf9751dcbdc42ee027
+      size: 10352
+  gridsearch@Random-LinearRegression:
+    cmd: "python ../../src/benchmark.py --use LinearRegression --optimizer gridsearch
+      --data ../../artifacts/umu/data/prepared/umu.pkl --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl
+      --output-results ../../artifacts/umu/models/gridsearch-Random-LinearRegression/LinearRegression-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../artifacts/umu/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 56563d64a25481f29acec94e7473f298
+      size: 61427
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: bbfda00dc34d6fb3692e36cd986f42fd
+      size: 5545
+    params:
+      params.yaml:
+        gridsearch.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
+    outs:
+    - path:
+        ../../artifacts/umu/models/gridsearch-Random-LinearRegression/LinearRegression-RandomSplit-results.pkl
+      hash: md5
+      md5: 7d94bf3e552de63af372e5d4dad44893
+      size: 69095
+  gridsearch@Random-RandomForestRegressor:
+    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --optimizer gridsearch
+      --data ../../artifacts/umu/data/prepared/umu.pkl --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl
+      --output-results ../../artifacts/umu/models/gridsearch-Random-RandomForestRegressor/RandomForestRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../artifacts/umu/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 56563d64a25481f29acec94e7473f298
+      size: 61427
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: bbfda00dc34d6fb3692e36cd986f42fd
+      size: 5545
+    params:
+      params.yaml:
+        gridsearch.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+    outs:
+    - path:
+        ../../artifacts/umu/models/gridsearch-Random-RandomForestRegressor/RandomForestRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 24cd6340a6e230859e014bdad56d79df
+      size: 69142
+  gridsearch@Random-KNeighborsRegressor:
+    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --optimizer gridsearch
+      --data ../../artifacts/umu/data/prepared/umu.pkl --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl
+      --output-results ../../artifacts/umu/models/gridsearch-Random-KNeighborsRegressor/KNeighborsRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../artifacts/umu/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 56563d64a25481f29acec94e7473f298
+      size: 61427
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: bbfda00dc34d6fb3692e36cd986f42fd
+      size: 5545
+    params:
+      params.yaml:
+        gridsearch.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          hyperparameters:
+            n_neighbors:
+            - 3
+            - 5
+            - 10
+            weights:
+            - uniform
+            - distance
+    outs:
+    - path:
+        ../../artifacts/umu/models/gridsearch-Random-KNeighborsRegressor/KNeighborsRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 3555d1e8b82f2e6d68a801071e9a2cfd
+      size: 70649
+  gridsearch@Random-XGBRegressor:
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --optimizer gridsearch
+      --data ../../artifacts/umu/data/prepared/umu.pkl --split-indices ../../artifacts/umu/data/splits/RandomSplit.pkl
+      --output-results ../../artifacts/umu/models/gridsearch-Random-XGBRegressor/XGBRegressor-RandomSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../artifacts/umu/data/splits/RandomSplit.pkl
+      hash: md5
+      md5: 56563d64a25481f29acec94e7473f298
+      size: 61427
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: bbfda00dc34d6fb3692e36cd986f42fd
+      size: 5545
+    params:
+      params.yaml:
+        gridsearch.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            enable_categorical: true
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+    outs:
+    - path:
+        ../../artifacts/umu/models/gridsearch-Random-XGBRegressor/XGBRegressor-RandomSplit-results.pkl
+      hash: md5
+      md5: 51765b05d4f4242ef97b72d3bb14bd00
+      size: 57766
+  gridsearch@KFold-LinearRegression:
+    cmd: "python ../../src/benchmark.py --use LinearRegression --optimizer gridsearch
+      --data ../../artifacts/umu/data/prepared/umu.pkl --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl
+      --output-results ../../artifacts/umu/models/gridsearch-KFold-LinearRegression/LinearRegression-KFoldSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../artifacts/umu/data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8984bc2101f2246b00e789bde9d7bf09
+      size: 61434
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 8a7b90bdd95edf4078c8f97ad452f1a8
+      size: 6041
+    params:
+      params.yaml:
+        gridsearch.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
+    outs:
+    - path:
+        ../../artifacts/umu/models/gridsearch-KFold-LinearRegression/LinearRegression-KFoldSplit-results.pkl
+      hash: md5
+      md5: d6b44f69d725ee1f6fd8d4a3eef8d551
+      size: 68855
+  gridsearch@KFold-RandomForestRegressor:
+    cmd: "python ../../src/benchmark.py --use RandomForestRegressor --optimizer gridsearch
+      --data ../../artifacts/umu/data/prepared/umu.pkl --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl
+      --output-results ../../artifacts/umu/models/gridsearch-KFold-RandomForestRegressor/RandomForestRegressor-KFoldSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../artifacts/umu/data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8984bc2101f2246b00e789bde9d7bf09
+      size: 61434
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 8a7b90bdd95edf4078c8f97ad452f1a8
+      size: 6041
+    params:
+      params.yaml:
+        gridsearch.RandomForestRegressor:
+          module: sklearn.ensemble
+          class: RandomForestRegressor
+          parameters:
+            random_state: 42
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            - 400
+            max_depth:
+            - 5
+            - 10
+            - 30
+            - 50
+            - 150
+            - 200
+            -
+    outs:
+    - path:
+        ../../artifacts/umu/models/gridsearch-KFold-RandomForestRegressor/RandomForestRegressor-KFoldSplit-results.pkl
+      hash: md5
+      md5: 5877ce2085eadae3365d54fa4090f5ef
+      size: 181450
+  gridsearch@KFold-KNeighborsRegressor:
+    cmd: "python ../../src/benchmark.py --use KNeighborsRegressor --optimizer gridsearch
+      --data ../../artifacts/umu/data/prepared/umu.pkl --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl
+      --output-results ../../artifacts/umu/models/gridsearch-KFold-KNeighborsRegressor/KNeighborsRegressor-KFoldSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../artifacts/umu/data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8984bc2101f2246b00e789bde9d7bf09
+      size: 61434
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 8a7b90bdd95edf4078c8f97ad452f1a8
+      size: 6041
+    params:
+      params.yaml:
+        gridsearch.KNeighborsRegressor:
+          module: sklearn.neighbors
+          class: KNeighborsRegressor
+          hyperparameters:
+            n_neighbors:
+            - 3
+            - 5
+            - 10
+            weights:
+            - uniform
+            - distance
+            p:
+            - 1
+            - 2
+            leaf_size:
+            - 10
+            - 15
+            - 30
+            metric:
+            - minkowski
+            - euclidean
+    outs:
+    - path:
+        ../../artifacts/umu/models/gridsearch-KFold-KNeighborsRegressor/KNeighborsRegressor-KFoldSplit-results.pkl
+      hash: md5
+      md5: ca8e74d7b958e4b4a4a06f682522ceeb
+      size: 396694
+  gridsearch@KFold-XGBRegressor:
+    cmd: "python ../../src/benchmark.py --use XGBRegressor --optimizer gridsearch
+      --data ../../artifacts/umu/data/prepared/umu.pkl --split-indices ../../artifacts/umu/data/splits/KFoldSplit.pkl
+      --output-results ../../artifacts/umu/models/gridsearch-KFold-XGBRegressor/XGBRegressor-KFoldSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: a6c25de5ae08c8157d4277a0f798c40a
+      size: 38115
+    - path: ../../artifacts/umu/data/splits/KFoldSplit.pkl
+      hash: md5
+      md5: 8984bc2101f2246b00e789bde9d7bf09
+      size: 61434
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 8a7b90bdd95edf4078c8f97ad452f1a8
+      size: 6041
+    params:
+      params.yaml:
+        gridsearch.XGBRegressor:
+          module: xgboost
+          class: XGBRegressor
+          parameters:
+            random_state: 42
+            enable_categorical: true
+          hyperparameters:
+            n_estimators:
+            - 10
+            - 50
+            - 100
+            - 250
+            max_depth:
+            - 3
+            - 5
+            - 10
+            - 30
+            - 50
+            learning_rate:
+            - 0.01
+            - 0.1
+            - 0.2
+    outs:
+    - path:
+        ../../artifacts/umu/models/gridsearch-KFold-XGBRegressor/XGBRegressor-KFoldSplit-results.pkl
+      hash: md5
+      md5: 1f805fe1fb1e0f5317e8bec83c083226
+      size: 269820
+  gridsearch@LeaveOneGroupOut-LinearRegression:
+    cmd: "python ../../src/benchmark.py --use LinearRegression --optimizer gridsearch
+      --data ../../artifacts/umu/data/prepared/umu.pkl --split-indices ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl
+      --output-results ../../artifacts/umu/models/LinearRegression-LeaveOneGroupOutSplit-results.pkl\n"
+    deps:
+    - path: ../../artifacts/umu/data/prepared/umu.pkl
+      hash: md5
+      md5: 072f9708a656112a8848b86c243f0ba2
+      size: 43281
+    - path: ../../artifacts/umu/data/splits/LeaveOneGroupOutSplit.pkl
+      hash: md5
+      md5: 604b430f9d0361ac2c0c4e43afe7b7be
+      size: 34990661
+    - path: ../../src/benchmark.py
+      hash: md5
+      md5: 3b7e206adc22941c47e30de5a4e645e5
+      size: 5751
+    params:
+      params.yaml:
+        gridsearch.LinearRegression:
+          module: sklearn.linear_model
+          class: LinearRegression
+          hyperparameters:
+            fit_intercept:
+            - true
+            - false
+    outs:
+    - path: ../../artifacts/umu/models/LinearRegression-LeaveOneGroupOutSplit-results.pkl
+      hash: md5
+      md5: 3eebddcbc784a5c74816410aa611d302
+      size: 1867879

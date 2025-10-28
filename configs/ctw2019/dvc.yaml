@@ -1,19 +1,13 @@
 vars:
   - path:
       # Path are relative to location of dvc.yaml file
-      scripts: ../../src/ctw2019
+      scripts: ../../src/datasets/ctw2019
       common: ../../src
       data: ../../artifacts/ctw2019/data
       models: ../../artifacts/ctw2019/models
       reports: ../../artifacts/ctw2019/reports
 
-  - splits:
-      - Random
-      - ShortEdge
-      - LongEdge
-      - Cutout
-
-  # Models are defined in params.yaml
+  # Models and splits are defined in params.yaml
 
 
 
@@ -27,37 +21,37 @@ stages:
         --data-h ${path.data}/raw/h_Estimated_CTW_Train.h5
         --data-snr ${path.data}/raw/SNR_CTW_Train.h5
         --data-pos ${path.data}/raw/r_Position_CTW_Train.h5
-        --output ${path.data}/interim/ctw2019.pkl
+        --output ${path.data}/featurized/ctw2019.pkl
       - rm ${path.data}/raw/*.h5
     deps:
       - ${path.scripts}/prepare.py
       - ${path.data}/raw/CTW2019_Dataset_h5.zip
     outs:
-      - ${path.data}/interim/ctw2019.pkl
+      - ${path.data}/featurized/ctw2019.pkl
 
 
 #  eda_raw:
 #    desc: Exploratory data analysis
 #    cmd: >
 #      python ${path.common}/eda.py
-#      --input ${path.data}/interim/ctw2019.pkl
-#      --output ${path.reports}/interim/ctw2019.tex
+#      --input ${path.data}/featurized/ctw2019.pkl
+#      --output ${path.reports}/featurized/ctw2019.tex
 #    deps:
 #      - ${path.common}/eda.py
-#      - ${path.data}/interim/ctw2019.pkl
+#      - ${path.data}/featurized/ctw2019.pkl
 #    outs:
-#      - ${path.reports}/interim/ctw2019.tex
+#      - ${path.reports}/featurized/ctw2019.tex
 
 
   featurize:
     desc: Enrich dataset with additional features
     cmd: >
       python ${path.scripts}/featurize.py
-      --input ${path.data}/interim/ctw2019.pkl
+      --input ${path.data}/featurized/ctw2019.pkl
       --output ${path.data}/prepared/ctw2019.pkl
     deps:
       - ${path.scripts}/featurize.py
-      - ${path.data}/interim/ctw2019.pkl
+      - ${path.data}/featurized/ctw2019.pkl
     outs:
       - ${path.data}/prepared/ctw2019.pkl
 
@@ -91,7 +85,7 @@ stages:
   split:
     desc: Split dataset and store indices
     matrix:
-      split: ${splits}
+      split: ${split.types}
     cmd: >
       python ${path.scripts}/split.py
       --input ${path.data}/prepared/ctw2019.pkl
@@ -109,7 +103,7 @@ stages:
   gridsearch:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
-      split: ${splits}
+      split: ${split.types}
       model: ${gridsearch}
     cmd: >
       python ${path.common}/benchmark.py
@@ -117,7 +111,7 @@ stages:
       --optimizer gridsearch
       --data ${path.data}/prepared/ctw2019.flatten.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
-      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+      --output-results ${path.models}/gridsearch-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
     params:
       - gridsearch.${item.model}
     deps:
@@ -125,12 +119,12 @@ stages:
       - ${path.data}/prepared/ctw2019.flatten.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/gridsearch-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
 
   automl:
     desc: Determine best hyper-parameters for algorithm on several CVs
     matrix:
-      split: ${splits}
+      split: ${split.types}
       model: ${automl}
     cmd: >
       python ${path.common}/benchmark.py
@@ -138,7 +132,7 @@ stages:
       --optimizer automl
       --data ${path.data}/prepared/ctw2019.pkl
       --split-indices ${path.data}/splits/${item.split}Split.pkl
-      --output-results ${path.models}/${item.model}-${item.split}Split-results.pkl
+      --output-results ${path.models}/automl-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
     params:
       - automl.${item.model}
     deps:
@@ -146,7 +140,7 @@ stages:
       - ${path.data}/prepared/ctw2019.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/automl-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
 
 
   evaluation:

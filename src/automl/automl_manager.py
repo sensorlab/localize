@@ -1,5 +1,6 @@
 import gc
 import os
+import re
 import shutil
 import time
 from copy import deepcopy
@@ -131,7 +132,6 @@ class AutoMLManager:
         - df (pd.DataFrame): a pandas dataframe that will be filtered.
         - config (dict): a dictionary of function_name: substring/s
         """
-        # TODO: rewrite this to just use regex for filtering
 
         selected_cols = df.columns
 
@@ -141,6 +141,7 @@ class AutoMLManager:
             "startswith": lambda name, search_str: name.startswith(search_str),
             "endswith": lambda name, search_str: name.endswith(search_str),
             "contains": lambda name, search_str: search_str in name,
+            "regex": lambda name, pattern: re.search(pattern, name) is not None,
         }
 
         """
