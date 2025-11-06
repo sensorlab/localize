@@ -73,6 +73,17 @@ Now run `pre-commit run --all-files` to see if your changes comply with code rul
 
 This project is licensed under the [BSD-3 Clause License](LICENSE) - see the LICENSE file for details.
 
+## Citation
+If you use this tool please cite our paper: 
+```
+@article{strnad2025configuration,
+  title={A Configuration-First Framework for Reproducible, Low-Code Localization},
+  author={Strnad, Tim and Bertalani{\v{c}}, Bla{\v{z}} and Fortuna, Carolina},
+  journal={arXiv preprint arXiv:2510.25692},
+  year={2025}
+}
+```
+
 ## Acknowledgments
 
 This project has received funding from the European Union's Horizon Europe Framework Programme under grant agreement No. 101096456 ([NANCY](https://nancy-project.eu/)).
