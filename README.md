@@ -1,6 +1,11 @@
 # LOCALIZE
 
-This project automates the training of wireless localization machine learning models using a low-code, configuration-first framework for radio localization in which 1) experiments are declared in human-readable configuration, 2) a workflow orchestrator runs standardized pipelines from data preparation to reporting, and 3) all artifacts, such as datasets, models, metrics, and reports are versioned. The pre-configured, versioned datasets reduce initial setup and boilerplate speeding up model development and evaluation. The design, with clear extension points, let experts add components without reworking the infrastructure.
+LOCALIZE meaning: 
+
+- finding, identifying a specific version of experimental details or parameters.
+- identify the location of a person or object
+  
+This project automates the training ofmachine learning models using a low-code, configuration-first framework in which 1) experiments are declared in human-readable configuration, 2) a workflow orchestrator runs standardized pipelines from data preparation to reporting, and 3) all artifacts, such as datasets, models, metrics, and reports are versioned. The pre-configured, versioned datasets reduce initial setup and boilerplate speeding up model development and evaluation. The design, with clear extension points, let experts add components without reworking the infrastructure. LOCALIZE is pre-configures with radio localization datasets.
 
 ## Features
 
