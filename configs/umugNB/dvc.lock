@@ -1,0 +1,96 @@
+schema: '2.0'
+stages:
+  prepare@TCP:
+    cmd: "python ../../src/datasets/umugNB/prepare.py --input ../../artifacts/umugNB/data/raw/TCP\
+      \ --output ../../artifacts/umugNB/data/featurized/TCP.pkl\n"
+    deps:
+    - path: ../../artifacts/umugNB/data/raw/TCP
+      hash: md5
+      md5: cf573b2ac2b37b7aee0260bce202bc81.dir
+      size: 229020
+      nfiles: 6
+    - path: ../../src/datasets/umugNB/prepare.py
+      hash: md5
+      md5: 9112ef011a954827e635bc705cc7b420
+      size: 3589
+    outs:
+    - path: ../../artifacts/umugNB/data/featurized/TCP.pkl
+      hash: md5
+      md5: ccd69456c13bbc76b920d8883e66b212
+      size: 52715
+  featurize@TCP:
+    cmd: "python ../../src/datasets/umugNB/featurize.py --input ../../artifacts/umugNB/data/featurized/TCP.pkl\
+      \ --output ../../artifacts/umugNB/data/prepared/TCP.pkl\n"
+    deps:
+    - path: ../../artifacts/umugNB/data/featurized/TCP.pkl
+      hash: md5
+      md5: ccd69456c13bbc76b920d8883e66b212
+      size: 52715
+    - path: ../../src/datasets/umugNB/featurize.py
+      hash: md5
+      md5: 2d02d0031e0772939e8ba93163ae01d8
+      size: 2195
+    outs:
+    - path: ../../artifacts/umugNB/data/prepared/TCP.pkl
+      hash: md5
+      md5: 83e4b87679d0192a3c6a5cc41120d283
+      size: 50018
+  split@TCP-Random:
+    cmd: "python ../../src/datasets/umugNB/split.py --input ../../artifacts/umugNB/data/prepared/TCP.pkl\
+      \ --split Random --output-indices ../../artifacts/umugNB/data/splits/TCP-RandomSplit.pkl\n"
+    deps:
+    - path: ../../artifacts/umugNB/data/prepared/TCP.pkl
+      hash: md5
+      md5: 83e4b87679d0192a3c6a5cc41120d283
+      size: 50018
+    - path: ../../src/datasets/umugNB/split.py
+      hash: md5
+      md5: 2f953e0e376539683c8c401c523702b0
+      size: 2116
+    params:
+      params.yaml:
+        split:
+          types:
+          - Random
+          seed: 42
+          n_splits: 5
+          test_size: 0.2
+    outs:
+    - path: ../../artifacts/umugNB/data/splits/TCP-RandomSplit.pkl
+      hash: md5
+      md5: e76da79aa4737efaed17d3d953630226
+      size: 67755
+  eda_features@TCP:
+    cmd: "python ../../src/eda.py --input ../../artifacts/umugNB/data/prepared/TCP.pkl\
+      \ --output ../../artifacts/umugNB/reports/prepared/TCP.tex\n"
+    deps:
+    - path: ../../artifacts/umugNB/data/prepared/TCP.pkl
+      hash: md5
+      md5: 83e4b87679d0192a3c6a5cc41120d283
+      size: 50018
+    - path: ../../src/eda.py
+      hash: md5
+      md5: 89fb0eae5e2cafe1d15605709dfa548a
+      size: 12052
+    outs:
+    - path: ../../artifacts/umugNB/reports/prepared/TCP.tex
+      hash: md5
+      md5: e6413a1195070484cb6f326231b1080a
+      size: 7362
+  eda_featurized@TCP:
+    cmd: "python ../../src/eda.py --input ../../artifacts/umugNB/data/prepared/TCP.pkl\
+      \ --output ../../artifacts/umugNB/reports/prepared/TCP.tex\n"
+    deps:
+    - path: ../../artifacts/umugNB/data/prepared/TCP.pkl
+      hash: md5
+      md5: 83e4b87679d0192a3c6a5cc41120d283
+      size: 50018
+    - path: ../../src/eda.py
+      hash: md5
+      md5: 89fb0eae5e2cafe1d15605709dfa548a
+      size: 12052
+    outs:
+    - path: ../../artifacts/umugNB/reports/prepared/TCP.tex
+      hash: md5
+      md5: e6413a1195070484cb6f326231b1080a
+      size: 7362

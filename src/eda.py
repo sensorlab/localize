@@ -78,9 +78,11 @@ class ExploratoryDataAnalysis:
                 num_unique = len(self.df[column].unique())
                 if num_unique > 10:  # Assuming if unique values > 10, consider it continuous
                     plt.figure(figsize=(8, 6))
+                    # Disable kde and limit bins for high-cardinality columns to avoid getting stuck
+                    use_kde = num_unique < 1000
                     ax = sns.histplot(
-                        self.df[column], kde=True
-                    )  # without bins = min(num_unique, 20) it get's stuck if extreme outliers are present, 20 is just an arbitrary value
+                        self.df[column], kde=use_kde, bins=min(num_unique, 50)
+                    )
                     plt.title(f"Histogram of {column}")
                     plt.xlabel(column)
                     plt.ylabel("Frequency")
@@ -225,8 +227,8 @@ class ExploratoryDataAnalysis:
 
 
 def escape_df(df):
-    # Escape all values in the DataFrame
-    escaped_df = df.map(escape_value)
+    # Escape all values in the DataFrame (applymap for pandas <2.1, map for >=2.1)
+    escaped_df = df.applymap(escape_value) if hasattr(df, 'applymap') else df.map(escape_value)
 
     # Escape column names
     escaped_df.columns = [escape_value(col) for col in df.columns]

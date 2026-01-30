@@ -1,0 +1,145 @@
+vars:
+  - path:
+      # Path are relative to location of dvc.yaml file
+      scripts: ../../src/datasets/umugNB
+      common: ../../src
+      data: ../../artifacts/umugNB/data
+      models: ../../artifacts/umugNB/models
+      reports: ../../artifacts/umugNB/reports
+
+  - subsets: [TCP, UDP]
+
+  # Models and splits are defined in params.yaml
+
+stages:
+  prepare:
+    desc: Prepare umugNB dataset for the MLOps pipeline
+    matrix:
+      subset: ${subsets}
+    cmd: >
+      python ${path.scripts}/prepare.py
+      --input ${path.data}/raw/${item.subset}
+      --output ${path.data}/featurized/${item.subset}.pkl
+    deps:
+      - ${path.scripts}/prepare.py
+      - ${path.data}/raw/${item.subset}
+    outs:
+      - ${path.data}/featurized/${item.subset}.pkl
+
+  featurize:
+    desc: Enrich dataset with additional features
+    matrix:
+      subset: ${subsets}
+    cmd: >
+      python ${path.scripts}/featurize.py
+      --input ${path.data}/featurized/${item.subset}.pkl
+      --output ${path.data}/prepared/${item.subset}.pkl
+    deps:
+      - ${path.scripts}/featurize.py
+      - ${path.data}/featurized/${item.subset}.pkl
+    outs:
+      - ${path.data}/prepared/${item.subset}.pkl
+
+  eda_raw:
+    desc: Exploratory data analysis on raw/interim data
+    matrix:
+      subset: ${subsets}
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/interim/${item.subset}.pkl
+      --output ${path.reports}/interim/${item.subset}.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/interim/${item.subset}.pkl
+    outs:
+      - ${path.reports}/interim/${item.subset}.tex
+
+  eda_featurized:
+    desc: Exploratory data analysis on prepared data
+    matrix:
+      subset: ${subsets}
+    cmd: >
+      python ${path.common}/eda.py
+      --input ${path.data}/prepared/${item.subset}.pkl
+      --output ${path.reports}/prepared/${item.subset}.tex
+    deps:
+      - ${path.common}/eda.py
+      - ${path.data}/prepared/${item.subset}.pkl
+    outs:
+      - ${path.reports}/prepared/${item.subset}.tex
+
+  split:
+    desc: Split dataset and store indices
+    matrix:
+      subset: ${subsets}
+      split: ${split.types}
+    cmd: >
+      python ${path.scripts}/split.py
+      --input ${path.data}/prepared/${item.subset}.pkl
+      --split ${item.split}
+      --output-indices ${path.data}/splits/${item.subset}-${item.split}Split.pkl
+    params:
+      - split
+    deps:
+      - ${path.scripts}/split.py
+      - ${path.data}/prepared/${item.subset}.pkl
+    outs:
+      - ${path.data}/splits/${item.subset}-${item.split}Split.pkl
+
+  gridsearch:
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      subset: ${subsets}
+      split: ${split.types}
+      model: ${gridsearch}
+    cmd: >
+      python ${path.common}/benchmark.py
+      --use ${item.model}
+      --optimizer gridsearch
+      --data ${path.data}/prepared/${item.subset}.pkl
+      --split-indices ${path.data}/splits/${item.subset}-${item.split}Split.pkl
+      --output-results ${path.models}/gridsearch-${item.subset}-${item.split}-${item.model}/${item.subset}-${item.model}-${item.split}Split-results.pkl
+    params:
+      - gridsearch.${item.model}
+    deps:
+      - ${path.common}/benchmark.py
+      - ${path.data}/prepared/${item.subset}.pkl
+      - ${path.data}/splits/${item.subset}-${item.split}Split.pkl
+    outs:
+      - ${path.models}/gridsearch-${item.subset}-${item.split}-${item.model}/${item.subset}-${item.model}-${item.split}Split-results.pkl
+
+  automl:
+    desc: Determine best hyper-parameters for algorithm on several CVs
+    matrix:
+      subset: ${subsets}
+      split: ${split.types}
+      model: ${automl}
+    cmd: >
+      python ${path.common}/benchmark.py
+      --use ${item.model}
+      --optimizer automl
+      --data ${path.data}/prepared/${item.subset}.pkl
+      --split-indices ${path.data}/splits/${item.subset}-${item.split}Split.pkl
+      --output-results ${path.models}/automl-${item.subset}-${item.split}-${item.model}/${item.subset}-${item.model}-${item.split}Split-results.pkl
+    params:
+      - automl.${item.model}
+    deps:
+      - ${path.common}/benchmark.py
+      - ${path.data}/prepared/${item.subset}.pkl
+      - ${path.data}/splits/${item.subset}-${item.split}Split.pkl
+    outs:
+      - ${path.models}/automl-${item.subset}-${item.split}-${item.model}/${item.subset}-${item.model}-${item.split}Split-results.pkl
+
+  evaluation:
+    matrix:
+      subset: ${subsets}
+    cmd: >
+      python ${path.common}/report.py
+      ${path.models}/${item.subset}*-results.pkl
+      --output-report ${path.reports}/performance-${item.subset}.tex
+    deps:
+      - ${path.common}/report.py
+      - ${path.models}
+    metrics:
+      - ${path.reports}/performance-${item.subset}.tex:
+          cache: false
