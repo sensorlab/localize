@@ -3,6 +3,7 @@ from pathlib import Path
 
 import click
 import joblib
+import pandas as pd
 
 
 def lat_lon_to_meters(origin_lat, origin_lon, point_lat, point_lon) -> tuple[float, float]:
@@ -51,7 +52,26 @@ def cli(input_path: Path, output_path: Path, task: str):
 
     print(df.dtypes)
 
+    gps_cols = ["gpsd_tpv_lat", "gpsd_tpv_lon"]
+    for col in gps_cols:
+        if df[col].dtype == 'object':
+            df[col] = df[col].astype(str).str.replace(',', '.')
+        # Convert to numeric, forcing errors to NaN
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    # 3. Filter Invalid GPS Coordinates
+    # Removes the '38018.0' outlier and any UINT_MAX errors
+    initial_len = len(df)
+    df = df[
+        (df.gpsd_tpv_lat >= -90) & (df.gpsd_tpv_lat <= 90) &
+        (df.gpsd_tpv_lon >= -180) & (df.gpsd_tpv_lon <= 180)
+    ]
+    
+    if len(df) < initial_len:
+        print(f"Dropped {initial_len - len(df)} rows with invalid coords.")
+
     origin_lat, origin_lon = df.gpsd_tpv_lat.min(), df.gpsd_tpv_lon.min()
+    print("ORIGIN LAT: ", origin_lat, "ORIGIN LON: ", origin_lon)
 
     df[["target_x", "target_y"]] = df.apply(
         lambda row: lat_lon_to_meters(origin_lat, origin_lon, row["gpsd_tpv_lat"], row["gpsd_tpv_lon"]),
@@ -62,8 +82,8 @@ def cli(input_path: Path, output_path: Path, task: str):
     df.drop(columns=["gpsd_tpv_lat", "gpsd_tpv_lon"], inplace=True)
 
     # Drop columns with too many missing values or low predictive value
-    columns_to_drop = ["phr", "retx_ul", "ta"]
-    df.drop(columns=[c for c in columns_to_drop if c in df.columns], inplace=True)
+    #columns_to_drop = ["phr", "retx_ul", "ta", "puc1"]
+    #df.drop(columns=[c for c in columns_to_drop if c in df.columns], inplace=True)
 
     # Find target column(s)
     targets = ["target_x", "target_y"]

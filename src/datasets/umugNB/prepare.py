@@ -11,7 +11,8 @@ def parse_bitrate(value):
         return float("nan")
     if isinstance(value, (int, float)):
         return float(value)
-    value = str(value).strip()
+    
+    value = str(value).strip().replace(",", ".")
     if value.endswith("k"):
         return float(value[:-1]) * 1e3
     elif value.endswith("M"):
@@ -73,22 +74,8 @@ def cli(input_path: Path, output_path: Path):
     # Select relevant columns for localization
     # Features: network metrics from gNB
     # Targets: GPS coordinates
-    feature_cols = [
-        "cqi",
-        "ri",
-        "mcs_dl",
-        "retx_dl",
-        "txok",
-        "brate_dl",
-        "snr",
-        "mcs_ul",
-        "retx_ul",
-        "rxok",
-        "brate_ul",
-        "phr",
-        "pl",
-        "ta",
-    ]
+    feature_cols = ["CL","C_ul",'mcs_ul', 'phr', 'pl', 'mcs_dl', 'txok', 'retx_dl', 'brate_ul', 'rxok', "cqi", "snr", "ri", "retx_ul", "ta"]
+    
     target_cols = ["gpsd_tpv_lat", "gpsd_tpv_lon"]
 
     # Keep only columns that exist in the data
@@ -103,14 +90,14 @@ def cli(input_path: Path, output_path: Path):
             df[col] = df[col].apply(parse_bitrate)
         elif df[col].dtype == object:
             # Handle "-" and other non-numeric values
-            df[col] = df[col].replace("-", float("nan"))
+            df[col] = df[col].astype(str).str.replace(",", ".").replace("-", "nan")
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
     # Drop rows with NaN in target columns
     df = df.dropna(subset=available_targets)
 
     # Drop rows with all NaN features
-    df = df.dropna(subset=available_features, how="all")
+    df = df.dropna(subset=available_features, how="any")
 
     # Keep only columns with more than one unique value
     df = df.loc[:, df.nunique() > 1]
