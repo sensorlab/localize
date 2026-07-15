@@ -10,6 +10,7 @@ from .commands.stage_cmd import stage as stage_group
 
 
 DEFAULT_CONFIGS_ENV = "CONFIGS_DIR"
+DEFAULT_CONFIGS_DIR = Path(__file__).resolve().parents[3] / "configs"
 
 
 @click.group()
@@ -19,14 +20,14 @@ DEFAULT_CONFIGS_ENV = "CONFIGS_DIR"
     type=click.Path(file_okay=False, path_type=Path),
     envvar=DEFAULT_CONFIGS_ENV,
     default=None,
-    help=f"Path to experiments root (defaults to ${DEFAULT_CONFIGS_ENV} or ./configs).",
+    help=f"Path to experiments root (defaults to ${DEFAULT_CONFIGS_ENV} or LOCALIZE's configs directory).",
 )
 @click.pass_context
 def cli(ctx: click.Context, configs_dir: Path | None):
     """Control multiple DVC experiment pipelines under CONFIGS_DIR/EXPERIMENT/."""
 
     if configs_dir is None:
-        configs_dir = Path.cwd() / "configs"
+        configs_dir = DEFAULT_CONFIGS_DIR
     configs_dir = configs_dir.resolve()
 
     if not configs_dir.exists():

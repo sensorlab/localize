@@ -19,8 +19,9 @@ def run_cmd(ctx: click.Context, experiment: str, stage: str | None, force: bool,
     configs_dir: Path = ctx.obj["configs_dir"]
     exp = get_experiment(configs_dir, experiment)
 
-    # `dvc repro` in the experiment directory runs that experiment's DAG.
-    cmd = ["dvc", "repro"] if stage is None else ["dvc", "repro", stage]
+    cmd = ["mamba", "run", "-n", "nancy", "dvc", "repro"]
+    if stage is not None:
+        cmd.append(stage)
     if force:
         cmd.append("--force")
     if dry:
