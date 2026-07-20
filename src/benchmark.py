@@ -19,7 +19,6 @@ import numpy as np
 import tensorflow as tf
 import yaml
 
-# from skorch.helper import SliceDict
 from src import PredefinedSplit, empty_directory
 from src.automl.automl_manager import AutoMLManager
 from src.gridsearch.gridsearch_manager import GridSearchManager

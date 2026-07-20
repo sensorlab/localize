@@ -63,18 +63,6 @@ stages:
     outs:
       - ${path.data}/prepared/ctw2020.flatten.pkl
 
-#  eda_features:
-#    desc: Exploratory data analysis
-#    cmd: >
-#      python ${path.common}/eda.py
-#      --input ${path.data}/prepared/ctw2020.flatten.pkl
-#      --output ${path.reports}/prepared/ctw2020.tex
-#    deps:
-#      - ${path.common}/eda.py
-#      - ${path.data}/prepared/ctw2020.flatten.pkl
-#    outs:
-#      - ${path.reports}/prepared/ctw2020.tex
-
   split:
     desc: Split dataset and store indices
     matrix:

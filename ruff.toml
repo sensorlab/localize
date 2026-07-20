@@ -21,7 +21,6 @@ unfixable = ["B"]
 # List of well known third party libraries. User at sorting imports
 known-third-party = [
     "sklearn", "pandas", "numpy", "scipy", "matplotlib",
-    "torch", "skorch",
     "keras", "tensorflow", "scikeras",
     "click", "joblib",
 ]

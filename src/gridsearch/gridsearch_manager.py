@@ -1,6 +1,5 @@
 import glob
 import importlib
-import inspect
 import os
 import shutil
 from pathlib import Path
@@ -12,7 +11,6 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
 from tabulate import tabulate
 from tqdm import tqdm
 
@@ -71,37 +69,10 @@ class GridSearchManager:
 
     @classmethod
     def construct_model(cls, model_config) -> BaseEstimator:
-        if "pipeline" in model_config:
-            steps = []
-            for step in model_config["pipeline"]:
-                step_estimator = cls.construct_model(step)
-                steps.append((step["step"], step_estimator))
-            return Pipeline(steps)
-        else:
-            module = importlib.import_module(model_config["module"])
-            ModelClass = getattr(module, model_config["class"])
-            parameters = model_config.get("parameters", {})
-
-            # Check if ModelClass has n_jobs parameter. If so, set it to number of cores (not threads)
-            if "n_jobs" in inspect.signature(ModelClass).parameters:
-                parameters["n_jobs"] = joblib.cpu_count(only_physical_cores=True)
-
-            if "optimizer" in parameters:
-                optimizer_module = importlib.import_module(parameters["optimizer"]["module"])
-                OptimizerClass = getattr(optimizer_module, parameters["optimizer"]["class"])
-                parameters["optimizer"] = OptimizerClass
-
-            if "callbacks" in parameters:
-                callbacks = [cls.construct_model(callback) for callback in parameters["callbacks"]]
-                parameters["callbacks"] = callbacks
-
-            if "estimator" in model_config:  # Handling nested models
-                inner_model = cls.construct_model(model_config["estimator"])
-                return ModelClass(inner_model, **parameters)
-
-            return ModelClass(**parameters)
-
-        return ModelClass(**parameters)
+        module = importlib.import_module(model_config["module"])
+        model_class = getattr(module, model_config["class"])
+        parameters = model_config.get("parameters", {})
+        return model_class(**parameters)
 
     def _order_by_score(self, results_df: pd.DataFrame, scoring: Union[dict, None] = None) -> pd.DataFrame:
         """
