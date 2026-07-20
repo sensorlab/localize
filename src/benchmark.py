@@ -146,12 +146,12 @@ def cli(
         estimator = GridSearchManager.construct_model(gridsearch_config)
 
         grid_search_parameters = {
+            **gridsearch_config.get("search_parameters", {}),
             "estimator": estimator,
             "param_grid": hyperparameters,
             "cv": cv,
         }
 
-        # Fix: Skorch and GridSearch don't play well with parallel CVs
         grid_search = GridSearchManager(
             tmp_dir_path=tmp_dir_path,
             model_save_dir_path=Path(str(results_path).replace(".pkl", "")),

@@ -33,7 +33,7 @@ class GridSearchManager:
         verbose: int = 2,
     ):
         # Default grid search settings
-        self._search_default_params = {"verbose": 1, "n_jobs": 4, "error_score": "raise", "refit": False}
+        self._search_default_params = {"verbose": 1, "n_jobs": -1, "error_score": "raise", "refit": False}
 
         self._search_forced_params = {
             "scoring": scorers.to_GridsearchCV(),
@@ -72,7 +72,12 @@ class GridSearchManager:
         module = importlib.import_module(model_config["module"])
         model_class = getattr(module, model_config["class"])
         parameters = model_config.get("parameters", {})
-        return model_class(**parameters)
+        model = model_class(**parameters)
+
+        if "n_jobs" not in parameters and "n_jobs" in model.get_params(deep=False):
+            model.set_params(n_jobs=1)
+
+        return model
 
     def _order_by_score(self, results_df: pd.DataFrame, scoring: Union[dict, None] = None) -> pd.DataFrame:
         """
