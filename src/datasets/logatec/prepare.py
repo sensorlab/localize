@@ -118,27 +118,17 @@ def cli(input_path: Path, output_path: Path, method: str):
 
     # Average samples in one second. If there are none, the value is NaN.
     elif method.lower() in ("average",):
-        data = []
-
-        # Average the sample value within a second.
-        for (x, y, node, ts), subset in df.groupby(by=["pos_x", "pos_y", "node", "timestamp"]):
-            avg_value = subset.value.sum(min_count=1) / subset.value.count()
-            item = {"pos_x": x, "pos_y": y, "node": node, "timestamp": ts, "value": avg_value}
-            data.append(item)
-
-        df = pd.DataFrame(data)
-        df = df.pivot(index=["timestamp", "pos_x", "pos_y"], columns=["node"], values=["value"])
-        df = df.reset_index(drop=False)
-
-        # After pivot, column names become tuples. Fix that.
-        df.columns = ["".join(map(str, col)).strip().replace("value", "node") for col in df.columns.values]
-
-        # Fill the NaN values with some extremely low RSS value
-        df = df.fillna(-180)
-
-        # TODO: Should this be part of prepare-feature stage?
-        # Remove datetime column
-        df = df.drop(columns=["timestamp"])
+        df = (
+            df.groupby(["pos_x", "pos_y", "node", "timestamp"], as_index=False)["value"]
+            .mean()
+            .pivot(index=["timestamp", "pos_x", "pos_y"], columns="node", values="value")
+            .reset_index()
+        )
+        df.columns = [
+            f"node{column}" if isinstance(column, (int, np.integer)) else str(column)
+            for column in df.columns
+        ]
+        df = df.fillna(-180).drop(columns="timestamp")
 
     # TODO: Unroll (calc probability of droped packed and then sample from them)
     else:
