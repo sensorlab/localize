@@ -449,7 +449,8 @@ class AutoMLManager:
         - y_test: true values.
         - y_pred: predicted values
         """
-        y_test = np.squeeze(np.stack(y_test, axis=0), axis=-1)
+        y_test = np.column_stack(y_test)
+        y_pred = y_pred.T
         for name, func in metrics.metrics.items():
             scores[name].append(func(y_test, y_pred))
 
