@@ -106,7 +106,7 @@ stages:
       - ${path.data}/prepared/ctw2019.flatten.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/gridsearch-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/gridsearch-${item.split}-${item.model}
 
   automl:
     desc: Determine best hyper-parameters for algorithm on several CVs
@@ -127,7 +127,7 @@ stages:
       - ${path.data}/prepared/ctw2019.pkl
       - ${path.data}/splits/${item.split}Split.pkl
     outs:
-      - ${path.models}/automl-${item.split}-${item.model}/${item.model}-${item.split}Split-results.pkl
+      - ${path.models}/automl-${item.split}-${item.model}
 
 
   evaluation:
